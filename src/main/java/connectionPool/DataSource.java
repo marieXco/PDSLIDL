@@ -1,5 +1,9 @@
 package connectionPool;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
 /*
  * Classe DataSource où le clien demande une connexion pour chaque requête
  * Instancie JDBCConnexionPool
@@ -7,13 +11,13 @@ package connectionPool;
  */
 public class DataSource {
 
-	static JDBCConnectionPool jcp = new JDBCConnectionPool(); // pas rester là
+	static JDBCConnectionPool jcp; 
 
 	/*
 	 * Methode qui alloue au client une connexion à chaque requête
 	 */
-	static Connection getConnection() {
-		Connection connection = jcp.getConnection();
+	static Connection getConnectionFromPool(JDBCConnectionPool jcp) throws ClassNotFoundException, SQLException {
+		Connection connection = jcp.addConnection();
 		return connection;
 	}
 
@@ -28,8 +32,8 @@ public class DataSource {
 	 * Methode pour fermer la connexion dans le sens la supprimer de la liste
 	 * des connexions
 	 */
-	static void close(Connection connection) {
-		connection = null;
+	static void close(List<Connection> connection) throws SQLException {
+		jcp.closeAll(connection); 
 	}
 
 }

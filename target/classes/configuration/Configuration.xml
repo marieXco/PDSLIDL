@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<serveur>
+	<url> jdbc:postgresql://localhost:5432/test </url>
+	<login> postgres </login>
+	<password> root </password>
+	<nbrconnexion> 10 </nbrconnexion>
+	<driver> org.postgresql.Driver </driver>
+</serveur>
