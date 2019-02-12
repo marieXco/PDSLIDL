@@ -21,7 +21,7 @@ public class Fenetre extends JFrame implements ActionListener{
 	//Main Panel
 	JPanel container = new JPanel();
 
-	//Panel that contains the ... for the select instruction 
+	//Panel that contains the tools for the select instruction 
 	JPanel panelSelect = new JPanel();
 	Button buttonSelect = new Button("Affichage des patients");
 	JTextArea textResultSelect = new JTextArea(30,50);
@@ -30,7 +30,7 @@ public class Fenetre extends JFrame implements ActionListener{
 	JPanel panelResult = new JPanel();
 	JLabel labelResult = new JLabel("Resultat");
 
-	//Panel that contains the ... for the insert and delete instructions
+	//Panel that contains the tools for the insert and delete instructions
 	JPanel panelInsert = new JPanel();
 	Button buttonInsert = new Button("Ajouter un patient");
 	Button buttonDeleteAll = new Button("Supprimer tous les patients");
@@ -39,7 +39,7 @@ public class Fenetre extends JFrame implements ActionListener{
 	JLabel labelLastname = new JLabel("Nom");
 	JTextField lastname = new JTextField(10);
 
-	//Panel that contains the ... for the update instructions
+	//Panel that contains the tools for the update instructions
 	JPanel panelUpdate = new JPanel();
 	Button buttonUpdate = new Button("Effectuer une modification");
 	Button buttonMakeUpdate = new Button("Modifier");
