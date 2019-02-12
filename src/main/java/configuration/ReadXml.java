@@ -40,10 +40,6 @@ public class ReadXml {
 			 */
 			final Document document = builder.parse(new File("src/main/resources/configuration/Configuration.xml"));
 
-			// Affichage du prologue
-			System.out.println("*************PROLOGUE************");
-			System.out.println("version : " + document.getXmlVersion());
-			System.out.println("encodage : " + document.getXmlEncoding());
 			
 
 			/*
@@ -51,15 +47,7 @@ public class ReadXml {
 			 */
 			final Element racine = document.getDocumentElement();
 
-			// Affichage de l'élément racine
-			System.out.println("\n*************RACINE************");
-			System.out.println(racine.getNodeName());
-		
 			
-
-			// TODO : boucle pour récupérer les noeuds Marie
-			System.out.println("\n*************NOEUDS************");
-		
 			
 			final NodeList racineNoeuds = racine.getChildNodes();
 			final int nbRacineNoeuds = racineNoeuds.getLength();

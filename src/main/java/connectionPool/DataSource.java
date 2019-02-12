@@ -11,12 +11,12 @@ import java.util.List;
  */
 public class DataSource {
 
-	static JDBCConnectionPool jcp; 
+	public static JDBCConnectionPool jcp; 
 
 	/*
 	 * Methode qui alloue au client une connexion à chaque requête
 	 */
-	static Connection getConnectionFromPool(JDBCConnectionPool jcp) throws ClassNotFoundException, SQLException {
+	public static Connection getConnectionFromPool(JDBCConnectionPool jcp) throws ClassNotFoundException, SQLException {
 		Connection connection = jcp.addConnection();
 		return connection;
 	}
@@ -24,7 +24,7 @@ public class DataSource {
 	/*
 	 * Methode qui rend la connexion allouée à chaque fin de requête
 	 */
-	static void backConnection(Connection connection) {
+	public static void backConnection(Connection connection) {
 		jcp.backConnection(connection);
 	}
 
@@ -32,7 +32,7 @@ public class DataSource {
 	 * Methode pour fermer la connexion dans le sens la supprimer de la liste
 	 * des connexions
 	 */
-	static void close(List<Connection> connection) throws SQLException {
+	public static void close(List<Connection> connection) throws SQLException {
 		jcp.closeAll(connection); 
 	}
 

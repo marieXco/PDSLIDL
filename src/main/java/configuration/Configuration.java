@@ -14,23 +14,13 @@ public class Configuration extends ReadXml {
 		this.cnbrConnexions = (String) super.getNbrConnexions()
 				.getTextContent();
 
-		System.out
-				.println(clogin + curl + cdriver + cpassword + cnbrConnexions);
+		
 
 	}
 
-	// surement une liste de parametre
-	// this.driver = nomdemaliste.get(index);
+	
 
-	// TODO : constructeur
-	// instancier dans un att
-	// refractor configuration
-	// methode pour close sql
-
-	public static void main(final String[] args) {
-		Configuration configuration = new Configuration();
-
-	}
+	
 
 	public String getClogin() {
 		return clogin;

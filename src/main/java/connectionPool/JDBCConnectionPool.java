@@ -29,22 +29,28 @@ public class JDBCConnectionPool {
 	 */
 	private List<Connection> availableConnections;
 	private List<Connection> synchroConnections;
+	
 
-	// att configuration dans le cnstructor
-
-	// ajuoter statement et setresult dans l'ihm
+	
 
 	public JDBCConnectionPool() {
+		System.out.println("ent");
+
 
 		Configuration configuration = new Configuration();
-		// TODO : recupérer de xml
+		System.out.println("ent");
+
+		
 		this.driver = configuration.getCdriver();
 		this.url = configuration.getCurl();
 		this.password = configuration.getCpassword();
 		this.login = configuration.getClogin();
+		System.out.println("int");
 		this.nbrConnexions = Integer
 				.parseInt(configuration.getCnbrConnexions());
-		// this.availableConnections = availableConnections;
+		System.out.println("int");
+
+		
 
 		availableConnections = new ArrayList<Connection>();
 		synchroConnections = Collections.synchronizedList(availableConnections);
@@ -60,7 +66,8 @@ public class JDBCConnectionPool {
 	 * Methode pour créer n connexions et les ajouter à l'arrayList
 	 */
 	public void putConnection(int nbrConnexions) throws
-			SQLException {
+			SQLException, ClassNotFoundException {
+	
 		for (int i = 0; i < nbrConnexions; i++) {
 			addConnection();
 		}
@@ -69,10 +76,11 @@ public class JDBCConnectionPool {
 	/*
 	 * Methode pour créer n connexions et les ajouter à l'arrayList
 	 */
-	public Connection addConnection() throws SQLException {
+	public Connection addConnection() throws SQLException, ClassNotFoundException {
 		
+		
+
 		Connection connection = getConnection();
-		synchroConnections.add(connection);
 		
 		return connection;
 	}
@@ -81,18 +89,22 @@ public class JDBCConnectionPool {
 	 * Methode pour récupérer une seule connexion dans la liste de connexions
 	 * (récupérer = eneleber de la liste)
 	 */
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection() throws SQLException, ClassNotFoundException {
 		Class.forName(driver);
-		Connection connection = DriverManager.getConnection(url, password,
-				login);
+		Connection connection = DriverManager.getConnection(url, login,
+				password);
+		synchroConnections.add(connection);
 		int last = 0;
-		if (!(synchroConnections == null)) {
-			while (!(synchroConnections == null)) {
+		if ((synchroConnections != null)) {
+
 				for (int i = 0; i < synchroConnections.size(); i++) {
 					last++;
 				}
-			}
-			connection = synchroConnections.remove(last);
+		
+			connection = synchroConnections.get(0);
+		}
+		if (synchroConnections == null){
+			System.out.println("KO");
 		}
 		return connection;
 	}
@@ -102,6 +114,7 @@ public class JDBCConnectionPool {
 	 */
 	public void backConnection(Connection connection) {
 
+		
 		synchroConnections.add(connection);
 
 	}
