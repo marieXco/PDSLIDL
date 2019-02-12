@@ -1,0 +1,8 @@
+
+
+<serveur URL = '#'>
+	<login> root </login>
+	<password> root </password>
+	<nbrconnexion> 10 </nbrconnexion>
+	<driver port='5432'/>
+</serveur>
