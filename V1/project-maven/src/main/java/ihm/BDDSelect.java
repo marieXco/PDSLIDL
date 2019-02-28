@@ -23,17 +23,12 @@ public class BDDSelect {
 		try {			
 			connection.setAutoCommit(false);
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT * FROM PATIENTS FOR JSON;" );
+			ResultSet rs = stmt.executeQuery( "SELECT * FROM PATIENTS;" );
 			ResultSetMetaData rsmd = rs.getMetaData();
 			
 			while(rs.next()) {          
 				for(int i=1;i<=rsmd.getColumnCount();i++)
 					arr.add(rs.getString(i));
-			}
-			
-			for(int i=0; i<arr.size(); i++)
-			{
-				System.out.println (i+"=>"+arr.get(i));
 			}
 			
 			rs.close();

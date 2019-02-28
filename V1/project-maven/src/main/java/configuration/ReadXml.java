@@ -1,6 +1,7 @@
 package configuration;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,72 +14,63 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * ReadXml
+ * 
+ * This class is made to fill up the Configuration.java file
+ * It parses our XML configuration file to give 
+ * our XML parameters to the configuration class 
+ *
+ */
 public class ReadXml {
-	
 	Element login, url, password, driver, nbrConnexions;
-	
+
 	{
-		
-		
 		/*
-		 * Etape 1 : récupération d'une instance de la classe
+		 * Retrieval of on instance of the class
 		 * "DocumentBuilderFactory"
 		 */
 		final DocumentBuilderFactory factory = DocumentBuilderFactory
 				.newInstance();
-		
-		
 
 		try {
 			/*
-			 * Etape 2 : création d'un parseur
+			 * Parser creation
 			 */
 			final DocumentBuilder builder = factory.newDocumentBuilder();
 
+
 			/*
-			 * Etape 3 : création d'un Document
+			 * Getting the document that will be parsed
 			 */
 			final Document document = builder.parse(new File("src/main/resources/configuration/Configuration.xml"));
 
-			
 
 			/*
-			 * Etape 4 : récupération de l'Element racine
+			 * Retrieval of the root element
 			 */
 			final Element racine = document.getDocumentElement();
 
-			
-			
+
+			/*
+			 * Retrieval of the children of the root element
+			 */
 			final NodeList racineNoeuds = racine.getChildNodes();
-			final int nbRacineNoeuds = racineNoeuds.getLength();
-			
-			for (int i = 0; i<2; i++) {
 
-	            if(racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
+			for (int i = 0; i < 2; i++) {
+				if(racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
-	            	final Element serveur = (Element) racineNoeuds.item(i);
-	            	
-	            	login = (Element) racine.getElementsByTagName("login").item(0);
+					login = (Element) racine.getElementsByTagName("login").item(0);
 
-	                password = (Element) racine.getElementsByTagName("password").item(0);
-	                
-	                driver = (Element) racine.getElementsByTagName("driver").item(0);
-	                
-	                nbrConnexions = (Element) racine.getElementsByTagName("nbrconnexion").item(0);
-	                
-	                url = (Element) racine.getElementsByTagName("url").item(0);
-	                
-	                
-	                
+					password = (Element) racine.getElementsByTagName("password").item(0);
 
-	             
-	                
+					driver = (Element) racine.getElementsByTagName("driver").item(0);
 
+					nbrConnexions = (Element) racine.getElementsByTagName("nbrconnexion").item(0);
 
-	            }}
-			
-			  
-
+					url = (Element) racine.getElementsByTagName("url").item(0);
+				}
+			}
 		}
 
 		catch (final ParserConfigurationException e) {
@@ -88,7 +80,9 @@ public class ReadXml {
 		} catch (final IOException exx) {
 			exx.printStackTrace();
 		}
-}
+		
+		
+	}
 
 	public Element getLogin() {
 		return login;
@@ -129,10 +123,4 @@ public class ReadXml {
 	public void setNbrConnexions(Element nbrConnexions) {
 		this.nbrConnexions = nbrConnexions;
 	}
-	
-	
-	
-	
-	
-	
 }

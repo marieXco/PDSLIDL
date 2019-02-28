@@ -5,10 +5,10 @@
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/BDDCreateTable.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/BDDUpdate.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/BDDEraseAll.java
-/Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/Panneau.java
+/Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/JSONRequest.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/PostgreSQLJDBC.java
+/Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/OpenDatabase.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/configuration/Configuration.java
-/Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/Fenetre.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/connectionpool/DataSource.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/configuration/ReadXml.java
 /Users/alveslaura/Documents/GitHub/PDSLIDL/src/main/java/ihm/BDDSelectName.java

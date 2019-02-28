@@ -1,10 +1,7 @@
 package ihm;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.BlockingQueue;
 
-import connectionpool.DataSource;
 import connectionpool.JDBCConnectionPool;
 
 public class PostgreSQLJDBC {

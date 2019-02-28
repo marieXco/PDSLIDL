@@ -49,19 +49,12 @@ public class WindowV1 extends JFrame implements ActionListener {
 	JLabel labelLastname = new JLabel("Nom");
 	JTextField lastname = new JTextField(10);
 
-
-	JPanel panelUpdate = new JPanel();
-	Button buttonUpdate = new Button("Effectuer une modification");
-	Button buttonMakeUpdate = new Button("Modifier");
-	JLabel labelFirstnameMAJ = new JLabel("Prénom");
-	JTextField firstnameMAJ = new JTextField(10);
-	JLabel labelLastnameMAJ = new JLabel("Nom");
-	JTextField lastnameMAJ = new JTextField(10);
+	
 	
 	public WindowV1(JDBCConnectionPool jdbc) throws ClassNotFoundException, SQLException {
 		jdb = jdbc;
 		connect = OpenDatabase.databaseConnection(jdbc);
-
+		System.out.println("Connection Used : " + connect);
 		this.setTitle("Test BDD");
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -90,19 +83,13 @@ public class WindowV1 extends JFrame implements ActionListener {
 		panelInsert.add(lastname, BorderLayout.CENTER);
 
 		
-		Font police = new Font("Tahoma", Font.BOLD, 14);  
+		Font police = new Font("Trebuchet", Font.BOLD, 14);  
 		textResultSelect.setFont(police);  
 		textResultSelect.setForeground(Color.black); 
 		panelResult.add(textResultSelect, BorderLayout.SOUTH);
 
-		
-		//miseAJour.add(boutonMAJ, BorderLayout.SOUTH);
-		//boutonMAJ.addActionListener(this);
-
-
 		container.add(BorderLayout.NORTH, panelInsert);
 		container.add(BorderLayout.SOUTH, panelSelect);
-		//container.add(BorderLayout.SOUTH, panelUpdate);
 		container.add(BorderLayout.SOUTH, panelResult);
 
 
@@ -113,13 +100,10 @@ public class WindowV1 extends JFrame implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		
 		if (e.getSource() == buttonSelect) {
 			
 			BDDSelect bddSelect = new BDDSelect(jdb, connect);
 			textResultSelect.setText(bddSelect.toString());
-			System.out.println("Connection Used : " + connect);
-			System.out.println();
 		}
 
 		if (e.getSource() == buttonInsert) {
@@ -129,11 +113,7 @@ public class WindowV1 extends JFrame implements ActionListener {
 			}
 			
 			else {
-				String first;
-				String last;
-				first = firstname.getText();
-				last = lastname.getText();
-				new BDDInsert(jdb, connect, first, last);
+				new BDDInsert(jdb, connect, firstname.getText(), lastname.getText());
 			}
 			
 		} 

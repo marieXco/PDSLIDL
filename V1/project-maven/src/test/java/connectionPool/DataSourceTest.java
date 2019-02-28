@@ -15,29 +15,28 @@ public class DataSourceTest {
 		JDBCConnectionPool jdbc;
 
 		try {
-			jdbc = OpenDatabase.database();
-			Connection connection = DataSource.getConnectionFromPool(jdbc);
-			System.out.println("Connection Used 1: " + connection);
-			assertNotNull(connection);
-			System.out.println();
+			jdbc = OpenDatabase.database();			
+			for (int i = 1; i < 10; i++) {
+				Connection connection = DataSource.getConnectionFromPool(jdbc);
+				System.out.println("Connection " + i + " Used: " + connection);
+				assertNotNull(connection);
+				System.out.println();
+			}
 			
 			Connection connection2 = DataSource.getConnectionFromPool(jdbc);
-			System.out.println("Connection Used 2: " + connection2);
+			System.out.println("Connection 10 Used: " + connection2);
 			assertNotNull(connection2);
 			System.out.println();
 			
-			DataSource.backConnection(jdbc, connection);
+			/*
+			 * You can toggle the next line to get the error when we ask for a connection
+			 * and that our available connections are all used
+			 */
+			DataSource.backConnection(jdbc, connection2);
 			
 			Connection connection3 = DataSource.getConnectionFromPool(jdbc);
-			System.out.println("Connection Used 3: " + connection3);
 			assertNotNull(connection3);
-			System.out.println();
 			
-			Connection connection4 = DataSource.getConnectionFromPool(jdbc);
-			System.out.println("Connection Used 4:" + connection4);
-			System.out.println();
-			
-
 			DataSource.close(jdbc);
 
 		} catch (SQLException e) {

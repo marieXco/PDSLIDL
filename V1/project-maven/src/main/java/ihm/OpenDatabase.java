@@ -1,6 +1,7 @@
 package ihm;
 
 import java.sql.Connection;
+
 import java.sql.SQLException;
 import connectionpool.DataSource;
 import connectionpool.JDBCConnectionPool;
