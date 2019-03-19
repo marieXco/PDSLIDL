@@ -1,9 +1,11 @@
 package fr.pds.floralis.commons.dao;
 
 import java.sql.Connection;
+
 import java.util.List;
 
 import org.postgresql.util.PGobject;
+
 
 public abstract class DAO<T> {
 
@@ -24,7 +26,9 @@ public abstract class DAO<T> {
 	 * @return boolean
 	 */
 
+
 	public abstract boolean create(PGobject jsonObject);
+
 
 	/**
 	 * 
@@ -35,7 +39,9 @@ public abstract class DAO<T> {
 	 * @return boolean
 	 */
 
+
 	public abstract boolean delete(PGobject jsonObject);
+
 
 	/**
 	 * 
@@ -58,6 +64,7 @@ public abstract class DAO<T> {
 	 */
 
 	public abstract T find(int id);
+
 	
 	/**
 	 * 
