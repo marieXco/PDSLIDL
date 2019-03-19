@@ -41,6 +41,7 @@ import fr.pds.floralis.commons.bean.entity.Personnels;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.Sensors;
 import fr.pds.floralis.commons.dao.SensorDao;
+
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
@@ -110,6 +111,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	
+
 
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -214,6 +216,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 		mainInfosPanel.add(macAddress);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
+
 		
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
@@ -290,6 +293,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 	}
 
 
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonAddPersonnel) {
 			newCode.setText("Ajout d'un personnel...");
@@ -360,6 +364,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 		}
 
 		if (e.getSource() == buttonAddSensor) {
+
 			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty() || caracteristics.getText().isEmpty()){
 				newCode.setText("Un ou plusieurs champs sont manquants");
 			}
@@ -372,6 +377,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 				sensor.setAlerts(null);
 				sensor.setBreakdowns(null);
 				sensor.setState(true);
+			
 				
 				//TODO vérifier ques les selectedIndex > 0, vérifier si foncitionne
 				int dayInstallation = day.getSelectedIndex();
@@ -381,7 +387,10 @@ public class WindowAdd extends JFrame implements ActionListener{
 				
 				
 				Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
+
 				sensor.setInstallation(dateInst);
+
+
 
 				JSONObject obj = new JSONObject(sensor);
 				PGobject jsonObject = new PGobject();

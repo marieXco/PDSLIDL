@@ -1,9 +1,13 @@
 package fr.pds.floralis.commons.dao;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.sql.ResultSet;
+
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,11 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fr.pds.floralis.commons.bean.entity.Patients;
+import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.Sensors;
 
 public class SensorDao extends DAO<Sensor> {
 
@@ -23,6 +32,7 @@ public class SensorDao extends DAO<Sensor> {
 	}
 
 	@Override
+
 	public boolean create(PGobject jsonObject) {
 		try {
 			connect.setAutoCommit(false);
@@ -48,8 +58,6 @@ public class SensorDao extends DAO<Sensor> {
 	@Override
 	public boolean delete(PGobject jsonObject) {
 		Statement stmt = null;
-		
-
 		try {
 			connect.setAutoCommit(false);
 
@@ -69,9 +77,10 @@ public class SensorDao extends DAO<Sensor> {
 		}
 
 		System.out.println("Delete success");
-
 		return false;
+
 	}
+
 
 	@Override
 	public boolean update(Sensor s) {
@@ -128,8 +137,8 @@ public class SensorDao extends DAO<Sensor> {
 			connect.setAutoCommit(false);
 			stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery("SELECT id, data FROM sensors;");
-
+			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors;" );
+			
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
 			}
@@ -137,6 +146,7 @@ public class SensorDao extends DAO<Sensor> {
 			rs.close();
 			stmt.close();
 		} catch (Exception e) {
+
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
@@ -176,5 +186,7 @@ public class SensorDao extends DAO<Sensor> {
 		return sensors;
 
 	}
+
+
 
 }
