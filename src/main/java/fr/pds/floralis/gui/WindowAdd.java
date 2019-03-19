@@ -38,7 +38,9 @@ import org.postgresql.util.PGobject;
 
 import fr.pds.floralis.commons.bean.entity.Patients;
 import fr.pds.floralis.commons.bean.entity.Personnels;
+import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.Sensors;
+import fr.pds.floralis.commons.dao.SensorDao;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
@@ -104,6 +106,10 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+	
+	JTextField identifiant = new JTextField(10);
+	JLabel identifiantLabel = new JLabel("Identifiant :");
+	
 
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -206,6 +212,8 @@ public class WindowAdd extends JFrame implements ActionListener{
 		mainInfosPanel.add(brand);
 		mainInfosPanel.add(macAddressLabel);
 		mainInfosPanel.add(macAddress);
+		mainInfosPanel.add(identifiantLabel);
+		mainInfosPanel.add(identifiant);
 		
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
@@ -352,17 +360,18 @@ public class WindowAdd extends JFrame implements ActionListener{
 		}
 
 		if (e.getSource() == buttonAddSensor) {
-			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || caracteristics.getText().isEmpty()){
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty() || caracteristics.getText().isEmpty()){
 				newCode.setText("Un ou plusieurs champs sont manquants");
 			}
 			else {
-				Sensors sensor = new Sensors();
+				Sensor sensor = new Sensor();
 				sensor.setBrand(brand.getText());
-				sensor.setMacAddress(macAddress.getText());
+				sensor.setMacAdress(macAddress.getText());
 				sensor.setCaracteristics(caracteristics.getText());
-				sensor.setAlert(false);
-				sensor.setBreakdown(false);
-				sensor.setState(false);
+				sensor.setId(Integer.parseInt(identifiant.getText()));
+				sensor.setAlerts(null);
+				sensor.setBreakdowns(null);
+				sensor.setState(true);
 				
 				//TODO vérifier ques les selectedIndex > 0, vérifier si foncitionne
 				int dayInstallation = day.getSelectedIndex();
@@ -372,10 +381,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 				
 				
 				Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
-				sensor.setDateInstallation(dateInst);
-				
-				//TODO créer 3 combo box, jour / date / année
-				//sensor.setDateInstallation(d2);
+				sensor.setInstallation(dateInst);
 
 				JSONObject obj = new JSONObject(sensor);
 				PGobject jsonObject = new PGobject();
@@ -387,14 +393,9 @@ public class WindowAdd extends JFrame implements ActionListener{
 					e2.printStackTrace();
 				}
 
-				String databaseName = sensor.getClass().getName().substring(4).toLowerCase();
-
-				try {
-					Insert json2 = new Insert(jdb, connect, databaseName, jsonObject);
-					this.setVisible(false);
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				} 
+				SensorDao sensorDao = new SensorDao(connect);
+				sensorDao.create(jsonObject);
+				this.setVisible(false); 
 			}
 		}
 	}

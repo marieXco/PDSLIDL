@@ -59,4 +59,5 @@ public class Sensors {
 	public int getId() {
 		return id;
 	}
+
 }

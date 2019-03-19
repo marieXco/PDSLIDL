@@ -5,19 +5,20 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.Sensors;
 
 public class SensorsTableModel extends AbstractTableModel {
 
-	private List<Sensors> userData = new ArrayList<Sensors>();
-	private String[] columnNames = { "Marque", "AdresseMac", "DateInstallation", "Etat", "En alerte", "En panne",
+	private List<Sensor> userData = new ArrayList<Sensor>();
+	private String[] columnNames = { "Marque", "Adresse Mac", "Date Installation", "Etat",
 			"Caractéristiques" };
 
 	public SensorsTableModel() {
 	}
 
-	public SensorsTableModel(List<Sensors> userData) {
-		this.userData = userData;
+	public SensorsTableModel(List<Sensor> sensorsList) {
+		this.userData = sensorsList;
 	}
 
 	@Override
@@ -38,27 +39,21 @@ public class SensorsTableModel extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int row, int column) {
 		Object userAttribute = null;
-		Sensors userObject = userData.get(row);
+		Sensor userObject = userData.get(row);
 		switch (column) {
-		case 1:
+		case 0:
 			userAttribute = userObject.getBrand();
 			break;
+		case 1:
+			userAttribute = userObject.getMacAdress();
+			break;
 		case 2:
-			userAttribute = userObject.getMacAddress();
+			userAttribute = userObject.getInstallation();
 			break;
 		case 3:
-			userAttribute = userObject.getDateInstallation();
-			break;
-		case 4:
 			userAttribute = userObject.getState();
 			break;
-		case 5:
-			userAttribute = userObject.getAlert();
-			break;
-		case 6:
-			userAttribute = userObject.getBreakdown();
-			break;
-		case 7:
+		case 4:
 			userAttribute = userObject.getCaracteristics();
 			break;
 		default:
@@ -67,7 +62,7 @@ public class SensorsTableModel extends AbstractTableModel {
 		return userAttribute;
 	}
 
-	public void addUser(Sensors user) {
+	public void addUser(Sensor user) {
 		userData.add(user);
 		fireTableDataChanged();
 	}
