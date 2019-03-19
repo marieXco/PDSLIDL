@@ -11,7 +11,7 @@ import fr.pds.floralis.gui.*;
 
 public class DataSourceTest {
 
-	@Test
+	
 	public void TestConnection() throws ClassNotFoundException {
 		JDBCConnectionPool jdbc;
 
