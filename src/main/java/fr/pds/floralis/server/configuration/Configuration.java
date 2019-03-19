@@ -1,4 +1,13 @@
-package configuration;
+package fr.pds.floralis.server.configuration;
+
+/**
+ * Configuration
+ * 
+ * This class is made to get the XML parameters 
+ * (by our XML parser ReadXML) and 
+ * to give them to our JDBCConnectionPool
+ *
+ */
 
 public class Configuration extends ReadXml {
 	String clogin;
@@ -13,14 +22,8 @@ public class Configuration extends ReadXml {
 		this.cpassword = (String) super.getPassword().getTextContent();
 		this.cnbrConnexions = (String) super.getNbrConnexions()
 				.getTextContent();
-
-		
-
 	}
 
-	
-
-	
 
 	public String getClogin() {
 		return clogin;
