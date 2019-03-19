@@ -32,6 +32,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 
+import org.json.JSONObject;
+import org.postgresql.util.PGobject;
+
 import fr.pds.floralis.commons.bean.entity.Patients;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
@@ -73,6 +76,9 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 	Button buttonDeletePatient = new Button("Supprimer le patient");
 	Button buttonUpdatePatient = new Button("Modifier les infos du patient");
+	
+	Button buttonDeleteSensor = new Button("Supprimer le capteur");
+	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
 
 	JPanel container1 = new JPanel();
 	JComboBox comboPatient = null;
@@ -110,7 +116,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		patientPanel.add(new JScrollPane(panePatients));
 
 		String[] selectPatient = new String[patientsList.size() + 1]; 
-		selectPatient[0] = "----------";
+		selectPatient[0] = "--Identifiant du patient--";
 
 		for (int listIndex = 0; listIndex < patientsList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
@@ -131,7 +137,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 
 		String[] selectSensor = new String[sensorsList.size() + 1]; 
-		selectSensor[0] = "----------";
+		selectSensor[0] = "--Identifiant du capteur--";
 
 		for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
@@ -141,7 +147,9 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		comboSensors = new JComboBox(selectSensor);
 
 		infoSensorsPanel.add(comboSensors);
-
+		
+		infoSensorsPanel.add(buttonDeleteSensor);
+		infoSensorsPanel.add(buttonDeleteSensor);
 
 		infoPatientPanel.add(buttonDeletePatient);
 		infoPatientPanel.add(buttonUpdatePatient);
@@ -168,6 +176,10 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		buttonDeletePatient.addActionListener(this);
 		buttonUpdatePatient.addActionListener(this);
+		
+		buttonDeleteSensor.addActionListener(this);
+		buttonUpdateSensor.addActionListener(this);
+		
 		accountThirdItem.addActionListener(this);
 		accountSecondItem.addActionListener(this);
 		accountFirstItem.addActionListener(this);
@@ -272,6 +284,44 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			int index = comboPatient.getSelectedIndex();
 			if (index > 0) {
 				int id = patientsList.get(index - 1).getId();
+				try {
+					new WindowUpdate(jdb, connect).initUpdatePatient(id);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+		
+		if(e.getSource() == buttonDeleteSensor) {
+
+			int index = comboSensors.getSelectedIndex();
+			if (index > 0) {
+				int id = sensorsList.get(index - 1).getId();
+				
+				JSONObject obj = new JSONObject();
+				obj.put("id", id);
+				
+
+				PGobject jsonObject = new PGobject();
+				jsonObject.setType("json");
+				
+				try {
+					jsonObject.setValue(obj.toString());
+				} catch (SQLException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				SensorDao sensorDao = new SensorDao(connect);
+				sensorDao.delete(obj);
+			}
+		}
+		
+		if(e.getSource() == buttonUpdateSensor) {
+
+			int index = comboSensors.getSelectedIndex();
+			if (index > 0) {
+				int id = sensorsList.get(index - 1).getId();
 				try {
 					new WindowUpdate(jdb, connect).initUpdatePatient(id);
 				} catch (SQLException e1) {

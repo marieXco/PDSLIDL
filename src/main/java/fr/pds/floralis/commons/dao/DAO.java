@@ -4,6 +4,7 @@ import java.sql.Connection;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 
@@ -40,7 +41,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean delete(PGobject jsonObject);
+	public abstract boolean delete(JSONObject jsonObject);
 
 
 	/**

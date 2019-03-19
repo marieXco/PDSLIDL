@@ -28,62 +28,76 @@ public class SensorDao extends DAO<Sensor> {
 
 	public SensorDao(Connection conn) {
 		super(conn);
-		// TODO Auto-generated constructor stub
 	}
 
-	@Override
 
 	public boolean create(PGobject jsonObject) {
+		boolean success = false;
+		
 		try {
 			connect.setAutoCommit(false);
 			String sql = "INSERT INTO sensors (data) VALUES (?);";
+			
 			PreparedStatement statement = connect.prepareStatement(sql);
 			statement.setObject(1, jsonObject);
 
 			statement.execute();
 			connect.commit();
 
+			if(statement.executeUpdate() > 0) {
+				success = true;
+			}
+
 			statement.close();
-			// JSONRequest.JSONRequestPersonnels();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		System.out.println("Insert success");
-		return false;
-
+		
+		if(success == true) {
+			System.out.println("Insert success");
+		}
+		
+		return success;
 	}
 
 	@Override
-	public boolean delete(PGobject jsonObject) {
-		Statement stmt = null;
+	public boolean delete(JSONObject jsonObject) {
+		boolean success = false;
+		
+		String identifiant = Integer.toString(jsonObject.getInt("id"));
+
 		try {
 			connect.setAutoCommit(false);
 
-			stmt = connect.createStatement();
-			String sql = "SELECT data FROM personnels where data ->> 'id' = '" + jsonObject+ "';";
-
+			//impossible à faire en JSON
+			String sql = "DELETE FROM sensors where data ->> 'id' = " + identifiant + ";";
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.execute();
 			connect.commit();
 
+			if(statement.executeUpdate() > 0) {
+				return true;
+			}
+
 			statement.close();
-			// JSONRequest.JSONRequestPersonnels();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		System.out.println("Delete success");
-		return false;
+		
+		if(success == true) {
+			System.out.println("Delete success");
+		}
+		return success;
 
 	}
 
 
 	@Override
 	public boolean update(Sensor s) {
+		boolean success = false;
 		Sensor sensor = new Sensor();
 		sensor.setAlerts(s.getAlerts());
 		sensor.setBrand(s.getBrand());
@@ -106,13 +120,17 @@ public class SensorDao extends DAO<Sensor> {
 			e2.printStackTrace();
 		}
 		try {
+			
+			//Pas compliqué, window à faire 
 			connect.setAutoCommit(false);
-			// stmt = c.createStatement(); to keep ?
-
-			String sql = "UPDATE sensors set data = (?) where id  = '" + s.getId() + "';";
+			String sql = "UPDATE sensors set data = (?) where data ->> id  = '" + s.getId() + "';";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 			statement.setObject(1, jsonObject);
+			
+			if(statement.executeUpdate() > 0) {
+				success = true;
+			}
 
 			statement.execute();
 			connect.commit();
@@ -123,8 +141,11 @@ public class SensorDao extends DAO<Sensor> {
 			System.exit(0);
 		}
 
-		System.out.println("Update success");
-		return false;
+		if(success == true) {
+			System.out.println("Update success");
+		}
+		
+		return success;
 	}
 
 	@Override
@@ -138,10 +159,11 @@ public class SensorDao extends DAO<Sensor> {
 			stmt = connect.createStatement();
 
 			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors;" );
-			
+
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
 			}
+
 
 			rs.close();
 			stmt.close();
@@ -150,8 +172,6 @@ public class SensorDao extends DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		System.out.println("find success");
-
 		return sensor;
 	}
 
@@ -171,7 +191,6 @@ public class SensorDao extends DAO<Sensor> {
 
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
-				// sensor.setId(Integer.parseInt(rs.getObject(1).toString()));
 				System.out.println(sensors.toString());
 				sensors.add(sensor);
 			}
@@ -181,10 +200,8 @@ public class SensorDao extends DAO<Sensor> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-		System.out.println("Select success");
+		}		
 		return sensors;
-
 	}
 
 
