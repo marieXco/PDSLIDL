@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +38,8 @@ import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 import fr.pds.floralis.commons.bean.entity.Patients;
+import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.dao.SensorDao;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
@@ -51,6 +54,34 @@ public class WindowUpdate extends JFrame implements ActionListener{
 	JPanel otherInfosPanel = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
 	
+	JTextField brand = new JTextField(10);
+	JLabel brandLabel = new JLabel("Marque :");
+
+	JTextField macAddress = new JTextField(10);
+	JLabel macAddressLabel = new JLabel("Adresse Mac :");
+
+	JTextField dateInstallation = new JTextField(10);
+	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
+	
+	JComboBox day = null;
+	
+	String[] days = new String[32];
+	
+	JComboBox month = null;
+	
+	String[] months = new String[13]; 
+	
+	JComboBox year = null;
+	
+	String[] years = new String[12]; 
+	
+	JTextField caracteristics = new JTextField(30);
+	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
+	
+	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+	
+	JTextField identifiant = new JTextField(10);
+	JLabel identifiantLabel = new JLabel("Identifiant :");
 
 	JTextField firstname = new JTextField(10);
 	JLabel nameLabel = new JLabel("Prenom :");
@@ -71,12 +102,16 @@ public class WindowUpdate extends JFrame implements ActionListener{
 	JLabel codeLabel = new JLabel("Code :");
 
 	Button buttonUpdatePersonnel = new Button("Modifier");
+	Button buttonUpdateSensor = new Button("Modifier");
 	Button buttonUpdatePatient = new Button("Modifier");
 
 	JTextField resultSend = new JTextField(10);
-	JTextPane newCode = new JTextPane();
+	JTextPane infos = new JTextPane();
 	
 	private List<Patients> patientData;
+	private List<Sensor> sensorData;
+	
+	JSONObject obj = new JSONObject();
 	
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
 	private int id;
@@ -141,12 +176,12 @@ public class WindowUpdate extends JFrame implements ActionListener{
 		this.id = id;
 		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
 
-		newCode.setParagraphAttributes(centrer, true);    
-		newCode.setText("Modification des infos d'un patient");
-		newCode.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-		newCode.setOpaque(false);
-		newCode.setEditable(false);
-		newCode.setFocusable(false);
+		infos.setParagraphAttributes(centrer, true);    
+		infos.setText("Modification des infos d'un patient");
+		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+		infos.setOpaque(false);
+		infos.setEditable(false);
+		infos.setFocusable(false);
 
 		Patients Patient = new Patients();
 		String databaseName = Patient.getClass().getName().substring(4).toLowerCase();
@@ -173,7 +208,7 @@ public class WindowUpdate extends JFrame implements ActionListener{
 
 		container.add(BorderLayout.NORTH, mainInfosPanel);
 		container.add(BorderLayout.NORTH, otherInfosPanel);	
-		container.add(newCode);
+		container.add(infos);
 		container.add(buttonUpdatePatient);
 
 		this.addWindowListener(new WindowAdapter(){
@@ -191,56 +226,94 @@ public class WindowUpdate extends JFrame implements ActionListener{
 		this.setVisible(true);
 	}
 	
-//	public void initAddSensor() {
-//		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
-//
-//		newCode.setParagraphAttributes(centrer, true);    
-//		newCode.setText("Ajout d'un personnel");
-//		newCode.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-//		newCode.setOpaque(false);
-//		newCode.setEditable(false);
-//		newCode.setFocusable(false);
-//
-//		buttonAdd.addActionListener(this);
-//
-//		container.setPreferredSize(new Dimension(LG, HT));
-//
-//		mainInfosPanel.add(lastnameLabel);
-//		mainInfosPanel.add(lastname);
-//		mainInfosPanel.add(nameLabel);
-//		mainInfosPanel.add(firstname);
-//		mainInfosPanel.add(fonctionLabel);
-//		mainInfosPanel.add(fonction);
-//
-//		otherInfosPanel.add(usernameLabel);
-//		otherInfosPanel.add(username);
-//
-//		otherInfosPanel.add(passwordLabel);
-//		otherInfosPanel.add(password);
-//		otherInfosPanel.add(codeLabel);
-//		otherInfosPanel.add(code);
-//
-//		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-//
-//		container.add(BorderLayout.NORTH, mainInfosPanel);
-//		container.add(BorderLayout.NORTH, otherInfosPanel);	
-//		container.add(newCode);
-//		container.add(buttonAdd);
-//
-//		this.addWindowListener(new WindowAdapter(){
-//			public void windowClosed(WindowEvent e){
-//				DataSource.backConnection(jdb, connect);
-//				System.out.println("Connexion fermée");
-//			}
-//		}); 
-//
-//		this.setTitle("Floralis - Ajout d'un personnel");
-//		this.setContentPane(container);
-//		pack();
-//		this.setLocationRelativeTo(null);
-//		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//		this.setVisible(true);
-//	}
+	@SuppressWarnings("deprecation")
+	public void initUpdateSensor(int id) {
+		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
+
+		infos.setParagraphAttributes(centrer, true);    
+		infos.setText("Modification d'un capteur");
+		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+		infos.setOpaque(false);
+		infos.setEditable(false);
+		infos.setFocusable(false);
+
+		buttonUpdateSensor.addActionListener(this);
+		
+		days[0] = "Jour";
+		
+		months[0] = "Mois";
+		
+		years[0] = "Annee";
+		
+		obj.put("id", id);
+		
+		SensorDao sensorDao = new SensorDao(connect);
+		Sensor sensorFound = sensorDao.find(obj);
+		
+		for (int dayIndex = 1; dayIndex < days.length; dayIndex++) {
+			String daysMax = (dayIndex) + "";
+			days[dayIndex] = daysMax;
+		}
+		
+		for (int monthIndex = 1; monthIndex < months.length; monthIndex++) {
+			String monthMax = (monthIndex) + "";
+			months[monthIndex] = monthMax;
+		}	
+		
+		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
+			String yearMax = (yearIndex + 2018) + "";
+			years[yearIndex] = yearMax;
+		}
+		
+		day =  new JComboBox(days);
+		
+		month = new JComboBox(months);
+		
+		year = new JComboBox(years);	
+
+		container.setPreferredSize(new Dimension(LG + 200, HT));
+		
+		mainInfosPanel.add(brandLabel);
+		mainInfosPanel.add(brand);
+		mainInfosPanel.add(macAddressLabel);
+		mainInfosPanel.add(macAddress);
+
+		otherInfosPanel.add(dateInstallationLabel);
+		otherInfosPanel.add(day);
+		otherInfosPanel.add(month);
+		otherInfosPanel.add(year);
+
+		otherInfosPanel.add(caracteristicsLabel);
+		otherInfosPanel.add(caracteristics);
+		
+		brand.setText(sensorFound.getBrand());
+		macAddress.setText(sensorFound.getMacAdress());
+		day.setSelectedIndex(sensorFound.getInstallation().getDate());
+		month.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
+		year.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
+		caracteristics.setText(sensorFound.getCaracteristics());
+
+		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+
+		container.add(BorderLayout.NORTH, mainInfosPanel);
+		container.add(BorderLayout.NORTH, otherInfosPanel);	
+		container.add(infos);
+		container.add(buttonUpdateSensor);
+
+		this.addWindowListener(new WindowAdapter(){
+			public void windowClosed(WindowEvent e){
+				DataSource.backConnection(jdb, connect);
+				System.out.println("Connexion fermée");
+			}
+		}); 
+
+		this.setTitle("Floralis - Modification d'un capteur");
+		this.setContentPane(container);
+		pack();
+		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setVisible(true);
+	}
 
 	public void actionPerformed(ActionEvent e) {
 //		if (e.getSource() == buttonUpdatePersonnel) {
@@ -279,37 +352,72 @@ public class WindowUpdate extends JFrame implements ActionListener{
 //			}
 //		}
 		
-		if (e.getSource() == buttonUpdatePatient) {
-			newCode.setText("Ajout d'un patient...");
-			if (firstname.getText().isEmpty() || lastname.getText().isEmpty() || code.getText().isEmpty()){
-				newCode.setText("Un ou plusieurs champs sont manquants");
+		if (e.getSource() == buttonUpdateSensor) {
+			infos.setText("Modification d'un capteur...");
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || caracteristics.getText().isEmpty()){
+				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			else {
-				Patients Patient = new Patients();
-				Patient.setFirstname(firstname.getText());
-				Patient.setLastname(lastname.getText());
-				Patient.setCode(Integer.parseInt(code.getText()));
+				Sensor sensor = new Sensor();
+				sensor.setBrand(brand.getText());
+				sensor.setMacAdress(macAddress.getText());
+				sensor.setCaracteristics(caracteristics.getText());
 				
 				
-				JSONObject obj = new JSONObject(Patient);
-				PGobject jsonObject = new PGobject();
-				jsonObject.setType("json");
+				sensor.setId(obj.getInt("id"));
+				sensor.setAlerts(null);
+				sensor.setBreakdowns(null);
+				sensor.setState(true);
 				
-				try {
-					jsonObject.setValue(obj.toString());
-				} catch (SQLException e2) {
-					e2.printStackTrace();
-				}
+				int dayInstallation = day.getSelectedIndex();
+				int monthInstallation = month.getSelectedIndex()-1;
+				int indexYear = year.getSelectedIndex();
+				int yearInstallation = Integer.parseInt(years[indexYear]);
 				
-				String databaseName = Patient.getClass().getName().substring(4).toLowerCase();
 				
-				try {
-					Update.UpdateData(jdb, connect, databaseName, id, jsonObject);
-					this.setVisible(false);
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				} 
+				Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
+
+				sensor.setInstallation(dateInst);
+
+				JSONObject obj = new JSONObject(sensor);
+				SensorDao sensorDao = new SensorDao(connect);
+				sensorDao.update(obj);
+				
+				this.setVisible(false); 
 			}
+		}
+		
+		if (e.getSource() == buttonUpdatePatient) {
+//			infos.setText("Modification d'un patient...");
+//			if (firstname.getText().isEmpty() || lastname.getText().isEmpty() || code.getText().isEmpty()){
+//				infos.setText("Un ou plusieurs champs sont manquants");
+//			}
+//			else {
+//				Patients Patient = new Patients();
+//				Patient.setFirstname(firstname.getText());
+//				Patient.setLastname(lastname.getText());
+//				Patient.setCode(Integer.parseInt(code.getText()));
+//				
+//				
+//				JSONObject obj = new JSONObject(Patient);
+//				PGobject jsonObject = new PGobject();
+//				jsonObject.setType("json");
+//				
+//				try {
+//					jsonObject.setValue(obj.toString());
+//				} catch (SQLException e2) {
+//					e2.printStackTrace();
+//				}
+//				
+//				String databaseName = Patient.getClass().getName().substring(4).toLowerCase();
+//				
+//				try {
+//					Update.UpdateData(jdb, connect, databaseName, id, jsonObject);
+//					this.setVisible(false);
+//				} catch (SQLException e1) {
+//					e1.printStackTrace();
+//				} 
+//			}
 		}
 	}
 }

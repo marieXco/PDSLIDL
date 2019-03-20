@@ -13,7 +13,7 @@ public class SensorsTableModel extends AbstractTableModel {
 
 
 	private List<Sensor> userData = new ArrayList<Sensor>();
-	private String[] columnNames = { "Marque", "Adresse Mac", "Date Installation", "Etat",
+	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
 			"Caractéristiques" };
 
 	public SensorsTableModel() {
@@ -44,19 +44,22 @@ public class SensorsTableModel extends AbstractTableModel {
 		Object userAttribute = null;
 		Sensor userObject = userData.get(row);
 		switch (column) {
-		case 0:
-			userAttribute = userObject.getBrand();
+		case 0: 
+			userAttribute = userObject.getId();
 			break;
 		case 1:
-			userAttribute = userObject.getMacAdress();
+			userAttribute = userObject.getBrand();
 			break;
 		case 2:
-			userAttribute = userObject.getInstallation();
+			userAttribute = userObject.getMacAdress();
 			break;
 		case 3:
-			userAttribute = userObject.getState();
+			userAttribute = userObject.getInstallation();
 			break;
 		case 4:
+			userAttribute = userObject.getState();
+			break;
+		case 5:
 			userAttribute = userObject.getCaracteristics();
 			break;
 		default:

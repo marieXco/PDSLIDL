@@ -1,13 +1,8 @@
 package fr.pds.floralis.commons.dao;
 
 import java.sql.Connection;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import java.sql.ResultSet;
-
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +13,6 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fr.pds.floralis.commons.bean.entity.Patients;
-import fr.pds.floralis.commons.bean.entity.Sensor;
-import fr.pds.floralis.commons.bean.entity.Sensors;
 
 public class SensorDao extends DAO<Sensor> {
 
@@ -33,11 +23,14 @@ public class SensorDao extends DAO<Sensor> {
 
 	public boolean create(PGobject jsonObject) {
 		boolean success = false;
-		
+
+		//TODO modifier et mettre un vrai object JSON
+
 		try {
+			//TODO vérifier que l'id n'existe pas déja
 			connect.setAutoCommit(false);
 			String sql = "INSERT INTO sensors (data) VALUES (?);";
-			
+
 			PreparedStatement statement = connect.prepareStatement(sql);
 			statement.setObject(1, jsonObject);
 
@@ -53,84 +46,57 @@ public class SensorDao extends DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
+
 		if(success == true) {
-			System.out.println("Insert success");
+			System.out.println("create success");
 		}
-		
+
 		return success;
 	}
 
 	@Override
 	public boolean delete(JSONObject jsonObject) {
 		boolean success = false;
-		
-		String identifiant = Integer.toString(jsonObject.getInt("id"));
+
+		int sensorId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 
-			//impossible à faire en JSON
-			String sql = "DELETE FROM sensors where data ->> 'id' = " + identifiant + ";";
+			String sql = "DELETE FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;";
+
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.execute();
 			connect.commit();
-
-			if(statement.executeUpdate() > 0) {
-				return true;
-			}
-
 			statement.close();
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		if(success == true) {
-			System.out.println("Delete success");
-		}
-		return success;
 
+		if(success == false) {
+			System.out.println("delete success");
+		}
+
+		return true;
 	}
 
 
 	@Override
-	public boolean update(Sensor s) {
+	public boolean update(JSONObject jsonObject) {
 		boolean success = false;
-		Sensor sensor = new Sensor();
-		sensor.setAlerts(s.getAlerts());
-		sensor.setBrand(s.getBrand());
-		sensor.setBreakdowns(s.getBreakdowns());
-		sensor.setCaracteristics(s.getCaracteristics());
-		sensor.setId(s.getId());
-		sensor.setInstallation(s.getInstallation());
-		sensor.setMacAdress(s.getMacAdress());
-		sensor.setState(s.getState());
-		sensor.setType(s.getType());
 
-		JSONObject obj = new JSONObject(sensor);
+		int sensorId = jsonObject.getInt("id");
 
-		PGobject jsonObject = new PGobject();
-		jsonObject.setType("json");
-
-		try {
-			jsonObject.setValue(obj.toString());
-		} catch (SQLException e2) {
-			e2.printStackTrace();
-		}
 		try {
 			
-			//Pas compliqué, window à faire 
+			//TODO vérifier que l'id n'existe déja pas
 			connect.setAutoCommit(false);
-			String sql = "UPDATE sensors set data = (?) where data ->> id  = '" + s.getId() + "';";
+			String sql = "UPDATE sensors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + sensorId + "'::json::text;;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
-			statement.setObject(1, jsonObject);
-			
-			if(statement.executeUpdate() > 0) {
-				success = true;
-			}
 
 			statement.execute();
 			connect.commit();
@@ -142,36 +108,46 @@ public class SensorDao extends DAO<Sensor> {
 		}
 
 		if(success == true) {
-			System.out.println("Update success");
+			System.out.println("update success");
 		}
-		
+
 		return success;
 	}
 
 	@Override
-	public Sensor find(int id) {
+	public Sensor find(JSONObject jsonObject) {
 		Statement stmt = null;
 		ObjectMapper mapper = new ObjectMapper();
-		Sensor sensor = new Sensor();
+		Sensor sensor = null;
+
+		int sensorId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors;" );
+			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
+
+			if (rs.next()) {
+				sensor = new Sensor();
+			}
 
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
 			}
 
-
 			rs.close();
 			stmt.close();
-		} catch (Exception e) {
 
+		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
+		
+		if (sensor != null) {
+			System.out.println("find success");
+		}
+		
 		return sensor;
 	}
 
@@ -200,7 +176,12 @@ public class SensorDao extends DAO<Sensor> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}		
+		}	
+
+		if (sensors != null) {
+			System.out.println("findAll success");
+		}
+
 		return sensors;
 	}
 

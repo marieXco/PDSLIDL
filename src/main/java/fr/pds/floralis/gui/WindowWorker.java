@@ -12,18 +12,12 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import java.util.ArrayList;
-
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-
-import javax.swing.JLabel;
-
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -36,12 +30,8 @@ import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 import fr.pds.floralis.commons.bean.entity.Patients;
-
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.dao.SensorDao;
-
-import fr.pds.floralis.commons.bean.entity.Sensors;
-
 import fr.pds.floralis.gui.tablemodel.PatientsTableModel;
 import fr.pds.floralis.gui.tablemodel.SensorsTableModel;
 import fr.pds.floralis.server.configurationpool.DataSource;
@@ -50,6 +40,7 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
+	
 	public final Object valueWait = new Object();
 	static JFrame window = new JFrame();
 
@@ -63,49 +54,38 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	JMenuBar menuBar = new JMenuBar(); 
 
 	JMenu account = new JMenu("Compte");
-	JMenu patients = new JMenu("Patients");
+	JMenu adding = new JMenu("Ajouts");
 
+	JMenuItem accountModifyCode = new JMenuItem("Modifier mon code"); 
+	JMenuItem accountModifyPassword = new JMenuItem("Modifier mon mot de passe"); 
+	JMenuItem accountDisconnect = new JMenuItem("Deconnexion"); 
 
-	JMenuItem accountFirstItem = new JMenuItem("Modifier mon code"); 
-	JMenuItem accountSecondItem = new JMenuItem("Modifier mon mot de passe"); 
-	JMenuItem accountThirdItem = new JMenuItem("Deconnexion"); 
-
-	JMenuItem patientsFirstItem = new JMenuItem("Ajouter un patient"); 
-	JMenuItem patientsSecondItem = new JMenuItem("Ajouter un capteur"); 
-	JMenuItem paitentsThirdItem = new JMenuItem("Supprimer un patient"); 
+	JMenuItem addingPatient = new JMenuItem("Ajouter un patient"); 
+	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur"); 
 
 	Button buttonDeletePatient = new Button("Supprimer le patient");
 	Button buttonUpdatePatient = new Button("Modifier les infos du patient");
-	
+
 	Button buttonDeleteSensor = new Button("Supprimer le capteur");
 	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
 
 	JPanel container1 = new JPanel();
-	JComboBox comboPatient = null;
+	JComboBox comboPatient;
+	JComboBox comboSensors;
 
 	List<Patients> patientsList;
 	List<Sensor> sensorsList;
 
-	// Autre combo box pour autre delete
-	// String[] selectPersonnel = {"--------", "Lundi", "Mardi"} ;
-	JComboBox comboSensors = null;
-
 	Thread t = new Thread();
 
+
 	public void init() throws SQLException {
-
-		// ComboBox pour autre delete
-		// infoSensorsPanel.add(combo1);
-
-
-
 		infoPatientPanel.setLayout(new BoxLayout(infoPatientPanel, BoxLayout.X_AXIS));
 		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel, BoxLayout.X_AXIS));
 
 		patientPanel.add(infoPatientPanel);
 		sensorsPanel.add(infoSensorsPanel);
-
-		//TODO Ajouter 2 boutons delete et update
+		
 
 		patientsList = Selects.SelectPatients(jdb, connect);
 		PatientsTableModel patientModel = new PatientsTableModel(patientsList);
@@ -122,14 +102,19 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			int tabIndex = listIndex + 1;
 			selectPatient[tabIndex] = patientsList.get(listIndex).getFirstname() + " " + patientsList.get(listIndex).getLastname();
 		}	
-		comboPatient = new JComboBox(selectPatient);		
+		
+		comboPatient = new JComboBox<Object>(selectPatient);		
 		infoPatientPanel.add(comboPatient);
-
-
+		
+		infoPatientPanel.add(buttonDeletePatient);
+		infoPatientPanel.add(buttonUpdatePatient);		
+		
+		
 		SensorDao sensorDao = new SensorDao(connect);
 		sensorsList = sensorDao.findAll();
 		SensorsTableModel sensorModel = new SensorsTableModel(sensorsList); 
 		JTable tableSensors = new JTable(sensorModel) {};
+
 
 		tableSensors.setEnabled(false);
 		JScrollPane paneSensors = new JScrollPane(tableSensors);
@@ -144,49 +129,42 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			selectSensor[tabIndex] = sensorsList.get(listIndex).getId() + " ";
 		}
 
-		comboSensors = new JComboBox(selectSensor);
-
+		comboSensors = new JComboBox<Object>(selectSensor);
 		infoSensorsPanel.add(comboSensors);
-		
-		infoSensorsPanel.add(buttonDeleteSensor);
-		infoSensorsPanel.add(buttonDeleteSensor);
 
-		infoPatientPanel.add(buttonDeletePatient);
-		infoPatientPanel.add(buttonUpdatePatient);
+		infoSensorsPanel.add(buttonDeleteSensor);
+		infoSensorsPanel.add(buttonUpdateSensor);
 
 		window.setJMenuBar(menuBar);
 		menuBar.add(account);
-		menuBar.add(patients);
+		menuBar.add(adding);
 
-		account.add(accountFirstItem);
-		account.add(accountSecondItem);
-		account.add(accountThirdItem);
+		account.add(accountModifyCode);
+		account.add(accountModifyPassword);
+		account.add(accountDisconnect);
 
-		patients.add(patientsFirstItem);
-		patients.add(patientsSecondItem);
-		patients.add(paitentsThirdItem);
+		adding.add(addingPatient);
+		adding.add(addingSensor);
 
-		accountFirstItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
-		accountSecondItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
-		accountThirdItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		accountModifyCode.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+		accountModifyPassword.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
+		accountDisconnect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
 
-		patientsFirstItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_DOWN_MASK));
-		patientsSecondItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_DOWN_MASK));
-		paitentsThirdItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK));
+		addingPatient.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.ALT_DOWN_MASK));
+		addingSensor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_DOWN_MASK));
 
 		buttonDeletePatient.addActionListener(this);
 		buttonUpdatePatient.addActionListener(this);
-		
+
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
-		
-		accountThirdItem.addActionListener(this);
-		accountSecondItem.addActionListener(this);
-		accountFirstItem.addActionListener(this);
 
-		paitentsThirdItem.addActionListener(this);
-		patientsSecondItem.addActionListener(this);
-		patientsFirstItem.addActionListener(this);
+		accountDisconnect.addActionListener(this);
+		accountModifyPassword.addActionListener(this);
+		accountModifyCode.addActionListener(this);
+
+		addingSensor.addActionListener(this);
+		addingPatient.addActionListener(this);
 
 		locationPanel.setBorder(BorderFactory.createTitledBorder("Plan"));
 		patientPanel.setBorder(BorderFactory.createTitledBorder("Liste des patients"));
@@ -197,8 +175,8 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		window.setBounds(0,0,screenSize.width, screenSize.height);
-		patientPanel.setMaximumSize(new Dimension(screenSize.width - 600,300));
-		sensorsPanel.setMaximumSize(new Dimension(600,300));
+		patientPanel.setMaximumSize(new Dimension(screenSize.width/2,300));
+		sensorsPanel.setMaximumSize(new Dimension(screenSize.width/2,300));
 		listsPanel.setPreferredSize(new Dimension(screenSize.width,300));
 
 		listsPanel.add(patientPanel);
@@ -234,102 +212,87 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	}
 
 
-
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == patientsFirstItem) {
+		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
-			new WindowAdd(jdb, connect).initAddPatient();
+			//new WindowAdd(jdb, connect).initAddPatient();
 		}
-		if (e.getSource() == patientsSecondItem) {
+
+		if (e.getSource() == addingSensor) {
 			System.out.println("Add sensor");
 			new WindowAdd(jdb, connect).initAddSensor();
 		}
 
-		if (e.getSource() == paitentsThirdItem) {
-			System.out.println("Delete patient");
-		}
 
-		if (e.getSource() == accountFirstItem) {
+		if (e.getSource() == accountModifyCode) {
 			System.out.println("Modifiy code");
 		}
-		if (e.getSource() == accountSecondItem) {
+
+		if (e.getSource() == accountModifyPassword) {
 			System.out.println("Modifiy password");
 		}
 
-		if (e.getSource() == accountThirdItem) { 
+
+		if (e.getSource() == accountDisconnect) { 
 			synchronized (valueWait) {
-				System.out.println ("Kill");
 				window.setVisible(false);
 				valueWait.notify();
 			}
-			System.out.println("Quit");
 		}
 
 		if(e.getSource() == buttonDeletePatient) {
-
-			int index = comboPatient.getSelectedIndex();
-			if (index > 0) {
-				int id = patientsList.get(index - 1).getId();
-				try {
-					new WindowConfirm(jdb, connect).initDeletePatient(id);
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
+//			int indexPatient = comboPatient.getSelectedIndex();
+//			if (indexPatient > 0) {
+//				int idPatient = patientsList.get(indexPatient - 1).getId();
+//				try {
+//					new WindowConfirm(jdb, connect).initDeletePatient(idPatient);
+//				} catch (SQLException e1) {
+//					e1.printStackTrace();
+//				}
+//			}
 		}
 
 		if(e.getSource() == buttonUpdatePatient) {
-
-			int index = comboPatient.getSelectedIndex();
-			if (index > 0) {
-				int id = patientsList.get(index - 1).getId();
-				try {
-					new WindowUpdate(jdb, connect).initUpdatePatient(id);
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
+//			int indexPatient = comboPatient.getSelectedIndex();
+//			if (indexPatient > 0) {
+//				int idPatient = patientsList.get(indexPatient - 1).getId();
+//				try {
+//					new WindowUpdate(jdb, connect).initUpdatePatient(idPatient);
+//				} catch (SQLException e1) {
+//					e1.printStackTrace();
+//				}
+//			}
 		}
-		
+
 		if(e.getSource() == buttonDeleteSensor) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			if (indexSensor > 0) {
+				int idSensor = sensorsList.get(indexSensor - 1).getId();
 
-			int index = comboSensors.getSelectedIndex();
-			if (index > 0) {
-				int id = sensorsList.get(index - 1).getId();
-				
 				JSONObject obj = new JSONObject();
-				obj.put("id", id);
+				obj.put("id", idSensor);
 				
-
 				PGobject jsonObject = new PGobject();
 				jsonObject.setType("json");
-				
+
 				try {
 					jsonObject.setValue(obj.toString());
 				} catch (SQLException e2) {
-					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-				SensorDao sensorDao = new SensorDao(connect);
-				sensorDao.delete(obj);
-			}
-		}
-		
-		if(e.getSource() == buttonUpdateSensor) {
-
-			int index = comboSensors.getSelectedIndex();
-			if (index > 0) {
-				int id = sensorsList.get(index - 1).getId();
-				try {
-					new WindowUpdate(jdb, connect).initUpdatePatient(id);
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (new WindowConfirm(jdb, connect).init("supprimer ce capteur")) {
+					SensorDao sensorDao = new SensorDao(connect);
+					sensorDao.delete(obj);
 				}
 			}
+		}
 
+		if(e.getSource() == buttonUpdateSensor) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			if (indexSensor > 0) {
+				int idSensor = sensorsList.get(indexSensor - 1).getId();
+				new WindowUpdate(jdb, connect).initUpdateSensor(idSensor);
+			}
 		}
 	}
 
@@ -337,7 +300,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		try {
 			init();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

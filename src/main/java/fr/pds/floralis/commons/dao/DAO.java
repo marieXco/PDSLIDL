@@ -53,7 +53,7 @@ public abstract class DAO<T> {
 	 * @return boolean
 	 */
 
-	public abstract boolean update(T obj);
+	public abstract boolean update(JSONObject jsonObject);
 
 	/**
 	 * 
@@ -64,7 +64,7 @@ public abstract class DAO<T> {
 	 * @return T
 	 */
 
-	public abstract T find(int id);
+	public abstract T find(JSONObject jsonObject);
 
 	
 	/**

@@ -19,7 +19,7 @@ public class WindowConfirm extends JFrame{
 	}
 
 	
-	public void init(String phrase) {
+	public boolean init(String phrase) {
 		ImageIcon img = new ImageIcon("src/main/resources/images/info-icon.png");
 
 		int input = JOptionPane.showConfirmDialog(null, "Voulez-vous vraiment " + phrase + " ?", "Confirmation",
@@ -29,7 +29,10 @@ public class WindowConfirm extends JFrame{
 		System.out.println(input);  // 0=yes, 1=no, 2=cancel
 
 		if (input == 0) {
-			//Appeler la prochaine procédure avec les bons paramètres
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 	
