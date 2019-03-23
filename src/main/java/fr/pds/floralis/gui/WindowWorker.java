@@ -167,7 +167,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
-			selectSensor[tabIndex] = sensorsList.get(listIndex) + " ";
+			selectSensor[tabIndex] = sensorsList.get(listIndex).getId() + " ";
 		}
 
 		//Notre combo bo
