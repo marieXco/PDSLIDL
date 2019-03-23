@@ -28,7 +28,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean create(PGobject jsonObject);
+	public abstract boolean create(JSONObject jsonObject);
 
 
 	/**

@@ -380,17 +380,9 @@ public class WindowAdd extends JFrame implements ActionListener{
 						sensor.setInstallation(dateInst);
 
 						JSONObject obj = new JSONObject(sensor);
-						PGobject jsonObject = new PGobject();
-						jsonObject.setType("json");
-
-						try {
-							jsonObject.setValue(obj.toString());
-						} catch (SQLException e2) {
-							e2.printStackTrace();
-						}
-
+						
 						SensorDao sensorDaoCreate = new SensorDao(connect);
-						sensorDaoCreate.create(jsonObject);
+						sensorDaoCreate.create(obj);
 						this.setVisible(false);
 					}
 					else {
