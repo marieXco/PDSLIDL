@@ -26,7 +26,7 @@ public class SensorDao extends DAO<Sensor> {
 
 
 	public boolean create(JSONObject jsonObject) {
-		// Boolean retourné pour savoir si il a fonctionn
+		// Boolean retourné pour savoir si il a fonctionne
 		boolean success = false;
 		
 		PGobject object1 = new PGobject();
