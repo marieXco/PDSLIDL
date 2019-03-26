@@ -50,7 +50,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>ihm/PostgreSQLJDBC</mainClass>
+							<mainClass>fr.pds.floralis.server.service.TestMain</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

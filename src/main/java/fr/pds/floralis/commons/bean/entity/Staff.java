@@ -8,6 +8,7 @@ public abstract class Staff extends Person {
 
 	public Staff(int id, String lastName, String firstName, Code code) {
 		super(id, lastName, firstName, code);
+		// TODO Auto-generated constructor stub
 	}
 
 	private TypeFonction fonction;
