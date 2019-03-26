@@ -1,4 +1,5 @@
 /target/
+<<<<<<< HEAD
 .DS_Store
 .DS_Store
 src/.DS_Store
@@ -12,3 +13,5 @@ target/classes/.DS_Store
 target/classes/.DS_Store
 src/main/java/fr/pds/floralis/server/.DS_Store
 /pom.xml
+=======
+>>>>>>> parent of cb468fe... Modified gitIgnore and Dao
