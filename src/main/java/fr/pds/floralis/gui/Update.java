@@ -10,9 +10,7 @@ import org.postgresql.util.PGobject;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public class Update {
-	//TODO garder stmt ?
 		public static void UpdateData(JDBCConnectionPool jdb, Connection connection, String databaseName, int id, PGobject jsonObject) throws SQLException {
-			//Statement stmt = null; to keep ? 
 
 			try {
 				connection.setAutoCommit(false);

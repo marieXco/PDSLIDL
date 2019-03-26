@@ -4,6 +4,7 @@ import java.sql.Connection;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 
@@ -27,7 +28,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean create(PGobject jsonObject);
+	public abstract boolean create(JSONObject jsonObject);
 
 
 	/**
@@ -40,7 +41,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean delete(PGobject jsonObject);
+	public abstract boolean delete(JSONObject jsonObject);
 
 
 	/**
@@ -52,7 +53,7 @@ public abstract class DAO<T> {
 	 * @return boolean
 	 */
 
-	public abstract boolean update(T obj);
+	public abstract boolean update(JSONObject jsonObject);
 
 	/**
 	 * 
@@ -63,7 +64,7 @@ public abstract class DAO<T> {
 	 * @return T
 	 */
 
-	public abstract T find(int id);
+	public abstract T find(JSONObject jsonObject);
 
 	
 	/**
