@@ -77,7 +77,7 @@ public class Selects {
 		return sensors;
 	}
 
-
+	//TODO Tout récuperer et tout renvoyer
 	public static ArrayList SelectPersonnelForConnection(JDBCConnectionPool jdb, Connection connection, String firstValue, String secondValue) throws SQLException {
 		JSONObject obj = new JSONObject();
 		Statement stmt = null;

@@ -1,5 +1,7 @@
 package fr.pds.floralis.server.service;
 
+import fr.pds.floralis.gui.connexion.ConnectionClient;
+
 public class TestMain {
 
 	public static void main(String[] args) {
@@ -8,11 +10,13 @@ public class TestMain {
 
 		int port = 2345;
 
-		TimeServer ts = new TimeServer(host, port);
+		for (int i = 0; i < 3; i++) {
 
-		ts.open();
+			Thread t = new Thread(new ConnectionClient(host, port));
 
-		System.out.println("Serveur initialisé.");
+			t.start();
+
+		}
 
 	}
 

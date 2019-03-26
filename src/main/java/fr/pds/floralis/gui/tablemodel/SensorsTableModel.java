@@ -5,20 +5,17 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-
 import fr.pds.floralis.commons.bean.entity.Sensor;
-
+import fr.pds.floralis.commons.bean.entity.Sensors;
 
 public class SensorsTableModel extends AbstractTableModel {
 
-
 	private List<Sensor> userData = new ArrayList<Sensor>();
-	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
+	private String[] columnNames = { "Marque", "Adresse Mac", "Date Installation", "Etat",
 			"Caractéristiques" };
 
 	public SensorsTableModel() {
 	}
-
 
 	public SensorsTableModel(List<Sensor> sensorsList) {
 		this.userData = sensorsList;
@@ -44,22 +41,19 @@ public class SensorsTableModel extends AbstractTableModel {
 		Object userAttribute = null;
 		Sensor userObject = userData.get(row);
 		switch (column) {
-		case 0: 
-			userAttribute = userObject.getId();
-			break;
-		case 1:
+		case 0:
 			userAttribute = userObject.getBrand();
 			break;
-		case 2:
+		case 1:
 			userAttribute = userObject.getMacAdress();
 			break;
-		case 3:
+		case 2:
 			userAttribute = userObject.getInstallation();
 			break;
-		case 4:
+		case 3:
 			userAttribute = userObject.getState();
 			break;
-		case 5:
+		case 4:
 			userAttribute = userObject.getCaracteristics();
 			break;
 		default:
@@ -68,16 +62,8 @@ public class SensorsTableModel extends AbstractTableModel {
 		return userAttribute;
 	}
 
-
-	public void remove() {
-		while(!(this.userData.isEmpty())) {
-			this.userData.remove(this.userData.size()-1);
-		}
-		fireTableDataChanged();
-	}
-	
-	public void add(List<Sensor> sensors) {
-		this.userData = sensors; 
+	public void addUser(Sensor user) {
+		userData.add(user);
 		fireTableDataChanged();
 	}
 }
