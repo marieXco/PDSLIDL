@@ -20,7 +20,7 @@ public class SensorDao extends DAO<Sensor> {
 	public SensorDao(Connection conn) {
 		super(conn);
 	}
-	
+
 	//TODO faire tous les retours en JSON
 	//TODO ajouter le fichier des BDD dans les ressources
 
@@ -28,7 +28,7 @@ public class SensorDao extends DAO<Sensor> {
 	public boolean create(JSONObject jsonObject) {
 		// Boolean retourné pour savoir si il a fonctionne
 		boolean success = false;
-		
+
 		PGobject object1 = new PGobject();
 		try {
 			object1.setValue(jsonObject.toString());
@@ -95,7 +95,7 @@ public class SensorDao extends DAO<Sensor> {
 			}
 
 			statement.close();
-			
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
@@ -112,7 +112,7 @@ public class SensorDao extends DAO<Sensor> {
 	@Override
 	public boolean update(JSONObject jsonObject) {
 		boolean success = false;
-		
+
 		// On récupère la valeur (int donc getInt) contenue dans le jsonObjectObject sous le nom de clé "id"
 		int sensorId = jsonObject.getInt("id");
 
@@ -124,11 +124,11 @@ public class SensorDao extends DAO<Sensor> {
 
 			statement.execute();
 			connect.commit();
-			
+
 			if(statement.executeUpdate() > 0) {
 				success = true;
 			}
-			
+
 			statement.close();
 
 		} catch (Exception e) {
@@ -152,11 +152,11 @@ public class SensorDao extends DAO<Sensor> {
 
 		try {
 			connect.setAutoCommit(false);
-			
+
 			// Ici, vu qu'on ajoute aucune valeur dans notre BDD
 			// On utilise un createStatement
 			Statement stmt = connect.createStatement();
-			
+
 			// ResultSet est utilisé et contiendra tout ce que la BDD renvoie sous forme de lignes qui se suivent
 			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
 
@@ -173,7 +173,7 @@ public class SensorDao extends DAO<Sensor> {
 				// l'objet sensor contiendra quelque chose du type { "caracteristics" : "toto", "id" : 1234..} 
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
 			}
-			
+
 			// Remarque : on aurait pu mettre le code du while dans le if car il n'y aura qu'une ligne renvoyé
 			//donc qu'un seul rs.next
 
@@ -204,17 +204,19 @@ public class SensorDao extends DAO<Sensor> {
 
 			ResultSet rs = stmt.executeQuery("SELECT id, data FROM sensors;");
 
-			while (rs.next()) {
-				// Même principe de le find normal mais on ajoute chaque capteur à la liste de capteurs
+			while(rs.next()) {
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
 				//TODO : WTF? 
-				//rs.next();
+				System.out.println("toto" + rs.getObject(2));
 				sensors.add(sensor);
 			}
 
+			System.out.println(sensors.toString());
+
+
 			rs.close();
 			stmt.close();
-			
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);

@@ -1,1 +1,13 @@
 /target/
+.DS_Store
+.DS_Store
+src/.DS_Store
+src/main/.DS_Store
+src/main/java/.DS_Store
+src/main/java/fr/.DS_Store
+src/main/java/fr/pds/.DS_Store
+src/main/java/fr/pds/floralis/.DS_Store
+src/main/java/fr/pds/floralis/server/.DS_Store
+target/classes/.DS_Store
+target/classes/.DS_Store
+src/main/java/fr/pds/floralis/server/.DS_Store
