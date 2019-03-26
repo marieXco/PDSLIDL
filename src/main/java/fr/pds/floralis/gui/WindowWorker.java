@@ -159,10 +159,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		sensorsPanel.add(new JScrollPane(paneSensors));
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> parent of e3087c3... ChangeTestMain
 		//ComboBox d'identifiants pour les capteurs
 
 		//On créé un tableau de ce que contient le tableau de capteur
@@ -171,18 +167,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		//(--identifiant du capteur--), il faut que notre tableau
 		//ait une case en plus que le nombre d'éléments dans le tableau du capteur 
 		//(index [0] + 1 index pour chaque élément --> tableau de taille 4 donc getRowCount() + 1)
-<<<<<<< HEAD
-		String[] selectSensor1 = new String[sensorModel.getRowCount() + 1]; 
-		selectSensor1[0] = "--Identifiant du capteur--";
 
-
-		for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
-			int tabIndex = listIndex + 1;
-			selectSensor1[tabIndex] = sensorsList.get(listIndex).getId() + " ";
-		}
-
-		comboSensors = new JComboBox(selectSensor1);
-=======
 		String[] selectSensor = new String[sensorModel.getRowCount() + 1]; 
 		selectSensor[0] = "--Identifiant du capteur--";
 
@@ -193,7 +178,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		//Notre combo bo
 		comboSensors = new JComboBox<Object>(selectSensor);
->>>>>>> parent of e3087c3... ChangeTestMain
+
 
 		//Ajout de la combo Box puis des boutons
 		infoSensorsPanel.add(comboSensors);
@@ -283,7 +268,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
-<<<<<<< HEAD
+
 
 			//SensorDao sensorDao = new SensorDao(connect);
 			SensorDao sensorDao = new SensorDao(connect);
@@ -294,10 +279,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			//On ajoute le modèle à un JTable simple
 			//tableSensors.setModel(sensorModels);	
 
-=======
-			SensorDao sensorDao = new SensorDao(connect);
-			tableSensors.setModel(new SensorsTableModel(sensorDao.findAll()));	
->>>>>>> parent of e3087c3... ChangeTestMain
 		}
 
 		if (e.getSource() == addingSensor) {
@@ -310,12 +291,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == accountModifyCode) {
 			System.out.println("Modifiy code");
-<<<<<<< HEAD
-
-=======
-			SensorDao sensorDao = new SensorDao(connect);			
-			sensorModel.add(sensorDao.findAll());
->>>>>>> parent of e3087c3... ChangeTestMain
 		}
 
 		if (e.getSource() == accountModifyPassword) {
