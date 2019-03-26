@@ -8,6 +8,7 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public class PostgreSQLJDBC extends Thread {
 
+	//TODO : enlever les appels BDD inutiles et enlever les classes avec
 
 	public static void main( String args[] )  throws ClassNotFoundException, SQLException, IOException, InterruptedException  {
 		//On ouvre la BDD
@@ -28,7 +29,6 @@ public class PostgreSQLJDBC extends Thread {
 		}
 
 
-		//TODO vérifier que on exit lorsque l'on ferme cette fenêtre 
 		WindowConnection frame3 = new WindowConnection(jdbc, connect);
 		synchronized(frame3.valueWaitConnection) {
 			//On la lance

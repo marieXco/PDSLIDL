@@ -69,8 +69,15 @@ public class SensorsTableModel extends AbstractTableModel {
 	}
 
 
-	public void addUser(Sensor user) {
-		userData.add(user);
+	public void remove() {
+		while(!(this.userData.isEmpty())) {
+			this.userData.remove(this.userData.size()-1);
+		}
+		fireTableDataChanged();
+	}
+	
+	public void add(List<Sensor> sensors) {
+		this.userData = sensors; 
 		fireTableDataChanged();
 	}
 }

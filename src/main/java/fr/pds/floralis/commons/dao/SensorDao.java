@@ -3,6 +3,7 @@ package fr.pds.floralis.commons.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +22,22 @@ public class SensorDao extends DAO<Sensor> {
 	}
 	
 	//TODO faire tous les retours en JSON
+	//TODO ajouter le fichier des BDD dans les ressources
 
 
 	public boolean create(JSONObject jsonObject) {
 		// Boolean retourné pour savoir si il a fonctionné
 		boolean success = false;
+		
+		PGobject object1 = new PGobject();
+		try {
+			object1.setValue(jsonObject.toString());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		object1.setType("json");
 
 		try {
-			//TODO vérifier que l'id n'existe pas déja
 			connect.setAutoCommit(false);
 
 			// Sql a éxécuter
@@ -39,7 +48,7 @@ public class SensorDao extends DAO<Sensor> {
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			// On ajoute le jsonObject à la place du 1er point d'interrogation dans la string sql
-			statement.setObject(1, jsonObject);
+			statement.setObject(1, object1);
 
 			// On execute le tout et on commit
 			statement.execute();
@@ -198,6 +207,8 @@ public class SensorDao extends DAO<Sensor> {
 			while (rs.next()) {
 				// Même principe de le find normal mais on ajoute chaque capteur à la liste de capteurs
 				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
+				//TODO : WTF? 
+				//rs.next();
 				sensors.add(sensor);
 			}
 

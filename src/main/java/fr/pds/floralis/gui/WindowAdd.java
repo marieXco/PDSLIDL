@@ -94,8 +94,8 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
-	
-    
+
+
 
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -162,6 +162,8 @@ public class WindowAdd extends JFrame implements ActionListener{
 		infos.setOpaque(false);
 		infos.setEditable(false);
 		infos.setFocusable(false);
+		
+		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
 		buttonAddSensor.addActionListener(this);
 
@@ -341,9 +343,22 @@ public class WindowAdd extends JFrame implements ActionListener{
 		}
 
 		if (e.getSource() == buttonAddSensor) {
+
+			try {
+				Integer.parseInt(identifiant.getText());
+			} catch (java.lang.NumberFormatException ex) {
+				infos.setText("L'identifiant ne peut contenir que des chiffres");
+			}
+
 			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty() || caracteristics.getText().isEmpty()){
 				infos.setText("Un ou plusieurs champs sont manquants");
+
 			}
+			
+			else if (day.getSelectedIndex() == 0 && month.getSelectedIndex() == 0 && year.getSelectedIndex() == 0) {
+				infos.setText("Veuillez selectionner une date valide");	
+			}
+			
 			else {
 				JSONObject object = new JSONObject();
 				object.put("id", Integer.parseInt(identifiant.getText()));
@@ -354,7 +369,6 @@ public class WindowAdd extends JFrame implements ActionListener{
 				if (sensorFound != null) {
 					infos.setText("Cet identifiant est déja utilisé");
 				}
-
 				else {
 					Sensor sensor = new Sensor();
 					sensor.setBrand(brand.getText());
@@ -368,26 +382,21 @@ public class WindowAdd extends JFrame implements ActionListener{
 					int dayInstallation;
 					int monthInstallation;
 					int yearInstallation;
+					dayInstallation= day.getSelectedIndex();
+					monthInstallation = month.getSelectedIndex()-1;
+					int indexYear = year.getSelectedIndex();
+					yearInstallation = Integer.parseInt(years[indexYear]);
 
-					if (day.getSelectedIndex() > 0 && month.getSelectedIndex() > 0 && year.getSelectedIndex() > 0) {
-						dayInstallation= day.getSelectedIndex();
-						monthInstallation = month.getSelectedIndex()-1;
-						int indexYear = year.getSelectedIndex();
-						yearInstallation = Integer.parseInt(years[indexYear]);
+					Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
 
-						Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
+					sensor.setInstallation(dateInst);
 
-						sensor.setInstallation(dateInst);
+					JSONObject obj = new JSONObject(sensor);
 
-						JSONObject obj = new JSONObject(sensor);
-						
-						SensorDao sensorDaoCreate = new SensorDao(connect);
-						sensorDaoCreate.create(obj);
-						this.setVisible(false);
-					}
-					else {
-						infos.setText("Veuillez selectionner une date valide");
-					}
+					SensorDao sensorDaoCreate = new SensorDao(connect);
+					sensorDaoCreate.create(obj);
+					this.setVisible(false);
+
 				}
 			}
 		}

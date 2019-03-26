@@ -36,7 +36,6 @@ public class WindowConfirm extends JFrame{
 		}
 	}
 	
-	// TODO Rendre cela générique, uniquement pour les delete
 	public void initDeletePatient(int id) throws SQLException {
 		ImageIcon img = new ImageIcon("src/main/resources/images/info-icon.png");
 		

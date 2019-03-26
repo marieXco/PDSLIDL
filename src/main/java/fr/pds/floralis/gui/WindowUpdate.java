@@ -353,6 +353,12 @@ public class WindowUpdate extends JFrame implements ActionListener{
 //		}
 		
 		if (e.getSource() == buttonUpdateSensor) {
+			try {
+				Integer.parseInt(identifiant.getText());
+			} catch (java.lang.NumberFormatException ex) {
+				infos.setText("L'identifiant ne peut contenir que des chiffres");
+			}
+			
 			infos.setText("Modification d'un capteur...");
 			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || caracteristics.getText().isEmpty()){
 				infos.setText("Un ou plusieurs champs sont manquants");
