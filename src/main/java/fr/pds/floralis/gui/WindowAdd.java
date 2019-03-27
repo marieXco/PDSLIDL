@@ -5,9 +5,9 @@ import java.awt.Button;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
@@ -23,13 +23,14 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 import org.json.JSONObject;
-import org.postgresql.util.PGobject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
-import fr.pds.floralis.commons.dao.SensorDao;
+import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
-public class WindowAdd extends JFrame implements ActionListener{
+public class WindowAdd extends JFrame implements ActionListener {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
 
@@ -55,11 +56,11 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 	JComboBox month = null;
 
-	String[] months = new String[13]; 
+	String[] months = new String[13];
 
 	JComboBox year = null;
 
-	String[] years = new String[12]; 
+	String[] years = new String[12];
 
 	JTextField caracteristics = new JTextField(30);
 	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
@@ -96,74 +97,72 @@ public class WindowAdd extends JFrame implements ActionListener{
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	public final Object waitAdd = new Object();
 
-
-
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
-		connect = connection;		
+		connect = connection;
 	}
 
 	public void initAddPersonnel() {
-		//		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
+		// StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER);
 		//
-		//		infos.setParagraphAttributes(centrer, true);    
-		//		infos.setText("Ajout d'un personnel");
-		//		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-		//		infos.setOpaque(false);
-		//		infos.setEditable(false);
-		//		infos.setFocusable(false);
+		// infos.setParagraphAttributes(centrer, true);
+		// infos.setText("Ajout d'un personnel");
+		// infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+		// infos.setOpaque(false);
+		// infos.setEditable(false);
+		// infos.setFocusable(false);
 		//
-		//		buttonAddPersonnel.addActionListener(this);
+		// buttonAddPersonnel.addActionListener(this);
 		//
-		//		container.setPreferredSize(new Dimension(LG, HT));
+		// container.setPreferredSize(new Dimension(LG, HT));
 		//
-		//		mainInfosPanel.add(lastnameLabel);
-		//		mainInfosPanel.add(lastname);
-		//		mainInfosPanel.add(nameLabel);
-		//		mainInfosPanel.add(firstname);
-		//		mainInfosPanel.add(fonctionLabel);
-		//		mainInfosPanel.add(fonction);
+		// mainInfosPanel.add(lastnameLabel);
+		// mainInfosPanel.add(lastname);
+		// mainInfosPanel.add(nameLabel);
+		// mainInfosPanel.add(firstname);
+		// mainInfosPanel.add(fonctionLabel);
+		// mainInfosPanel.add(fonction);
 		//
-		//		otherInfosPanel.add(usernameLabel);
-		//		otherInfosPanel.add(username);
+		// otherInfosPanel.add(usernameLabel);
+		// otherInfosPanel.add(username);
 		//
-		//		otherInfosPanel.add(passwordLabel);
-		//		otherInfosPanel.add(password);
-		//		otherInfosPanel.add(codeLabel);
-		//		otherInfosPanel.add(code);
+		// otherInfosPanel.add(passwordLabel);
+		// otherInfosPanel.add(password);
+		// otherInfosPanel.add(codeLabel);
+		// otherInfosPanel.add(code);
 		//
-		//		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+		// container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		//
-		//		container.add(BorderLayout.NORTH, mainInfosPanel);
-		//		container.add(BorderLayout.NORTH, otherInfosPanel);	
-		//		container.add(infos);
-		//		container.add(buttonAddPersonnel);
+		// container.add(BorderLayout.NORTH, mainInfosPanel);
+		// container.add(BorderLayout.NORTH, otherInfosPanel);
+		// container.add(infos);
+		// container.add(buttonAddPersonnel);
 		//
-		//		this.addWindowListener(new WindowAdapter(){
-		//			public void windowClosed(WindowEvent e){
-		//				DataSource.backConnection(jdb, connect);
-		//				System.out.println("Connexion fermée");
-		//			}
-		//		}); 
+		// this.addWindowListener(new WindowAdapter(){
+		// public void windowClosed(WindowEvent e){
+		// DataSource.backConnection(jdb, connect);
+		// System.out.println("Connexion fermée");
+		// }
+		// });
 		//
-		//		this.setTitle("Floralis - Ajout d'un personnel");
-		//		this.setContentPane(container);
-		//		pack();
-		//		this.setLocationRelativeTo(null);
-		//		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		//		this.setVisible(true);
+		// this.setTitle("Floralis - Ajout d'un personnel");
+		// this.setContentPane(container);
+		// pack();
+		// this.setLocationRelativeTo(null);
+		// this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		// this.setVisible(true);
 	}
 
 	public void initAddSensor() {
-		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
+		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
-		infos.setParagraphAttributes(centrer, true);    
+		infos.setParagraphAttributes(centrer, true);
 		infos.setText("Ajout d'un capteur");
 		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		infos.setOpaque(false);
 		infos.setEditable(false);
 		infos.setFocusable(false);
-		
+
 		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
 		buttonAddSensor.addActionListener(this);
@@ -182,18 +181,18 @@ public class WindowAdd extends JFrame implements ActionListener{
 		for (int monthIndex = 1; monthIndex < months.length; monthIndex++) {
 			String monthMax = (monthIndex) + "";
 			months[monthIndex] = monthMax;
-		}	
+		}
 
 		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
 			String yearMax = (yearIndex + 2018) + "";
 			years[yearIndex] = yearMax;
 		}
 
-		day =  new JComboBox(days);
+		day = new JComboBox(days);
 
 		month = new JComboBox(months);
 
-		year = new JComboBox(years);	
+		year = new JComboBox(years);
 
 		container.setPreferredSize(new Dimension(LG, HT));
 
@@ -203,7 +202,6 @@ public class WindowAdd extends JFrame implements ActionListener{
 		mainInfosPanel.add(macAddress);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
-
 
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
@@ -216,7 +214,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
 		container.add(BorderLayout.NORTH, mainInfosPanel);
-		container.add(BorderLayout.NORTH, otherInfosPanel);	
+		container.add(BorderLayout.NORTH, otherInfosPanel);
 		container.add(infos);
 		container.add(buttonAddSensor);
 
@@ -229,118 +227,123 @@ public class WindowAdd extends JFrame implements ActionListener{
 	}
 
 	public void initAddPatient() {
-		//		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
+		// StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER);
 		//
-		//		infos.setParagraphAttributes(centrer, true);    
-		//		infos.setText("Ajout d'un patient");
-		//		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-		//		infos.setOpaque(false);
-		//		infos.setEditable(false);
-		//		infos.setFocusable(false);
+		// infos.setParagraphAttributes(centrer, true);
+		// infos.setText("Ajout d'un patient");
+		// infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+		// infos.setOpaque(false);
+		// infos.setEditable(false);
+		// infos.setFocusable(false);
 		//
-		//		buttonAddPatient.addActionListener(this);
+		// buttonAddPatient.addActionListener(this);
 		//
-		//		container.setPreferredSize(new Dimension(LG, HT));
+		// container.setPreferredSize(new Dimension(LG, HT));
 		//
-		//		mainInfosPanel.add(lastnameLabel);
-		//		mainInfosPanel.add(lastname);
-		//		mainInfosPanel.add(nameLabel);
-		//		mainInfosPanel.add(firstname);
+		// mainInfosPanel.add(lastnameLabel);
+		// mainInfosPanel.add(lastname);
+		// mainInfosPanel.add(nameLabel);
+		// mainInfosPanel.add(firstname);
 		//
-		//		otherInfosPanel.add(codeLabel);
-		//		otherInfosPanel.add(code);
+		// otherInfosPanel.add(codeLabel);
+		// otherInfosPanel.add(code);
 		//
-		//		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+		// container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		//
-		//		container.add(BorderLayout.NORTH, mainInfosPanel);
-		//		container.add(BorderLayout.NORTH, otherInfosPanel);	
-		//		container.add(infos);
-		//		container.add(buttonAddPatient);
+		// container.add(BorderLayout.NORTH, mainInfosPanel);
+		// container.add(BorderLayout.NORTH, otherInfosPanel);
+		// container.add(infos);
+		// container.add(buttonAddPatient);
 		//
-		//		this.addWindowListener(new WindowAdapter(){
-		//			public void windowClosed(WindowEvent e){
-		//				DataSource.backConnection(jdb, connect);
-		//				System.out.println("Connexion fermée");
-		//			}
-		//		}); 
+		// this.addWindowListener(new WindowAdapter(){
+		// public void windowClosed(WindowEvent e){
+		// DataSource.backConnection(jdb, connect);
+		// System.out.println("Connexion fermée");
+		// }
+		// });
 		//
-		//		this.setTitle("Floralis - Ajout d'un patient");
-		//		this.setContentPane(container);
-		//		pack();
-		//		this.setLocationRelativeTo(null);
-		//		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		//		this.setVisible(true);
+		// this.setTitle("Floralis - Ajout d'un patient");
+		// this.setContentPane(container);
+		// pack();
+		// this.setLocationRelativeTo(null);
+		// this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		// this.setVisible(true);
 	}
-
-
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonAddPersonnel) {
-			//			infos.setText("Ajout d'un personnel...");
-			//			if (firstname.getText().isEmpty() || lastname.getText().isEmpty() || fonction.getText().isEmpty()
-			//					|| username.getText().isEmpty() || password.getText().isEmpty() || code.getText().isEmpty()){
-			//				infos.setText("Un ou plusieurs champs sont manquants");
-			//			}
-			//			else {
-			//				Personnels Personnel = new Personnels();
-			//				Personnel.setFirstname(firstname.getText().toLowerCase());
-			//				Personnel.setLastname(lastname.getText().toLowerCase());
-			//				Personnel.setFonction(fonction.getText().toLowerCase());
-			//				Personnel.setUsername(username.getText());
-			//				Personnel.setPassword(password.getText());
-			//				Personnel.setCode(Integer.parseInt(code.getText()));
+			// infos.setText("Ajout d'un personnel...");
+			// if (firstname.getText().isEmpty() || lastname.getText().isEmpty()
+			// || fonction.getText().isEmpty()
+			// || username.getText().isEmpty() || password.getText().isEmpty()
+			// || code.getText().isEmpty()){
+			// infos.setText("Un ou plusieurs champs sont manquants");
+			// }
+			// else {
+			// Personnels Personnel = new Personnels();
+			// Personnel.setFirstname(firstname.getText().toLowerCase());
+			// Personnel.setLastname(lastname.getText().toLowerCase());
+			// Personnel.setFonction(fonction.getText().toLowerCase());
+			// Personnel.setUsername(username.getText());
+			// Personnel.setPassword(password.getText());
+			// Personnel.setCode(Integer.parseInt(code.getText()));
 			//
-			//				JSONObject obj = new JSONObject(Personnel);
-			//				PGobject jsonObject = new PGobject();
-			//				jsonObject.setType("json");
+			// JSONObject obj = new JSONObject(Personnel);
+			// PGobject jsonObject = new PGobject();
+			// jsonObject.setType("json");
 			//
-			//				try {
-			//					jsonObject.setValue(obj.toString());
-			//				} catch (SQLException e2) {
-			//					e2.printStackTrace();
-			//				}
+			// try {
+			// jsonObject.setValue(obj.toString());
+			// } catch (SQLException e2) {
+			// e2.printStackTrace();
+			// }
 			//
-			//				String databaseName = Personnel.getClass().getName().substring(4).toLowerCase();
+			// String databaseName =
+			// Personnel.getClass().getName().substring(4).toLowerCase();
 			//
-			//				try {
-			//					Insert json2 = new Insert(jdb, connect, databaseName, jsonObject);
-			//					this.setVisible(false);
-			//				} catch (SQLException e1) {
-			//					e1.printStackTrace();
-			//				} 
-			//			}
+			// try {
+			// Insert json2 = new Insert(jdb, connect, databaseName,
+			// jsonObject);
+			// this.setVisible(false);
+			// } catch (SQLException e1) {
+			// e1.printStackTrace();
+			// }
+			// }
 		}
 
 		if (e.getSource() == buttonAddPatient) {
-			//			infos.setText("Ajout d'un patient...");
-			//			if (firstname.getText().isEmpty() || lastname.getText().isEmpty() || code.getText().isEmpty()){
-			//				infos.setText("Un ou plusieurs champs sont manquants");
-			//			}
-			//			else {
-			//				Patients Patient = new Patients();
-			//				Patient.setFirstname(firstname.getText());
-			//				Patient.setLastname(lastname.getText());
-			//				Patient.setCode(Integer.parseInt(code.getText()));
+			// infos.setText("Ajout d'un patient...");
+			// if (firstname.getText().isEmpty() || lastname.getText().isEmpty()
+			// || code.getText().isEmpty()){
+			// infos.setText("Un ou plusieurs champs sont manquants");
+			// }
+			// else {
+			// Patients Patient = new Patients();
+			// Patient.setFirstname(firstname.getText());
+			// Patient.setLastname(lastname.getText());
+			// Patient.setCode(Integer.parseInt(code.getText()));
 			//
-			//				JSONObject obj = new JSONObject(Patient);
-			//				PGobject jsonObject = new PGobject();
-			//				jsonObject.setType("json");
+			// JSONObject obj = new JSONObject(Patient);
+			// PGobject jsonObject = new PGobject();
+			// jsonObject.setType("json");
 			//
-			//				try {
-			//					jsonObject.setValue(obj.toString());
-			//				} catch (SQLException e2) {
-			//					e2.printStackTrace();
-			//				}
+			// try {
+			// jsonObject.setValue(obj.toString());
+			// } catch (SQLException e2) {
+			// e2.printStackTrace();
+			// }
 			//
-			//				String databaseName = Patient.getClass().getName().substring(4).toLowerCase();
+			// String databaseName =
+			// Patient.getClass().getName().substring(4).toLowerCase();
 			//
-			//				try {
-			//					Insert json2 = new Insert(jdb, connect, databaseName, jsonObject);
-			//					this.setVisible(false);
-			//				} catch (SQLException e1) {
-			//					e1.printStackTrace();
-			//				} 
-			//			}
+			// try {
+			// Insert json2 = new Insert(jdb, connect, databaseName,
+			// jsonObject);
+			// this.setVisible(false);
+			// } catch (SQLException e1) {
+			// e1.printStackTrace();
+			// }
+			// }
 		}
 
 		if (e.getSource() == buttonAddSensor) {
@@ -351,31 +354,53 @@ public class WindowAdd extends JFrame implements ActionListener{
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
 			}
 
-			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty() || caracteristics.getText().isEmpty()){
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty()
+					|| identifiant.getText().isEmpty()
+					|| caracteristics.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 
 			}
+
 			
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une date valide");	
+
 			}
-			
+
 			else {
 				JSONObject object = new JSONObject();
 				object.put("id", Integer.parseInt(identifiant.getText()));
 
-				SensorDao sensorDaoFind = new SensorDao(connect);
-				Sensor sensorFound = sensorDaoFind.find(object);
+				//enlever les DAO ici
+				ConnectionClient cc = new ConnectionClient(object.toString(),
+						"FINDBYID", "Sensor");
+				// doit récupérer un obj en retour
+				String retour = cc.getobjJSON();
+				JSONObject retourJ = new JSONObject(retour);
+				// baeldung transformer en Sensor
+				ObjectMapper objectMapper = new ObjectMapper();
+
+				Sensor sensorFound = null;
+				try {
+					sensorFound = objectMapper.readValue(retourJ.toString(),
+							Sensor.class);
+				} catch (IOException e1) {
+					
+					e1.printStackTrace();
+				}
 
 				if (sensorFound.getBrand() != null) {
 					infos.setText("Cet identifiant est déja utilisé");
+
 				}
 				
+				
 				else {
+
 					Sensor sensor = new Sensor();
-					sensor.setBrand(brand.getText());
-					sensor.setMacAdress(macAddress.getText());
-					sensor.setCaracteristics(caracteristics.getText());
+					sensor.setBrand(brand.getText().trim());
+					sensor.setMacAdress(macAddress.getText().trim());
+					sensor.setCaracteristics(caracteristics.getText().trim());
 					sensor.setId(Integer.parseInt(identifiant.getText()));
 					sensor.setAlerts(null);
 					sensor.setBreakdowns(null);
@@ -384,26 +409,29 @@ public class WindowAdd extends JFrame implements ActionListener{
 					int dayInstallation;
 					int monthInstallation;
 					int yearInstallation;
-					dayInstallation= day.getSelectedIndex();
-					monthInstallation = month.getSelectedIndex()-1;
+					dayInstallation = day.getSelectedIndex();
+					monthInstallation = month.getSelectedIndex() - 1;
 					int indexYear = year.getSelectedIndex();
 					yearInstallation = Integer.parseInt(years[indexYear]);
 
-					Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
+					Date dateInst = new Date(yearInstallation - 1900,
+							monthInstallation, dayInstallation);
 
 					sensor.setInstallation(dateInst);
 
 					JSONObject obj = new JSONObject(sensor);
 
-					SensorDao sensorDaoCreate = new SensorDao(connect);
-					sensorDaoCreate.create(obj);
-					synchronized (waitAdd) {
-						this.setVisible(false);
-						waitAdd.notify();	
-					}
+
+					// créer socket
+					ConnectionClient cc2 = new ConnectionClient(obj.toString(),
+							"CREATE", "Sensor");
+
+					this.setVisible(false);
+
 
 				}
 			}
+
 		}
 	}
 	
