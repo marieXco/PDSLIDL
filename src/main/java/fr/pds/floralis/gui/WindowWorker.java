@@ -42,8 +42,8 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
-	
-	//TODO : refresh de l'index de la comboBox
+
+	// TODO : refresh de l'index de la comboBox
 
 	// Object pour lancer le top de la fin de la JFrame --> voir synchronized
 	// dans le cours
@@ -299,8 +299,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
 
-
-			// créer socket pb 
+			// créer socket pb
 			ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
 			// sensorsList
 			// doit récupérer un obj en retour
@@ -313,7 +312,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				sensorList = (List<Sensor>) objectMapper.readValue(
 						retourJ.toString(), Sensor.class);
 			} catch (IOException e1) {
-				
+
 				e1.printStackTrace();
 			}
 			// On insère cette liste dans un modèle de tableau créé spécialement
@@ -322,20 +321,18 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			// On ajoute le modèle à un JTable simple
 			// tableSensors.setModel(sensorModels);
 
-
-			String[] selectSensors = new String[sensorModels.getRowCount() + 1]; 
-			System.out.println(selectSensors);
-			selectSensors[0]= "id";
+			String[] selectSensors = new String[sensorModels.getRowCount() + 1];
+			selectSensors[0] = "--Identifiant du capteur--";
 
 			for (int listIndex = 0; listIndex < sensorList.size(); listIndex++) {
 				int tabIndex = listIndex + 1;
-				selectSensors[tabIndex] = sensorList.get(listIndex).getId() + " ";
+				selectSensors[tabIndex] = sensorList.get(listIndex).getId()
+						+ " ";
+
 			}
 
-
 			comboSensors.removeAllItems();
-			for (int i = 0; i < selectSensors.length - 1; i++) {
-				System.out.println(selectSensors[i]);
+			for (int i = 0; i < selectSensors.length; i++) {
 				comboSensors.addItem(selectSensors[i]);
 			}
 
@@ -345,16 +342,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			System.out.println("Modifiy code");
 		}
 
-
-		
-
-
-	
-
-
-
-
-		if(e.getSource() == accountDisconnect) {
+		if (e.getSource() == accountDisconnect) {
 			// On lance un sychronized pour notifié le main que nous avons fini
 			synchronized (valueWait) {
 				window.setVisible(false);
@@ -433,8 +421,10 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			// index [0] = --id du capteur--
 			if (indexSensor > 0) {
 
-				//on récupère l'id du capteur contenu à l'index de la checkbox - 1
-				// Index checkbox : 3 est équivalant à l'index 2 du tableau des capteurs 
+				// on récupère l'id du capteur contenu à l'index de la checkbox
+				// - 1
+				// Index checkbox : 3 est équivalant à l'index 2 du tableau des
+				// capteurs
 				System.out.println(sensorsList.get(indexSensor - 1).getId());
 
 				int idSensor = sensorsList.get(indexSensor - 1).getId();
@@ -445,7 +435,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				try {
 					new WindowUpdate(jdb, connect).initUpdateSensor(idSensor);
 				} catch (IOException e1) {
-					
+
 					e1.printStackTrace();
 				}
 			}
@@ -461,10 +451,10 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (JsonParseException e) {
-			
+
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			
+
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

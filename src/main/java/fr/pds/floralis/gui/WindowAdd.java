@@ -389,9 +389,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 					e1.printStackTrace();
 				}
 
-				if (sensorFound.getState() != null) {
+				if (sensorFound.getBrand() != null) {
 					infos.setText("Cet identifiant est déja utilisé");
-				} else {
+
+				}
+				
+				
+				else {
+
 					Sensor sensor = new Sensor();
 					sensor.setBrand(brand.getText().trim());
 					sensor.setMacAdress(macAddress.getText().trim());
