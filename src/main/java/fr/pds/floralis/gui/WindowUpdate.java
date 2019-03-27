@@ -244,6 +244,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		obj.put("id", id);
 
+
 		ConnectionClient cc = new ConnectionClient(obj.toString(), "FINDBYID",
 				"Sensor");
 		// doit récupérer un obj en retour
@@ -253,6 +254,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Sensor sensorFound = objectMapper.readValue(retourJ.toString(),
 				Sensor.class);
+
 
 		for (int dayIndex = 1; dayIndex < days.length; dayIndex++) {
 			String daysMax = (dayIndex) + "";

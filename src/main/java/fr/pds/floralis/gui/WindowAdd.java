@@ -95,6 +95,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
+	public final Object waitAdd = new Object();
 
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -360,10 +361,10 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 			}
 
-			else if (day.getSelectedIndex() == 0
-					&& month.getSelectedIndex() == 0
-					&& year.getSelectedIndex() == 0) {
-				infos.setText("Veuillez selectionner une date valide");
+			
+			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
+				infos.setText("Veuillez selectionner une date valide");	
+
 			}
 
 			else {
@@ -388,7 +389,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 					e1.printStackTrace();
 				}
 
-				if (sensorFound != null) {
+				if (sensorFound.getState() != null) {
 					infos.setText("Cet identifiant est déja utilisé");
 				} else {
 					Sensor sensor = new Sensor();
@@ -415,15 +416,22 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 					JSONObject obj = new JSONObject(sensor);
 
+
 					// créer socket
 					ConnectionClient cc2 = new ConnectionClient(obj.toString(),
 							"CREATE", "Sensor");
 
 					this.setVisible(false);
 
+
 				}
 			}
 
 		}
 	}
+	
+	public void run() {
+		initAddPatient();
+	}
+	
 }

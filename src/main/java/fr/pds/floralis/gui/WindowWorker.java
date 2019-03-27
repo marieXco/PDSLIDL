@@ -38,11 +38,12 @@ import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorsTableModel;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-import fr.pds.floralis.server.dao.SensorDao;
 
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
+	
+	//TODO : refresh de l'index de la comboBox
 
 	// Object pour lancer le top de la fin de la JFrame --> voir synchronized
 	// dans le cours
@@ -86,13 +87,14 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
 
 	JComboBox comboPatient;
-	JComboBox comboSensors;
+	JComboBox<Object> comboSensors;
 
 	// Listes pour les patients et les capteurs
 	List<Patients> patientsList;
 	List<Sensor> sensorsList;
 	JTable tableSensors;
 	private SensorsTableModel sensorModel;
+	Button buttonRefreshSensor = new Button("R");
 
 	public WindowWorker(JDBCConnectionPool jdb, Connection connect)
 			throws ClassNotFoundException, SQLException, IOException {
@@ -204,6 +206,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
+		infoSensorsPanel.add(buttonRefreshSensor);
 
 		// Mise en place des raccourcis
 		accountModifyCode.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
@@ -223,6 +226,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
+		buttonRefreshSensor.addActionListener(this);
 
 		accountDisconnect.addActionListener(this);
 		accountModifyPassword.addActionListener(this);
@@ -295,7 +299,8 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
 
-			// créer socket pb : pour les findall pas d'objet à passer
+
+			// créer socket pb 
 			ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
 			// sensorsList
 			// doit récupérer un obj en retour
@@ -317,25 +322,39 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			// On ajoute le modèle à un JTable simple
 			// tableSensors.setModel(sensorModels);
 
-		}
 
-		if (e.getSource() == addingSensor) {
-			System.out.println("Add sensor");
+			String[] selectSensors = new String[sensorModels.getRowCount() + 1]; 
+			System.out.println(selectSensors);
+			selectSensors[0]= "id";
 
-			// On lance la fenêtre d'ajout d'une capteur
-			new WindowAdd(jdb, connect).initAddSensor();
+			for (int listIndex = 0; listIndex < sensorList.size(); listIndex++) {
+				int tabIndex = listIndex + 1;
+				selectSensors[tabIndex] = sensorList.get(listIndex).getId() + " ";
+			}
+
+
+			comboSensors.removeAllItems();
+			for (int i = 0; i < selectSensors.length - 1; i++) {
+				System.out.println(selectSensors[i]);
+				comboSensors.addItem(selectSensors[i]);
+			}
+
 		}
 
 		if (e.getSource() == accountModifyCode) {
 			System.out.println("Modifiy code");
 		}
 
-		if (e.getSource() == accountModifyPassword) {
-			System.out.println("Modifiy password");
 
-		}
+		
 
-		if (e.getSource() == accountDisconnect) {
+
+	
+
+
+
+
+		if(e.getSource() == accountDisconnect) {
 			// On lance un sychronized pour notifié le main que nous avons fini
 			synchronized (valueWait) {
 				window.setVisible(false);
@@ -413,10 +432,11 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			// Si il est à 0, c'est qu'aucun vrai ID n'a été selectionné car
 			// index [0] = --id du capteur--
 			if (indexSensor > 0) {
-				// on récupère l'id du capteur contenu à l'index de la checkbox
-				// - 1
-				// Index checkbox : 3 est équivalant à l'index 2 du tableau des
-				// capteurs
+
+				//on récupère l'id du capteur contenu à l'index de la checkbox - 1
+				// Index checkbox : 3 est équivalant à l'index 2 du tableau des capteurs 
+				System.out.println(sensorsList.get(indexSensor - 1).getId());
+
 				int idSensor = sensorsList.get(indexSensor - 1).getId();
 
 				// On lance la fenêtre de modification avec l'id correspondant
