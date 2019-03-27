@@ -367,9 +367,10 @@ public class WindowAdd extends JFrame implements ActionListener{
 				SensorDao sensorDaoFind = new SensorDao(connect);
 				Sensor sensorFound = sensorDaoFind.find(object);
 
-				if (sensorFound.getState() != null) {
+				if (sensorFound.getBrand() != null) {
 					infos.setText("Cet identifiant est déja utilisé");
 				}
+				
 				else {
 					Sensor sensor = new Sensor();
 					sensor.setBrand(brand.getText());

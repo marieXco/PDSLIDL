@@ -288,26 +288,25 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			System.out.println("Refresh sensor");
 			SensorDao sensorDao = new SensorDao(connect);
 			//findAll renvoie une liste de tous les capteurs de la base
-			List <Sensor> sensorList = sensorDao.findAll();
+			sensorsList = sensorDao.findAll();
 			//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
-			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
+			SensorsTableModel sensorModels = new SensorsTableModel(sensorsList);
 			//On ajoute le modèle à un JTable simple
 			tableSensors.setModel(sensorModels);	
 
 			String[] selectSensors = new String[sensorModels.getRowCount() + 1]; 
-			System.out.println(selectSensors);
-			selectSensors[0]= "id";
+			selectSensors[0]= "--Identifiant du capteur--";
 
-			for (int listIndex = 0; listIndex < sensorDao.findAll().size(); listIndex++) {
+			for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
 				int tabIndex = listIndex + 1;
-				selectSensors[tabIndex] = sensorDao.findAll().get(listIndex).getId() + " ";
+				selectSensors[tabIndex] = sensorsList.get(listIndex).getId() + " ";
 			}
 
 			comboSensors.removeAllItems();
-			for (int i = 0; i < selectSensors.length - 1; i++) {
-				System.out.println(selectSensors[i]);
+			for (int i = 0; i < selectSensors.length; i++) {
 				comboSensors.addItem(selectSensors[i]);
 			}
+			
 		}
 
 
