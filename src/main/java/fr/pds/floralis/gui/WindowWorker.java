@@ -41,8 +41,6 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
-	
-	//TODO : refresh de l'index de la comboBox
 
 	//Object pour lancer le top de la fin de la JFrame --> voir synchronized dans le cours
 	public final Object valueWait = new Object();
@@ -72,6 +70,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	//Boutons pour les patients
 	Button buttonDeletePatient = new Button("Supprimer le patient");
 	Button buttonUpdatePatient = new Button("Modifier les infos du patient");
+	Button buttonRefreshSensor = new Button("R");
 
 
 	JMenuBar menuBar = new JMenuBar(); 
@@ -92,9 +91,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	//Listes pour les patients et les capteurs
 	List<Patients> patientsList;
 	List<Sensor> sensorsList;
-	JTable tableSensors;
-	private SensorsTableModel sensorModel;
-	Button buttonRefreshSensor = new Button("R");
+	
 
 	public WindowWorker(JDBCConnectionPool jdb, Connection connect)  throws ClassNotFoundException, SQLException, IOException {
 		this.jdb = jdb;
@@ -151,9 +148,9 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		//findAll renvoie une liste de tous les capteurs de la base
 		sensorsList = sensorDao.findAll();
 		//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
-		sensorModel = new SensorsTableModel(sensorsList);
+		SensorsTableModel sensorModel = new SensorsTableModel(sensorsList);
 		//On ajoute le modèle à un JTable simple
-		tableSensors = new JTable(sensorModel) {};
+		JTable tableSensors = new JTable(sensorModel) {};
 
 		//On interdit l'edition du tableau
 		tableSensors.setEnabled(false);
@@ -290,21 +287,21 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			//findAll renvoie une liste de tous les capteurs de la base
 			sensorsList = sensorDao.findAll();
 			//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
-			SensorsTableModel sensorModels = new SensorsTableModel(sensorsList);
+			SensorsTableModel newSensorModel = new SensorsTableModel(sensorsList);
 			//On ajoute le modèle à un JTable simple
-			tableSensors.setModel(sensorModels);	
-
-			String[] selectSensors = new String[sensorModels.getRowCount() + 1]; 
-			selectSensors[0]= "--Identifiant du capteur--";
+			tableSensors.setModel(newSensorModel);	
+			
+			String[] newSelectSensors = new String[newSensorModel.getRowCount() + 1]; 
+			newSelectSensors[0]= "--Identifiant du capteur--";
 
 			for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
-				int tabIndex = listIndex + 1;
-				selectSensors[tabIndex] = sensorsList.get(listIndex).getId() + " ";
+				int newTabIndex = listIndex + 1;
+				newSelectSensors[newTabIndex] = sensorsList.get(listIndex).getId() + " ";
 			}
 
 			comboSensors.removeAllItems();
-			for (int i = 0; i < selectSensors.length; i++) {
-				comboSensors.addItem(selectSensors[i]);
+			for (int i = 0; i < newSelectSensors.length; i++) {
+				comboSensors.addItem(newSelectSensors[i]);
 			}
 			
 		}
