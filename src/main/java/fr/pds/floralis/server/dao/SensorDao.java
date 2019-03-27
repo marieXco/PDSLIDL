@@ -1,4 +1,4 @@
-package fr.pds.floralis.commons.dao;
+package fr.pds.floralis.server.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +21,7 @@ public class SensorDao extends DAO<Sensor> {
 		super(conn);
 	}
 	
-	//TODO faire tous les retours en JSON
+	//TODO faire tous les retours en JSON 
 	//TODO ajouter le fichier des BDD dans les ressources
 
 

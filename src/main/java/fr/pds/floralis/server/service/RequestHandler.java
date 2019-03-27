@@ -6,8 +6,14 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.DateFormat;
-import java.util.Date;
+import java.sql.Connection;
+import java.util.List;
+
+import org.json.JSONObject;
+
+import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
+import fr.pds.floralis.server.dao.SensorDao;
 
 public class RequestHandler implements Runnable {
 
@@ -16,6 +22,17 @@ public class RequestHandler implements Runnable {
 	private PrintWriter writer = null;
 
 	private BufferedInputStream reader = null;
+
+	private String response;
+
+	private JDBCConnectionPool jdb;
+	private Connection connect;
+
+	// en gros quand t'envoie un message à partir de ton client serveur il doit
+	// le recevoir dans le client socket
+	// dans le run faire les cas de requetes du crud
+	// type requete
+	// table
 
 	public RequestHandler(Socket pSock) {
 
@@ -47,65 +64,120 @@ public class RequestHandler implements Runnable {
 
 				// On attend la demande du client
 
-				String response = read();
+				response = read();
 
 				InetSocketAddress remote = (InetSocketAddress) sock
 						.getRemoteSocketAddress();
 
-				// On affiche quelques infos, pour le débuggage
-
-				String debug = "";
-
-				debug = "Thread : " + Thread.currentThread().getName() + ". ";
-
-				debug += "Demande de l'adresse : "
-						+ remote.getAddress().getHostAddress() + ".";
-
-				debug += " Sur le port : " + remote.getPort() + ".\n";
-
-				debug += "\t -> Commande reçue : " + response + "\n";
-
-				System.err.println("\n" + debug);
-
-				// On traite la demande du client en fonction de la commande
-				// envoyée
-
-				String toSend = "";
-
 				switch (response.toUpperCase()) {
 
-				case "FULL":
+				case "CREATE":
+					// vient de recevoir la commande CREATE
+					System.out.println();
+					writer.write("OK commande CREATE recue");
+					writer.flush();
+					response = read(); // en attente de la requete
+					// il recoit la requete
+					// traitement
 
-					toSend = DateFormat.getDateTimeInstance(DateFormat.FULL,
-							DateFormat.MEDIUM).format(new Date());
-
-					break;
-
-				case "DATE":
-
-					toSend = DateFormat.getDateInstance(DateFormat.FULL)
-							.format(new Date());
-
-					break;
-
-				case "HOUR":
-
-					toSend = DateFormat.getTimeInstance(DateFormat.MEDIUM)
-							.format(new Date());
+					switch (response.toUpperCase()) {
+					case "SENSOR":
+						SensorDao sensorDaoCreate = new SensorDao(connect);
+						JSONObject objCreate = new JSONObject(response);
+						sensorDaoCreate.create(objCreate);
+						break;
+					}
 
 					break;
 
-				case "CLOSE":
+				case "FINDALL":
 
-					toSend = "Communication terminée";
+					// vient de recevoir la commande UPDATE
+					System.out.println();
+					writer.write("OK commande UPDATE recue");
+					writer.flush();
+					response = read(); // en attente de la requete
+					// il recoit la requete
+					// traitement
 
-					closeConnexion = true;
+					switch (response.toUpperCase()) {
+					case "SENSOR":
+						SensorDao sensorDaoFindAll = new SensorDao(connect);
+						List<Sensor> sensorsFound = sensorDaoFindAll.findAll();
+						// renvoyer sensorsFound
+						JSONObject retours = new JSONObject(sensorsFound);
+						writer.write(retours.toString());
+						writer.flush();
+						break;
+					}
+
+					break;
+
+				case "FINDBYID":
+
+					// vient de recevoir la commande UPDATE
+					System.out.println();
+					writer.write("OK commande UPDATE recue");
+					writer.flush();
+					response = read(); // en attente de la requete
+					// il recoit la requete
+					// traitemen
+
+					switch (response.toUpperCase()) {
+					case "SENSOR":
+						SensorDao sensorDaoFindById = new SensorDao(connect);
+						JSONObject objFindById = new JSONObject(response);
+						Sensor sensorFound = sensorDaoFindById
+								.find(objFindById);
+						// renvoyer sensorFound
+						JSONObject retour = new JSONObject(sensorFound);
+						writer.write(retour.toString());
+						writer.flush();
+						break;
+					}
+
+					break;
+
+				case "UPDATE":
+					// vient de recevoir la commande UPDATE
+					System.out.println();
+					writer.write("OK commande UPDATE recue");
+					writer.flush();
+					response = read(); // en attente de la requete
+					// il recoit la requete
+					// traitement
+					switch (response.toUpperCase()) {
+					case "SENSOR":
+						SensorDao sensorDaoUpdate = new SensorDao(connect);
+						JSONObject objUpdate = new JSONObject(response);
+						sensorDaoUpdate.update(objUpdate);
+						break;
+					}
+
+					break;
+
+				case "DELETE":
+					// vient de recevoir la commande DELETE
+					System.out.println();
+					writer.write("OK commande DELETE recue");
+					writer.flush();
+					response = read(); // en attente de la requete
+					// il recoit la requete
+					// traitement
+
+					switch (response.toUpperCase()) {
+					case "SENSOR":
+						SensorDao sensorDaoDelete = new SensorDao(connect);
+						JSONObject objDelete = new JSONObject(response);
+						sensorDaoDelete.delete(objDelete);
+						break;
+					}
 
 					break;
 
 				default:
 
-					toSend = "Commande inconnu !";
+					// toSend = "Commande inconnu !";
 
 					break;
 
@@ -113,7 +185,7 @@ public class RequestHandler implements Runnable {
 
 				// On envoie la réponse au client
 
-				writer.write(toSend);
+				// writer.write(toSend);
 
 				// Il FAUT IMPERATIVEMENT UTILISER flush()
 

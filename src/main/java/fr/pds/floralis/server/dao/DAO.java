@@ -1,4 +1,4 @@
-package fr.pds.floralis.commons.dao;
+package fr.pds.floralis.server.dao;
 
 import java.sql.Connection;
 

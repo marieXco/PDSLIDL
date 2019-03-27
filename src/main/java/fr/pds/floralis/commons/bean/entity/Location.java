@@ -4,6 +4,7 @@ import fr.pds.floralis.commons.bean.entity.type.TypeFloor;
 
 public class Location {
 
+	//TODO : créer une location avec les capteurs 
 	private int id;
 	private Sensor sensor[];
 	private Room room;
