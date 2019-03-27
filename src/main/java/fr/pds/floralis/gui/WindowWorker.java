@@ -167,6 +167,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		//(--identifiant du capteur--), il faut que notre tableau
 		//ait une case en plus que le nombre d'éléments dans le tableau du capteur 
 		//(index [0] + 1 index pour chaque élément --> tableau de taille 4 donc getRowCount() + 1)
+
 		String[] selectSensor = new String[sensorModel.getRowCount() + 1]; 
 		selectSensor[0] = "--Identifiant du capteur--";
 
@@ -181,6 +182,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		//Notre combo bo
 		comboSensors = new JComboBox<Object>(selectSensor);
+
 
 		//Ajout de la combo Box puis des boutons
 		infoSensorsPanel.add(comboSensors);
@@ -270,8 +272,17 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
+
+
+			//SensorDao sensorDao = new SensorDao(connect);
 			SensorDao sensorDao = new SensorDao(connect);
-			tableSensors.setModel(new SensorsTableModel(sensorDao.findAll()));	
+			//findAll renvoie une liste de tous les capteurs de la base
+			List <Sensor> sensorList = sensorDao.findAll();
+			//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
+			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
+			//On ajoute le modèle à un JTable simple
+			//tableSensors.setModel(sensorModels);	
+
 		}
 
 		if (e.getSource() == addingSensor) {
@@ -284,8 +295,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == accountModifyCode) {
 			System.out.println("Modifiy code");
-			SensorDao sensorDao = new SensorDao(connect);			
-			sensorModel.add(sensorDao.findAll());
 		}
 
 		if (e.getSource() == accountModifyPassword) {
