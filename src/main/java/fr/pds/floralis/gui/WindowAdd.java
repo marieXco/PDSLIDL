@@ -94,6 +94,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
+	public final Object waitAdd = new Object();
 
 
 
@@ -355,7 +356,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 			}
 			
-			else if (day.getSelectedIndex() == 0 && month.getSelectedIndex() == 0 && year.getSelectedIndex() == 0) {
+			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une date valide");	
 			}
 			
@@ -366,7 +367,7 @@ public class WindowAdd extends JFrame implements ActionListener{
 				SensorDao sensorDaoFind = new SensorDao(connect);
 				Sensor sensorFound = sensorDaoFind.find(object);
 
-				if (sensorFound != null) {
+				if (sensorFound.getState() != null) {
 					infos.setText("Cet identifiant est déja utilisé");
 				}
 				else {
@@ -395,10 +396,18 @@ public class WindowAdd extends JFrame implements ActionListener{
 
 					SensorDao sensorDaoCreate = new SensorDao(connect);
 					sensorDaoCreate.create(obj);
-					this.setVisible(false);
+					synchronized (waitAdd) {
+						this.setVisible(false);
+						waitAdd.notify();	
+					}
 
 				}
 			}
 		}
 	}
+	
+	public void run() {
+		initAddPatient();
+	}
+	
 }

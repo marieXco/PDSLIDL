@@ -246,6 +246,7 @@ public class WindowUpdate extends JFrame implements ActionListener{
 		years[0] = "Annee";
 		
 		obj.put("id", id);
+		System.out.println(obj.toString());
 		
 		SensorDao sensorDao = new SensorDao(connect);
 		Sensor sensorFound = sensorDao.find(obj);

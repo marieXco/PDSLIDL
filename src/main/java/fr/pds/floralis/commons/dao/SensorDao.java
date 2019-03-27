@@ -22,7 +22,6 @@ public class SensorDao extends DAO<Sensor> {
 	}
 	
 	//TODO faire tous les retours en JSON
-	//TODO ajouter le fichier des BDD dans les ressources
 
 
 	public boolean create(JSONObject jsonObject) {
@@ -51,15 +50,8 @@ public class SensorDao extends DAO<Sensor> {
 			statement.setObject(1, object1);
 
 			// On execute le tout et on commit
-			statement.execute();
+			success = statement.execute();
 			connect.commit();
-
-			// statement.executeUpdate renvoi 0 si aucun changement dans la bdd c'est produit
-			// et que donc notre SQL n'a pas fonctionné
-			// success devient vrai seulement si executeUpdate est > à 0
-			if(statement.executeUpdate() > 0) {
-				success = true;
-			}
 
 			statement.close();
 		} catch (Exception e) {
@@ -87,12 +79,8 @@ public class SensorDao extends DAO<Sensor> {
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
-			statement.execute();
+			success = statement.execute();
 			connect.commit();
-
-			if(statement.executeUpdate() > 0) {
-				success = true;
-			}
 
 			statement.close();
 			
@@ -122,12 +110,9 @@ public class SensorDao extends DAO<Sensor> {
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
-			statement.execute();
+			success = statement.execute();
 			connect.commit();
 			
-			if(statement.executeUpdate() > 0) {
-				success = true;
-			}
 			
 			statement.close();
 
@@ -146,9 +131,10 @@ public class SensorDao extends DAO<Sensor> {
 	@Override
 	public Sensor find(JSONObject jsonObject) {
 		ObjectMapper mapper = new ObjectMapper();
-		Sensor sensor = null;
+		Sensor sensor = new Sensor();
 
 		int sensorId = jsonObject.getInt("id");
+		System.out.println(sensorId);
 
 		try {
 			connect.setAutoCommit(false);
@@ -158,24 +144,15 @@ public class SensorDao extends DAO<Sensor> {
 			Statement stmt = connect.createStatement();
 			
 			// ResultSet est utilisé et contiendra tout ce que la BDD renvoie sous forme de lignes qui se suivent
-			ResultSet rs = stmt.executeQuery( "SELECT id, data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
-
-			// next retourne true is il trouve une ligne 
-			// false sinon
-			if (rs.next()) {
-				// On créer un capteur uniquement si notre sql retourne quelque chose sinon c'est inutile
-				sensor = new Sensor();
-			}
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
 
 			// Ici, tant qu'il va trouver des lignes
 			while (rs.next()) {
-				// Il va ajouter au capteur l'object de la colonne numéro 2 (colonne data)
+				// Il va ajouter au capteur l'object de la colonne numéro 1 dans la requête (colonne data)
 				// l'objet sensor contiendra quelque chose du type { "caracteristics" : "toto", "id" : 1234..} 
-				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
-			}
-			
-			// Remarque : on aurait pu mettre le code du while dans le if car il n'y aura qu'une ligne renvoyé
-			//donc qu'un seul rs.next
+				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
+				System.out.println(sensor.getBrand());
+			}			
 
 			rs.close();
 			stmt.close();
@@ -185,7 +162,7 @@ public class SensorDao extends DAO<Sensor> {
 			System.exit(0);
 		}
 
-		if (sensor != null) {
+		if (sensor.getBrand() != null) {
 			System.out.println("find success");
 		}
 
@@ -202,13 +179,12 @@ public class SensorDao extends DAO<Sensor> {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery("SELECT id, data FROM sensors;");
+			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors;");
 
+			
 			while (rs.next()) {
 				// Même principe de le find normal mais on ajoute chaque capteur à la liste de capteurs
-				sensor = mapper.readValue(rs.getObject(2).toString(), Sensor.class);
-				//TODO : WTF? 
-				//rs.next();
+				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
 				sensors.add(sensor);
 			}
 

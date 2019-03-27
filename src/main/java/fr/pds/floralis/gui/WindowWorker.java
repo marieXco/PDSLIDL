@@ -41,6 +41,8 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
+	
+	//TODO : refresh de l'index de la comboBox
 
 	//Object pour lancer le top de la fin de la JFrame --> voir synchronized dans le cours
 	public final Object valueWait = new Object();
@@ -85,13 +87,14 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 
 	JComboBox comboPatient;
-	JComboBox comboSensors;
+	JComboBox<Object> comboSensors;
 
 	//Listes pour les patients et les capteurs
 	List<Patients> patientsList;
 	List<Sensor> sensorsList;
 	JTable tableSensors;
 	private SensorsTableModel sensorModel;
+	Button buttonRefreshSensor = new Button("R");
 
 	public WindowWorker(JDBCConnectionPool jdb, Connection connect)  throws ClassNotFoundException, SQLException, IOException {
 		this.jdb = jdb;
@@ -184,6 +187,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
+		infoSensorsPanel.add(buttonRefreshSensor);
 
 
 		//Mise en place des raccourcis
@@ -199,6 +203,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
+		buttonRefreshSensor.addActionListener(this);
 
 		accountDisconnect.addActionListener(this);
 		accountModifyPassword.addActionListener(this);
@@ -270,22 +275,39 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			System.out.println("Add personnel");
 
 
-			//SensorDao sensorDao = new SensorDao(connect);
+
+
+		}
+
+		if (e.getSource() == addingSensor) {
+			System.out.println("Add sensor");
+			new WindowAdd(jdb, connect).initAddSensor();
+		}
+
+		if (e.getSource() == buttonRefreshSensor) {
+			System.out.println("Refresh sensor");
 			SensorDao sensorDao = new SensorDao(connect);
 			//findAll renvoie une liste de tous les capteurs de la base
 			List <Sensor> sensorList = sensorDao.findAll();
 			//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
 			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
 			//On ajoute le modèle à un JTable simple
-			//tableSensors.setModel(sensorModels);	
+			tableSensors.setModel(sensorModels);	
 
-		}
+			String[] selectSensors = new String[sensorModels.getRowCount() + 1]; 
+			System.out.println(selectSensors);
+			selectSensors[0]= "id";
 
-		if (e.getSource() == addingSensor) {
-			System.out.println("Add sensor");
+			for (int listIndex = 0; listIndex < sensorDao.findAll().size(); listIndex++) {
+				int tabIndex = listIndex + 1;
+				selectSensors[tabIndex] = sensorDao.findAll().get(listIndex).getId() + " ";
+			}
 
-			//On lance la fenêtre d'ajout d'une capteur
-			new WindowAdd(jdb, connect).initAddSensor();
+			comboSensors.removeAllItems();
+			for (int i = 0; i < selectSensors.length - 1; i++) {
+				System.out.println(selectSensors[i]);
+				comboSensors.addItem(selectSensors[i]);
+			}
 		}
 
 
@@ -295,7 +317,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == accountModifyPassword) {
 			System.out.println("Modifiy password");
-			
+
 		}
 
 
@@ -369,6 +391,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			if (indexSensor > 0) {
 				//on récupère l'id du capteur contenu à l'index de la checkbox - 1
 				// Index checkbox : 3 est équivalant à l'index 2 du tableau des capteurs 
+				System.out.println(sensorsList.get(indexSensor - 1).getId());
 				int idSensor = sensorsList.get(indexSensor - 1).getId();
 
 				//On lance la fenêtre de modification avec l'id correspondant (pas de JSON pour l'instant
