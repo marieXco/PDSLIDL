@@ -5,7 +5,6 @@ import java.awt.Button;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -23,8 +22,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
@@ -96,6 +93,9 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	public final Object waitAdd = new Object();
+
+	String host = "127.0.0.1";
+	int port = 2345;
 
 	public WindowAdd(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -354,89 +354,86 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
 			}
 
-			if (brand.getText().isEmpty() || macAddress.getText().isEmpty()
-					|| identifiant.getText().isEmpty()
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty()
 					|| caracteristics.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 
 			}
 
-			
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
-				infos.setText("Veuillez selectionner une date valide");	
+				infos.setText("Veuillez selectionner une date valide");
 
 			}
+
+			// else {
+			// JSONObject object = new JSONObject();
+			// object.put("id", Integer.parseInt(identifiant.getText()));
+			//
+			// //enlever les DAO ici
+			// ConnectionClient cc = new ConnectionClient(object.toString(),
+			// "FINDBYID", "Sensor");
+			// // doit récupérer un obj en retour
+			// String retour = cc.getObjJSON();
+			// JSONObject retourJ = new JSONObject(retour);
+			// // baeldung transformer en Sensor
+			// ObjectMapper objectMapper = new ObjectMapper();
+			//
+			// Sensor sensorFound = null;
+			// try {
+			// sensorFound = objectMapper.readValue(retourJ.toString(),
+			// Sensor.class);
+			// } catch (IOException e1) {
+			//
+			// e1.printStackTrace();
+			// }
+			//
+			// if (sensorFound.getBrand() != null) {
+			// infos.setText("Cet identifiant est déja utilisé");
+			//
+			// }
 
 			else {
-				JSONObject object = new JSONObject();
-				object.put("id", Integer.parseInt(identifiant.getText()));
 
-				//enlever les DAO ici
-				ConnectionClient cc = new ConnectionClient(object.toString(),
-						"FINDBYID", "Sensor");
-				// doit récupérer un obj en retour
-				String retour = cc.getobjJSON();
-				JSONObject retourJ = new JSONObject(retour);
-				// baeldung transformer en Sensor
-				ObjectMapper objectMapper = new ObjectMapper();
+				Sensor sensor = new Sensor();
+				sensor.setBrand(brand.getText().trim());
+				sensor.setMacAdress(macAddress.getText().trim());
+				sensor.setCaracteristics(caracteristics.getText().trim());
+				sensor.setId(Integer.parseInt(identifiant.getText()));
+				sensor.setAlerts(null);
+				sensor.setBreakdowns(null);
+				sensor.setState(true);
 
-				Sensor sensorFound = null;
-				try {
-					sensorFound = objectMapper.readValue(retourJ.toString(),
-							Sensor.class);
-				} catch (IOException e1) {
-					
-					e1.printStackTrace();
-				}
+				int dayInstallation;
+				int monthInstallation;
+				int yearInstallation;
+				dayInstallation = day.getSelectedIndex();
+				monthInstallation = month.getSelectedIndex() - 1;
+				int indexYear = year.getSelectedIndex();
+				yearInstallation = Integer.parseInt(years[indexYear]);
 
-				if (sensorFound.getBrand() != null) {
-					infos.setText("Cet identifiant est déja utilisé");
+				Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
 
-				}
-				
-				
-				else {
+				sensor.setInstallation(dateInst);
 
-					Sensor sensor = new Sensor();
-					sensor.setBrand(brand.getText().trim());
-					sensor.setMacAdress(macAddress.getText().trim());
-					sensor.setCaracteristics(caracteristics.getText().trim());
-					sensor.setId(Integer.parseInt(identifiant.getText()));
-					sensor.setAlerts(null);
-					sensor.setBreakdowns(null);
-					sensor.setState(true);
+				JSONObject obj = new JSONObject(sensor);
 
-					int dayInstallation;
-					int monthInstallation;
-					int yearInstallation;
-					dayInstallation = day.getSelectedIndex();
-					monthInstallation = month.getSelectedIndex() - 1;
-					int indexYear = year.getSelectedIndex();
-					yearInstallation = Integer.parseInt(years[indexYear]);
+				ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "CREATE", obj.toString());
+				cc.run();
 
-					Date dateInst = new Date(yearInstallation - 1900,
-							monthInstallation, dayInstallation);
+				String retours = cc.getResponse();
+				System.out.println(retours);
 
-					sensor.setInstallation(dateInst);
+				// créer socket
 
-					JSONObject obj = new JSONObject(sensor);
+				this.setVisible(false);
 
-
-					// créer socket
-					ConnectionClient cc2 = new ConnectionClient(obj.toString(),
-							"CREATE", "Sensor");
-
-					this.setVisible(false);
-
-
-				}
 			}
-
 		}
+
 	}
-	
+
 	public void run() {
 		initAddPatient();
 	}
-	
+
 }

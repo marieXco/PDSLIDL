@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
@@ -20,17 +21,17 @@ public class SensorDao extends DAO<Sensor> {
 	public SensorDao(Connection conn) {
 		super(conn);
 	}
-	
+
 
 
 
 	public boolean create(JSONObject jsonObject) {
 		// Boolean retourné pour savoir si il a fonctionne
 		boolean success = false;
-		
+
 		PGobject object1 = new PGobject();
 		try {
-			object1.setValue(jsonObject.toString());
+			object1.setValue(jsonObject.getString("sensor"));
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -70,12 +71,13 @@ public class SensorDao extends DAO<Sensor> {
 	public boolean delete(JSONObject jsonObject) {
 		boolean success = false;
 
-		int sensorId = jsonObject.getInt("id");
+		//TODO : modifier json.getInt("id");
+		//
 
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;";
+			String sql = "DELETE FROM sensors where (data -> 'id')::json::text = '" + jsonObject.getInt("id") + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -83,7 +85,7 @@ public class SensorDao extends DAO<Sensor> {
 			connect.commit();
 
 			statement.close();
-			
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
@@ -100,20 +102,21 @@ public class SensorDao extends DAO<Sensor> {
 	@Override
 	public boolean update(JSONObject jsonObject) {
 		boolean success = false;
-		
-		// On récupère la valeur (int donc getInt) contenue dans le jsonObjectObject sous le nom de clé "id"
-		int sensorId = jsonObject.getInt("id");
+		System.out.println("toto");
+		JSONObject json = new JSONObject(jsonObject.getString("sensor"));
+		System.out.println(json.getInt("id"));
+
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE sensors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + sensorId + "'::json::text;;";
+			String sql = "UPDATE sensors SET data = '" + json + "' WHERE (data -> 'id')::json::text = '" + json.getInt("id") + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			success = statement.execute();
 			connect.commit();
-			
-			
+
+
 			statement.close();
 
 		} catch (Exception e) {
@@ -138,11 +141,11 @@ public class SensorDao extends DAO<Sensor> {
 
 		try {
 			connect.setAutoCommit(false);
-			
+
 			// Ici, vu qu'on ajoute aucune valeur dans notre BDD
 			// On utilise un createStatement
 			Statement stmt = connect.createStatement();
-			
+
 			// ResultSet est utilisé et contiendra tout ce que la BDD renvoie sous forme de lignes qui se suivent
 			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
 
@@ -151,7 +154,6 @@ public class SensorDao extends DAO<Sensor> {
 				// Il va ajouter au capteur l'object de la colonne numéro 1 dans la requête (colonne data)
 				// l'objet sensor contiendra quelque chose du type { "caracteristics" : "toto", "id" : 1234..} 
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
-				System.out.println(sensor.getBrand());
 			}			
 
 			rs.close();
@@ -181,7 +183,7 @@ public class SensorDao extends DAO<Sensor> {
 
 			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors;");
 
-			
+
 			while (rs.next()) {
 				// Même principe de le find normal mais on ajoute chaque capteur à la liste de capteurs
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
@@ -190,7 +192,7 @@ public class SensorDao extends DAO<Sensor> {
 
 			rs.close();
 			stmt.close();
-			
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);

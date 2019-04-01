@@ -1,6 +1,7 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
+import java.util.Arrays;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 
@@ -106,8 +107,13 @@ public class Sensor {
 	public Sensor() {
 		
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "{ \"id\" : " + id + ", \"type\" : " + type + ", \"state\" :" + state + ", \"alerts\" : " + Arrays.toString(alerts)
+				+ ", \"brand\" : \"" + brand + "\", \"macAdress\" : \"" + macAdress + "\", \"installation\" : \"" + installation
+				+ "\", \"caracteristics\" : \"" + caracteristics + "\", \"breakdowns\" : " + Arrays.toString(breakdowns) + "}";
+	}
 	
 
 }

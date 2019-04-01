@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -37,6 +38,7 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
+import fr.pds.floralis.server.service.TimeServer;
 
 public class WindowUpdate extends JFrame implements ActionListener {
 	private JDBCConnectionPool jdb;
@@ -109,7 +111,17 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	JSONObject obj = new JSONObject();
 
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
+	String host = "127.0.0.1";
+	int port = 2345 ;
 	private int id;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public WindowUpdate(JDBCConnectionPool jdbc, Connection connection) {
 		jdb = jdbc;
@@ -168,7 +180,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	// }
 	//
 	public void initUpdatePatient(int id) throws SQLException {
-		this.id = id;
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
@@ -224,7 +235,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 	@SuppressWarnings("deprecation")
 	public void initUpdateSensor(int id) throws JsonParseException,
-			JsonMappingException, IOException {
+	JsonMappingException, IOException {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
@@ -242,19 +253,24 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		years[0] = "Annee";
 
-		obj.put("id", id);
+		setId(id);
+		
+		
+		String idString = String.valueOf(getId());
 
+		ConnectionClient cc = new ConnectionClient(host, port,"SENSOR",
+				"FINDBYID", idString);
+		cc.run();
 
-		ConnectionClient cc = new ConnectionClient(obj.toString(), "FINDBYID",
-				"Sensor");
 		// doit récupérer un obj en retour
-		String retour = cc.getobjJSON();
-		JSONObject retourJ = new JSONObject(retour);
-		// baeldung transformer en Sensor
-		ObjectMapper objectMapper = new ObjectMapper();
-		Sensor sensorFound = objectMapper.readValue(retourJ.toString(),
-				Sensor.class);
+		String retour = cc.getResponse();
+		JSONObject retourJson = new JSONObject();
+		retourJson.put("sensor", retour);
 
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		Sensor sensorFound =  objectMapper.readValue(
+				retourJson.get("sensor").toString(), Sensor.class);
 
 		for (int dayIndex = 1; dayIndex < days.length; dayIndex++) {
 			String daysMax = (dayIndex) + "";
@@ -373,12 +389,13 @@ public class WindowUpdate extends JFrame implements ActionListener {
 					|| caracteristics.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			} else {
+
 				Sensor sensor = new Sensor();
 				sensor.setBrand(brand.getText().trim());
 				sensor.setMacAdress(macAddress.getText().trim());
 				sensor.setCaracteristics(caracteristics.getText().trim());
 
-				sensor.setId(obj.getInt("id"));
+				sensor.setId(getId());
 				sensor.setAlerts(null);
 				sensor.setBreakdowns(null);
 				sensor.setState(true);
@@ -394,9 +411,10 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				sensor.setInstallation(dateInst);
 
 				JSONObject obj = new JSONObject(sensor);
-				// remplacer DAO par socket
-				ConnectionClient cc = new ConnectionClient(obj.toString(),
-						"UPDATE", "Sensor");
+				System.out.println("tattal");
+
+				ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "UPDATE", obj.toString());
+				cc.run();
 
 				this.setVisible(false);
 			}

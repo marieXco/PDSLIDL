@@ -16,6 +16,8 @@ public class PostgreSQLJDBC extends Thread {
 
 		//On récupère une connection
 		Connection connect = OpenDatabase.databaseConnection(jdbc);
+		
+		
 
 		//Fenêtre qui montre le logo
 		WindowOpening frame2 = new WindowOpening(jdbc, connect);

@@ -12,6 +12,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -26,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -38,6 +40,7 @@ import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorsTableModel;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
+import fr.pds.floralis.server.service.TimeServer;
 
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
@@ -95,6 +98,11 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	List<Sensor> sensorsList;
 	private JTable tableSensors;
 	
+	String host = "127.0.0.1";
+	int port = 2345;
+	
+	SensorsTableModel sensorModel;
+	private JMenu tableSensor;
 
 	public WindowWorker(JDBCConnectionPool jdb, Connection connect)
 			throws ClassNotFoundException, SQLException, IOException {
@@ -103,7 +111,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	}
 
 	public void init() throws SQLException, JsonParseException,
-			JsonMappingException, IOException {
+	JsonMappingException, IOException {
 
 		// Mise en place de la JMenu Bar
 		window.setJMenuBar(menuBar);
@@ -144,7 +152,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		// selectPatient[tabIndex] = patientsList.get(listIndex).getFirstname()
 		// + " " + patientsList.get(listIndex).getLastname();
 		// }
-		
+
 		//		for (int listIndex = 0; listIndex < patientsList.size(); listIndex++) {
 		//			int tabIndex = listIndex + 1;
 		//			selectPatient[tabIndex] = patientsList.get(listIndex).getFirstname() + " " + patientsList.get(listIndex).getLastname();
@@ -160,27 +168,48 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		// On appelle le DAO des capteurs
 		// enelver DAO remplacer par socket
 		// créer socket pb : pour les findall pas d'objet à passer
-		ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
+		//		TimeServer ts = new TimeServer("localhost", 9098);
+		//
+		//		ts.open();
+		//
+		
+
+		TimeServer ts = new TimeServer(host, port);
+		ts.open();
+
+		System.out.println("Serveur initialisé.");
+
+		ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
+		cc.run();
+		
 		// sensorsList
 		// doit récupérer un obj en retour
-		String retours = cc.getobjJSON();
-		JSONObject retourJ = new JSONObject(retours);
-		// baeldung transformer en Sensor
+		// QUESTION : j'ai un null pointer exception ici -->
+		String retours = cc.getResponse();
+		JSONObject retourJ = new JSONObject();
+		System.out.println(retours);
+		retourJ.put("sensorsList", retours);
+
+		//		// baeldung transformer en Sensor
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Sensor> listSensors = (List<Sensor>) objectMapper.readValue(
-				retourJ.toString(), Sensor.class);
-		// On insère cette liste dans un modèle de tableau créé spécialement
-		// pour les capteurs
+		Sensor[] listSensors =  objectMapper.readValue(
+				retourJ.get("sensorsList").toString(), Sensor[].class);
+
+		//		// On insère cette liste dans un modèle de tableau créé spécialement
+		//		// pour les capteurs
+
+		sensorsList = Arrays.asList(listSensors);
 		SensorsTableModel sensorModel = new SensorsTableModel(sensorsList);
-		// On ajoute le modèle à un JTable simple
+
+		//		// On ajoute le modèle à un JTable simple
 		tableSensors = new JTable(sensorModel) {
 		};
-
-
-		// On interdit l'edition du tableau
+		//
+		//
+		//		// On interdit l'edition du tableau
 		tableSensors.setEnabled(false);
-		// On ajoute à un panneau qui permet de scroller notre JTable qui sera
-		// ajouter à notre panneau de capteurs
+		//		// On ajoute à un panneau qui permet de scroller notre JTable qui sera
+		//		// ajouter à notre panneau de capteurs
 		JScrollPane paneSensors = new JScrollPane(tableSensors);
 		sensorsPanel.add(new JScrollPane(paneSensors));
 
@@ -199,14 +228,14 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		String[] selectSensor = new String[sensorModel.getRowCount() + 1];
 		selectSensor[0] = "--Identifiant du capteur--";
-
-		// utiliser sensorsList et non refaire un appel sur les DAO
+		//
+		//		// utiliser sensorsList et non refaire un appel sur les DAO
 		for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
 			selectSensor[tabIndex] = sensorsList.get(listIndex).getId() + " ";
 		}
-
-		// Notre combo bo
+		//
+		//		// Notre combo bo
 		comboSensors = new JComboBox<Object>(selectSensor);
 
 		// Ajout de la combo Box puis des boutons
@@ -306,30 +335,30 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
 
-			// créer socket pb
-			ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
-			// sensorsList
-			// doit récupérer un obj en retour
-			String retours = cc.getobjJSON();
-			JSONObject retourJ = new JSONObject(retours);
-			// baeldung transformer en Sensor
-			ObjectMapper objectMapper = new ObjectMapper();
-			List<Sensor> sensorList = null;
-			try {
-				sensorList = (List<Sensor>) objectMapper.readValue(
-						retourJ.toString(), Sensor.class);
-			} catch (IOException e1) {
-
-				e1.printStackTrace();
-			}
-			// On insère cette liste dans un modèle de tableau créé spécialement
-			// pour les capteurs
-			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
-			// On ajoute le modèle à un JTable simple
-			// tableSensors.setModel(sensorModels);
-
-			String[] selectSensors = new String[sensorModels.getRowCount() + 1];
-			selectSensors[0] = "--Identifiant du capteur--";
+			//			// créer socket pb
+			//			ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
+			//			// sensorsList
+			//			// doit récupérer un obj en retour
+			//			String retours = cc.getObjJSON();
+			//			JSONObject retourJ = new JSONObject(retours);
+			//			// baeldung transformer en Sensor
+			//			ObjectMapper objectMapper = new ObjectMapper();
+			//			List<Sensor> sensorList = null;
+			//			try {
+			//				sensorList = (List<Sensor>) objectMapper.readValue(
+			//						retourJ.toString(), Sensor.class);
+			//			} catch (IOException e1) {
+			//
+			//				e1.printStackTrace();
+			//			}
+			//			// On insère cette liste dans un modèle de tableau créé spécialement
+			//			// pour les capteurs
+			//			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
+			//			// On ajoute le modèle à un JTable simple
+			//			// tableSensors.setModel(sensorModels);
+			//
+			//			String[] selectSensors = new String[sensorModels.getRowCount() + 1];
+			//			selectSensors[0] = "--Identifiant du capteur--";
 		}
 
 		if (e.getSource() == addingSensor) {
@@ -339,27 +368,49 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshSensor) {
 			System.out.println("Refresh sensor");
-			//SensorDao sensorDao = new SensorDao(connect);
-			//findAll renvoie une liste de tous les capteurs de la base
-			//sensorsList = sensorDao.findAll();
-			//On insère cette liste dans un modèle de tableau créé spécialement pour les capteurs
-			//SensorsTableModel newSensorModel = new SensorsTableModel(sensorsList);
-			//On ajoute le modèle à un JTable simple
-			//tableSensors.setModel(newSensorModel);	
+			ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
+			cc.run();
 			
-			//String[] newSelectSensors = new String[newSensorModel.getRowCount() + 1]; 
-			//newSelectSensors[0]= "--Identifiant du capteur--";
+			// sensorsList
+			// doit récupérer un obj en retour
+			// QUESTION : j'ai un null pointer exception ici -->
+			String retours = cc.getResponse();
+			JSONObject retourJ = new JSONObject();
+			System.out.println(retours);
+			retourJ.put("sensorsList", retours);
 
-			//for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
-			//	int newTabIndex = listIndex + 1;
-			//	newSelectSensors[newTabIndex] = sensorsList.get(listIndex).getId() + " ";
+			//		// baeldung transformer en Sensor
+			ObjectMapper objectMapper = new ObjectMapper();
+			Sensor[] listSensor = null;
+			try {
+				listSensor = objectMapper.readValue(
+						retourJ.get("sensorsList").toString(), Sensor[].class);
+			} catch (JSONException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
-			//}
+			//		// On insère cette liste dans un modèle de tableau créé spécialement
+			//		// pour les capteurs
 
-			//comboSensors.removeAllItems();
-			//for (int i = 0; i < newSelectSensors.length; i++) {
-			//	comboSensors.addItem(newSelectSensors[i]);
-			//}
+			sensorsList = Arrays.asList(listSensor);
+			SensorsTableModel sensorModels = new SensorsTableModel(sensorsList);
+
+			String[] newSelectSensors = new String[sensorModels.getRowCount() + 1]; 
+			newSelectSensors[0]= "--Identifiant du capteur--";
+
+			for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
+				int newTabIndex = listIndex + 1;
+				newSelectSensors[newTabIndex] = sensorsList.get(listIndex).getId() + " ";
+
+			}
+
+			comboSensors.removeAllItems();
+			for (int i = 0; i < newSelectSensors.length; i++) {
+				comboSensors.addItem(newSelectSensors[i]);
+			}
+			
+			tableSensors.setModel(sensorModels);
 
 		}
 
@@ -429,9 +480,8 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				// Si sure est à true alors on lance la supression en insérant
 				// l'object JSON contenant l'id
 				if (sure) {
-					// créer socket
-					ConnectionClient cc = new ConnectionClient(obj.toString(),
-							"DELETE", "Sensor");
+					ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "DELETE", obj.toString());
+					cc.run();
 
 				}
 			}
@@ -454,7 +504,12 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 				int idSensor = sensorsList.get(indexSensor - 1).getId();
 
-				new WindowUpdate(jdb, connect).initUpdateSensor(idSensor);
+				try {
+					new WindowUpdate(jdb, connect).initUpdateSensor(idSensor);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 		}
