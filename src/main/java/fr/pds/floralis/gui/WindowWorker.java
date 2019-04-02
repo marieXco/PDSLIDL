@@ -97,10 +97,10 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	List<Patients> patientsList;
 	List<Sensor> sensorsList;
 	private JTable tableSensors;
-	
+
 	String host = "127.0.0.1";
 	int port = 2345;
-	
+
 	SensorsTableModel sensorModel;
 	private JMenu tableSensor;
 
@@ -163,16 +163,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		// infoPatientPanel.add(comboPatient);
 		//
 		// infoPatientPanel.add(buttonDeletePatient);
-		// infoPatientPanel.add(buttonUpdatePatient);
-
-		// On appelle le DAO des capteurs
-		// enelver DAO remplacer par socket
-		// créer socket pb : pour les findall pas d'objet à passer
-		//		TimeServer ts = new TimeServer("localhost", 9098);
-		//
-		//		ts.open();
-		//
-		
+		// infoPatientPanel.add(buttonUpdatePatient);		
 
 		TimeServer ts = new TimeServer(host, port);
 		ts.open();
@@ -181,32 +172,26 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
 		cc.run();
-		
-		// sensorsList
-		// doit récupérer un obj en retour
-		// QUESTION : j'ai un null pointer exception ici -->
+
 		String retours = cc.getResponse();
 		JSONObject retourJ = new JSONObject();
-		System.out.println(retours);
 		retourJ.put("sensorsList", retours);
 
-		//		// baeldung transformer en Sensor
 		ObjectMapper objectMapper = new ObjectMapper();
 		Sensor[] listSensors =  objectMapper.readValue(
 				retourJ.get("sensorsList").toString(), Sensor[].class);
 
-		//		// On insère cette liste dans un modèle de tableau créé spécialement
-		//		// pour les capteurs
+		// On insère cette liste dans un modèle de tableau créé spécialement
+		// pour les capteurs
 
 		sensorsList = Arrays.asList(listSensors);
 		SensorsTableModel sensorModel = new SensorsTableModel(sensorsList);
 
-		//		// On ajoute le modèle à un JTable simple
+		// On ajoute le modèle à un JTable simple
 		tableSensors = new JTable(sensorModel) {
 		};
-		//
-		//
-		//		// On interdit l'edition du tableau
+
+		// On interdit l'edition du tableau
 		tableSensors.setEnabled(false);
 		//		// On ajoute à un panneau qui permet de scroller notre JTable qui sera
 		//		// ajouter à notre panneau de capteurs
@@ -370,7 +355,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			System.out.println("Refresh sensor");
 			ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
 			cc.run();
-			
+
 			// sensorsList
 			// doit récupérer un obj en retour
 			// QUESTION : j'ai un null pointer exception ici -->
@@ -409,7 +394,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			for (int i = 0; i < newSelectSensors.length; i++) {
 				comboSensors.addItem(newSelectSensors[i]);
 			}
-			
+
 			tableSensors.setModel(sensorModels);
 
 		}
@@ -482,7 +467,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				if (sure) {
 					ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "DELETE", obj.toString());
 					cc.run();
-
 				}
 			}
 

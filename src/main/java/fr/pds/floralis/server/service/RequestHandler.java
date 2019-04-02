@@ -24,8 +24,10 @@ public class RequestHandler implements Runnable {
 
 	// TODO : nettoyer les private inutiles, gérer les getters et setters
 	// TODO : cntr + shift + O, F, S
-	
+
 	private Socket sock;
+
+
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
 
@@ -73,7 +75,7 @@ public class RequestHandler implements Runnable {
 				String parameters = r.readLine();
 
 				// TODO : enlever les sysout inutiles
-				System.out.println(table + " " + command + " " + parameters);
+
 
 				InetSocketAddress remote = (InetSocketAddress) sock.getRemoteSocketAddress();
 
@@ -95,34 +97,23 @@ public class RequestHandler implements Runnable {
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						List<Sensor> sensorsList = sensorDao.findAll();
-						JSONObject json = new JSONObject();
-						json.put("sensorsList", sensorsList);
+						JSONObject json = sensorDao.findAll();
 
 						toSend = json.get("sensorsList").toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject();
-						jsonId.put("id", Integer.parseInt(parameters));
+						JSONObject jsonId = new JSONObject(parameters);
 
-						Sensor sensorFind = new Sensor();
-						sensorFind = sensorDao.find(jsonId);
+						JSONObject sensorFound = sensorDao.find(jsonId);
 
-						JSONObject jsonSensorFindById = new JSONObject();
-
-						jsonSensorFindById.put("sensor", sensorFind.toString());
-						toSend = jsonSensorFindById.getString("sensor");
+						toSend = sensorFound.getString("sensorFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject();
-						jsonCreate.put("sensor", parameters);
-						// TODO: faire comme pour DELETE JSONOBJECT
+						JSONObject jsonCreate = new JSONObject(parameters);
 
-						Boolean sensorCreate = sensorDao.create(jsonCreate);
-						JSONObject jsonSensorDaoCreate = new JSONObject();
-						jsonSensorDaoCreate.put("successCreate", sensorCreate);
+						JSONObject jsonSensorDaoCreate = sensorDao.create(jsonCreate);
 
 						toSend = jsonSensorDaoCreate.get("successCreate").toString();
 						break;
@@ -130,24 +121,15 @@ public class RequestHandler implements Runnable {
 					case "DELETE":
 						JSONObject jsonDeleteId = new JSONObject(parameters);
 
-						Boolean sensorDelete = sensorDao.delete(jsonDeleteId);
-						JSONObject jsonSensorDaoDelete = new JSONObject();
-						jsonSensorDaoDelete.put("successDelete", sensorDelete);
+						JSONObject jsonSensorDaoDelete = sensorDao.delete(jsonDeleteId);
 
 						toSend = jsonSensorDaoDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject();
-						System.out.println("totto");
-						jsonUpdate.put("sensor", parameters);
-						System.out.println("tata");
-						Boolean sensorUpdate = sensorDao.update(jsonUpdate);
-						System.out.println("tatu");
-						System.out.println(sensorUpdate);
-						System.out.println("tut");
-						JSONObject jsonSensorDaoUpdate = new JSONObject();
-						jsonSensorDaoUpdate.put("successUpdate", sensorUpdate);
+						JSONObject jsonUpdate = new JSONObject(parameters);
+
+						JSONObject jsonSensorDaoUpdate = sensorDao.update(jsonUpdate);
 
 						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
 						break;
@@ -184,5 +166,29 @@ public class RequestHandler implements Runnable {
 
 			}
 		}
+	}
+
+	public Socket getSock() {
+		return sock;
+	}
+
+	public void setSock(Socket sock) {
+		this.sock = sock;
+	}
+
+	public PrintWriter getWriter() {
+		return writer;
+	}
+
+	public void setWriter(PrintWriter writer) {
+		this.writer = writer;
+	}
+
+	public BufferedInputStream getReader() {
+		return reader;
+	}
+
+	public void setReader(BufferedInputStream reader) {
+		this.reader = reader;
 	}
 }

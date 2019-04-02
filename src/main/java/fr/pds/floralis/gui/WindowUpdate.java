@@ -12,7 +12,6 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -38,7 +37,6 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-import fr.pds.floralis.server.service.TimeServer;
 
 public class WindowUpdate extends JFrame implements ActionListener {
 	private JDBCConnectionPool jdb;
@@ -255,14 +253,14 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		setId(id);
 		
+		JSONObject obj = new JSONObject();
+		obj.put("id", getId());
 		
-		String idString = String.valueOf(getId());
 
 		ConnectionClient cc = new ConnectionClient(host, port,"SENSOR",
-				"FINDBYID", idString);
+				"FINDBYID", obj.toString());
 		cc.run();
 
-		// doit récupérer un obj en retour
 		String retour = cc.getResponse();
 		JSONObject retourJson = new JSONObject();
 		retourJson.put("sensor", retour);
@@ -411,7 +409,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				sensor.setInstallation(dateInst);
 
 				JSONObject obj = new JSONObject(sensor);
-				System.out.println("tattal");
 
 				ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "UPDATE", obj.toString());
 				cc.run();

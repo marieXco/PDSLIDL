@@ -1,11 +1,9 @@
 package fr.pds.floralis.server.dao;
 
 import java.sql.Connection;
-
 import java.util.List;
 
 import org.json.JSONObject;
-import org.postgresql.util.PGobject;
 
 
 public abstract class DAO<T> {
@@ -28,7 +26,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean create(JSONObject jsonObject);
+	public abstract JSONObject create(JSONObject jsonObject);
 
 
 	/**
@@ -41,7 +39,7 @@ public abstract class DAO<T> {
 	 */
 
 
-	public abstract boolean delete(JSONObject jsonObject);
+	public abstract JSONObject delete(JSONObject jsonObject);
 
 
 	/**
@@ -53,7 +51,7 @@ public abstract class DAO<T> {
 	 * @return boolean
 	 */
 
-	public abstract boolean update(JSONObject jsonObject);
+	public abstract JSONObject update(JSONObject jsonObject);
 
 	/**
 	 * 
@@ -64,7 +62,7 @@ public abstract class DAO<T> {
 	 * @return T
 	 */
 
-	public abstract T find(JSONObject jsonObject);
+	public abstract JSONObject find(JSONObject jsonObject);
 
 	
 	/**
@@ -74,7 +72,7 @@ public abstract class DAO<T> {
 	 * 
 	 * @return List<T>
 	 */
-	public abstract List<T> findAll();
+	public abstract JSONObject findAll();
 
 
 }

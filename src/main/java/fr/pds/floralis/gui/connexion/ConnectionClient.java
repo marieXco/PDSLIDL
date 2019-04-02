@@ -71,7 +71,7 @@ public class ConnectionClient implements Runnable{
 		}
 
 
-		// writer.write("CLOSE");
+		//writer.write("CLOSE");
 		//writer.flush();
 		//writer.close();
 	}
