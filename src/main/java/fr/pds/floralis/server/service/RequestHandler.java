@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.OpenDatabase;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
+import fr.pds.floralis.server.dao.LocationDao;
 import fr.pds.floralis.server.dao.SensorDao;
 
 public class RequestHandler implements Runnable {
@@ -132,6 +133,52 @@ public class RequestHandler implements Runnable {
 						JSONObject jsonSensorDaoUpdate = sensorDao.update(jsonUpdate);
 
 						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
+						break;
+					default:
+						toSend = "Commande inconnue !";
+						break;
+					}
+					
+				case "LOCATION":
+					LocationDao locationDao = new LocationDao(connect);
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						JSONObject json = locationDao.findAll();
+
+						toSend = json.get("locationList").toString();
+						break;
+
+					case "FINDBYID":
+						JSONObject jsonId = new JSONObject(parameters);
+
+						JSONObject locationFound = locationDao.find(jsonId);
+
+						toSend = locationFound.getString("locationFound");
+						break;
+
+					case "CREATE":
+						JSONObject jsonCreate = new JSONObject(parameters);
+
+						JSONObject jsonLocationDaoCreate = locationDao.create(jsonCreate);
+
+						toSend = jsonLocationDaoCreate.get("successCreate").toString();
+						break;
+
+					case "DELETE":
+						JSONObject jsonDeleteId = new JSONObject(parameters);
+
+						JSONObject jsonLocationDaoDelete = locationDao.delete(jsonDeleteId);
+
+						toSend = jsonLocationDaoDelete.get("successDelete").toString();
+						break;
+
+					case "UPDATE":
+						JSONObject jsonUpdate = new JSONObject(parameters);
+
+						JSONObject jsonLocationDaoUpdate = locationDao.update(jsonUpdate);
+
+						toSend = jsonLocationDaoUpdate.get("successUpdate").toString();
 						break;
 					default:
 						toSend = "Commande inconnue !";
