@@ -11,11 +11,9 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.json.JSONObject;
 
-import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.OpenDatabase;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 import fr.pds.floralis.server.dao.SensorDao;

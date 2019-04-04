@@ -34,7 +34,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.pds.floralis.commons.bean.entity.Patients;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorsTableModel;
@@ -45,8 +44,8 @@ import fr.pds.floralis.server.service.TimeServer;
 public class WindowWorker extends Thread implements ActionListener, Runnable {
 	private JDBCConnectionPool jdb;
 	private Connection connect;
-
-	// TODO : refresh de l'index de la comboBox
+	
+	// TODO : mettre host et port dans la main et enlever la connection et le pool du main
 
 	// Object pour lancer le top de la fin de la JFrame --> voir synchronized
 	// dans le cours
@@ -89,20 +88,18 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 	JMenu adding = new JMenu("Ajouts");
 	JMenuItem addingPatient = new JMenuItem("Ajouter un patient");
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
-
-	JComboBox comboPatient;
+	
 	JComboBox<Object> comboSensors;
 
-	// Listes pour les patients et les capteurs
-	List<Patients> patientsList;
+	//Liste pour les sensors
 	List<Sensor> sensorsList;
+
 	private JTable tableSensors;
 
 	String host = "127.0.0.1";
 	int port = 2345;
 
 	SensorsTableModel sensorModel;
-	private JMenu tableSensor;
 
 	public WindowWorker(JDBCConnectionPool jdb, Connection connect)
 			throws ClassNotFoundException, SQLException, IOException {
@@ -132,38 +129,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				BoxLayout.X_AXIS));
 
 		patientPanel.add(infoPatientPanel);
-		sensorsPanel.add(infoSensorsPanel);
-
-		// patientsList = Selects.SelectPatients(jdb, connect);
-		// PatientsTableModel patientModel = new
-		// PatientsTableModel(patientsList);
-		// JTable tablePatients = new JTable(patientModel) {};
-		//
-		// tablePatients.setEnabled(false);
-		// JScrollPane panePatients = new JScrollPane(tablePatients);
-		// patientPanel.add(new JScrollPane(panePatients));
-		//
-		// String[] selectPatient = new String[patientsList.size() + 1];
-		// selectPatient[0] = "--Identifiant du patient--";
-		//
-		// for (int listIndex = 0; listIndex < patientsList.size(); listIndex++)
-		// {
-		// int tabIndex = listIndex + 1;
-		// selectPatient[tabIndex] = patientsList.get(listIndex).getFirstname()
-		// + " " + patientsList.get(listIndex).getLastname();
-		// }
-
-		//		for (int listIndex = 0; listIndex < patientsList.size(); listIndex++) {
-		//			int tabIndex = listIndex + 1;
-		//			selectPatient[tabIndex] = patientsList.get(listIndex).getFirstname() + " " + patientsList.get(listIndex).getLastname();
-		//		}	
-		//		
-
-		// comboPatient = new JComboBox<Object>(selectPatient);
-		// infoPatientPanel.add(comboPatient);
-		//
-		// infoPatientPanel.add(buttonDeletePatient);
-		// infoPatientPanel.add(buttonUpdatePatient);		
+		sensorsPanel.add(infoSensorsPanel);	
 
 		TimeServer ts = new TimeServer(host, port);
 		ts.open();
@@ -183,18 +149,18 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		// On insère cette liste dans un modèle de tableau créé spécialement
 		// pour les capteurs
-
 		sensorsList = Arrays.asList(listSensors);
 		SensorsTableModel sensorModel = new SensorsTableModel(sensorsList);
 
 		// On ajoute le modèle à un JTable simple
 		tableSensors = new JTable(sensorModel) {
+			// See WindowConfirm for serialVersionUID
+			private static final long serialVersionUID = 5025433811409489149L;
 		};
 
 		// On interdit l'edition du tableau
 		tableSensors.setEnabled(false);
-		//		// On ajoute à un panneau qui permet de scroller notre JTable qui sera
-		//		// ajouter à notre panneau de capteurs
+
 		JScrollPane paneSensors = new JScrollPane(tableSensors);
 		sensorsPanel.add(new JScrollPane(paneSensors));
 
@@ -213,14 +179,13 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 
 		String[] selectSensor = new String[sensorModel.getRowCount() + 1];
 		selectSensor[0] = "--Identifiant du capteur--";
-		//
-		//		// utiliser sensorsList et non refaire un appel sur les DAO
+
+		
 		for (int listIndex = 0; listIndex < sensorsList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
 			selectSensor[tabIndex] = sensorsList.get(listIndex).getId() + " ";
 		}
-		//
-		//		// Notre combo bo
+
 		comboSensors = new JComboBox<Object>(selectSensor);
 
 		// Ajout de la combo Box puis des boutons
@@ -320,30 +285,6 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == addingPatient) {
 			System.out.println("Add personnel");
 
-			//			// créer socket pb
-			//			ConnectionClient cc = new ConnectionClient("FINDALL", "Sensor");
-			//			// sensorsList
-			//			// doit récupérer un obj en retour
-			//			String retours = cc.getObjJSON();
-			//			JSONObject retourJ = new JSONObject(retours);
-			//			// baeldung transformer en Sensor
-			//			ObjectMapper objectMapper = new ObjectMapper();
-			//			List<Sensor> sensorList = null;
-			//			try {
-			//				sensorList = (List<Sensor>) objectMapper.readValue(
-			//						retourJ.toString(), Sensor.class);
-			//			} catch (IOException e1) {
-			//
-			//				e1.printStackTrace();
-			//			}
-			//			// On insère cette liste dans un modèle de tableau créé spécialement
-			//			// pour les capteurs
-			//			SensorsTableModel sensorModels = new SensorsTableModel(sensorList);
-			//			// On ajoute le modèle à un JTable simple
-			//			// tableSensors.setModel(sensorModels);
-			//
-			//			String[] selectSensors = new String[sensorModels.getRowCount() + 1];
-			//			selectSensors[0] = "--Identifiant du capteur--";
 		}
 
 		if (e.getSource() == addingSensor) {
@@ -356,27 +297,21 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 			ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
 			cc.run();
 
-			// sensorsList
-			// doit récupérer un obj en retour
-			// QUESTION : j'ai un null pointer exception ici -->
+
 			String retours = cc.getResponse();
 			JSONObject retourJ = new JSONObject();
 			System.out.println(retours);
 			retourJ.put("sensorsList", retours);
 
-			//		// baeldung transformer en Sensor
+
 			ObjectMapper objectMapper = new ObjectMapper();
 			Sensor[] listSensor = null;
 			try {
 				listSensor = objectMapper.readValue(
 						retourJ.get("sensorsList").toString(), Sensor[].class);
 			} catch (JSONException | IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
-			//		// On insère cette liste dans un modèle de tableau créé spécialement
-			//		// pour les capteurs
 
 			sensorsList = Arrays.asList(listSensor);
 			SensorsTableModel sensorModels = new SensorsTableModel(sensorsList);
@@ -412,27 +347,11 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		}
 
 		if (e.getSource() == buttonDeletePatient) {
-			// int indexPatient = comboPatient.getSelectedIndex();
-			// if (indexPatient > 0) {
-			// int idPatient = patientsList.get(indexPatient - 1).getId();
-			// try {
-			// new WindowConfirm(jdb, connect).initDeletePatient(idPatient);
-			// } catch (SQLException e1) {
-			// e1.printStackTrace();
-			// }
-			// }
+
 		}
 
 		if (e.getSource() == buttonUpdatePatient) {
-			// int indexPatient = comboPatient.getSelectedIndex();
-			// if (indexPatient > 0) {
-			// int idPatient = patientsList.get(indexPatient - 1).getId();
-			// try {
-			// new WindowUpdate(jdb, connect).initUpdatePatient(idPatient);
-			// } catch (SQLException e1) {
-			// e1.printStackTrace();
-			// }
-			// }
+
 		}
 
 		if (e.getSource() == buttonDeleteSensor) {
@@ -459,7 +378,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				// On lance une fênetre de confirmation qui renvoie 'true' si on
 				// clique sur oui
 				// 'false' pour le reste
-				boolean sure = new WindowConfirm(jdb, connect)
+				boolean sure = new WindowConfirm()
 						.init("supprimer ce capteur");
 
 				// Si sure est à true alors on lance la supression en insérant
@@ -491,7 +410,7 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				try {
 					new WindowUpdate(jdb, connect).initUpdateSensor(idSensor);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
+
 					e1.printStackTrace();
 				}
 			}
