@@ -22,7 +22,7 @@ public abstract class DAO<T> {
 	 * 
 	 * @param obj
 	 * 
-	 * @return boolean
+	 * @return JSONObject
 	 */
 
 
@@ -35,7 +35,7 @@ public abstract class DAO<T> {
 	 * 
 	 * @param obj
 	 * 
-	 * @return boolean
+	 * @return JSONObject
 	 */
 
 
@@ -48,7 +48,7 @@ public abstract class DAO<T> {
 	 * 
 	 * @param obj
 	 * 
-	 * @return boolean
+	 * @return JSONObject
 	 */
 
 	public abstract JSONObject update(JSONObject jsonObject);
