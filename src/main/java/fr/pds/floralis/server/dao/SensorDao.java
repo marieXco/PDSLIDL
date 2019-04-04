@@ -22,7 +22,7 @@ public class SensorDao extends DAO<Sensor> {
 	}
 
 	public JSONObject create(JSONObject jsonObject) {
-		// Boolean retourné pour savoir si il a fonctionne
+		// int retourné pour savoir si il a fonctionne
 		int success = 0;
 
 		PGobject object1 = new PGobject();

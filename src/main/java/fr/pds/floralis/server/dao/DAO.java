@@ -1,7 +1,6 @@
 package fr.pds.floralis.server.dao;
 
 import java.sql.Connection;
-import java.util.List;
 
 import org.json.JSONObject;
 
