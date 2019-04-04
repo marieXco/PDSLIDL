@@ -147,6 +147,7 @@ public class RequestHandler implements Runnable {
 						JSONObject json = locationDao.findAll();
 
 						toSend = json.get("locationList").toString();
+						System.out.println("je fonctionne");
 						break;
 
 					case "FINDBYID":
