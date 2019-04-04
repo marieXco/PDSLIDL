@@ -47,7 +47,7 @@ public class SensorDao extends DAO<Sensor> {
 			statement.setObject(1, object1);
 
 			// On execute le tout et on commit
-			success = statement.executeUpdate();
+			success = statement.executeUpdate(); 
 			connect.commit();
 
 			statement.close();
