@@ -142,10 +142,12 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 		String retours = cc.getResponse();
 		JSONObject retourJ = new JSONObject();
 		retourJ.put("sensorsList", retours);
+		retourJ.put("sensorsList", retours); 
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		Sensor[] listSensors =  objectMapper.readValue(
 				retourJ.get("sensorsList").toString(), Sensor[].class);
+				retourJ.get("sensorsList").toString(), Sensor[].class); 
 
 		// On insère cette liste dans un modèle de tableau créé spécialement
 		// pour les capteurs
@@ -279,6 +281,10 @@ public class WindowWorker extends Thread implements ActionListener, Runnable {
 				}
 			}
 		});
+		
+		// TEST DE LOCATION JE L'AI MIS LA BUT JE SAIS PAS SI C'EST SA PLACE
+		ConnectionClient ccLocation = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
+		ccLocation.run();
 	}
 
 	public void actionPerformed(ActionEvent e) {
