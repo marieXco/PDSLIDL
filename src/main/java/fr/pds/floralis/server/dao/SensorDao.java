@@ -16,9 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 
 public class SensorDao extends DAO<Sensor> {
-
-	public SensorDao(Connection conn) {
-		super(conn);
+	Connection connect = null;
+	
+	public SensorDao() throws ClassNotFoundException, SQLException {
+		connect = super.connect;
 	}
 
 	public JSONObject create(JSONObject jsonObject) {
@@ -71,7 +72,6 @@ public class SensorDao extends DAO<Sensor> {
 		int success = 0;
 		int sensorId = jsonObject.getInt("id");
 
-		//TODO : voir le fonctionnnement de success
 
 		try {
 			connect.setAutoCommit(false);

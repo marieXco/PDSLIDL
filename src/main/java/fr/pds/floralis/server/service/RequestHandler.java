@@ -9,26 +9,26 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.json.JSONObject;
 
-import fr.pds.floralis.gui.OpenDatabase;
-import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
+import fr.pds.floralis.server.dao.BuildingDao;
+import fr.pds.floralis.server.dao.FloorDao;
 import fr.pds.floralis.server.dao.LocationDao;
+import fr.pds.floralis.server.dao.RoomDao;
 import fr.pds.floralis.server.dao.SensorDao;
 
 public class RequestHandler implements Runnable {
 
-	// TODO : nettoyer les private inutiles, gérer les getters et setters
-	// TODO : cntr + shift + O, F, S
+	// TODO : quand est-ce qu'on close la socket ?
 
 	private Socket sock;
 
 
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
+	private BufferedReader readerLine =  null;
 
 	public RequestHandler(Socket pSock) {
 		sock = pSock;
@@ -41,23 +41,6 @@ public class RequestHandler implements Runnable {
 		boolean closeConnexion = false;
 		// tant que la connexion est active, on traite les demandes
 
-		// TODO : ou mettre le connectionPool et le JDBC
-		JDBCConnectionPool jdbc = null;
-
-		try {
-			jdbc = OpenDatabase.database();
-		} catch (ClassNotFoundException | SQLException e1) {
-			e1.printStackTrace();
-		}
-
-		// On récupère une connection
-		Connection connect = null;
-		try {
-			connect = OpenDatabase.databaseConnection(jdbc);
-		} catch (ClassNotFoundException | SQLException e1) {
-			e1.printStackTrace();
-		}
-
 		while (!sock.isClosed()) {
 
 			try {
@@ -66,15 +49,12 @@ public class RequestHandler implements Runnable {
 				// Je vous expliquerai pourquoi ensuite
 				writer = new PrintWriter(sock.getOutputStream());
 				reader = new BufferedInputStream(sock.getInputStream());
-				//TODO : a remonter
-				BufferedReader r = new BufferedReader(new InputStreamReader(reader, StandardCharsets.UTF_8));
+				readerLine = new BufferedReader(new InputStreamReader(reader, StandardCharsets.UTF_8));
 
-				String table = r.readLine();
-				String command = r.readLine();
-				String parameters = r.readLine();
-
-				// TODO : enlever les sysout inutiles
-
+				String table = readerLine.readLine();
+				String command = readerLine.readLine();
+				String parameters = readerLine.readLine();
+				String close = readerLine.readLine();
 
 				InetSocketAddress remote = (InetSocketAddress) sock.getRemoteSocketAddress();
 
@@ -88,11 +68,11 @@ public class RequestHandler implements Runnable {
 
 				// On traite la demande du client en fonction de la commande envoyée
 				String toSend = "";
-
+				
 				switch (table.toUpperCase()) {
 
 				case "SENSOR":
-					SensorDao sensorDao = new SensorDao(connect);
+					SensorDao sensorDao = new SensorDao();
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -136,16 +116,16 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					
+					break;
+
 				case "LOCATION":
-					LocationDao locationDao = new LocationDao(connect);
+					LocationDao locationDao = new LocationDao();
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
 						JSONObject json = locationDao.findAll();
 
 						toSend = json.get("locationList").toString();
-						System.out.println("je fonctionne");
 						break;
 
 					case "FINDBYID":
@@ -179,16 +159,164 @@ public class RequestHandler implements Runnable {
 
 						toSend = jsonLocationDaoUpdate.get("successUpdate").toString();
 						break;
+
 					default:
 						toSend = "Commande inconnue !";
 						break;
 					}
 
 					break;
+					
+				case "ROOM":
+					RoomDao roomDao = new RoomDao();
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						JSONObject json = roomDao.findAll();
+						System.out.println(json.toString());
+
+						toSend = json.get("roomsList").toString();
+						break;
+
+					case "FINDBYID":
+						JSONObject jsonId = new JSONObject(parameters);
+
+						JSONObject roomFound = roomDao.find(jsonId);
+
+						toSend = roomFound.getString("roomFound");
+						break;
+
+					case "CREATE":
+						JSONObject jsonCreate = new JSONObject(parameters);
+
+						JSONObject jsonRoomDaoCreate = roomDao.create(jsonCreate);
+
+						toSend = jsonRoomDaoCreate.get("successCreate").toString();
+						break;
+
+					case "DELETE":
+						JSONObject jsonDeleteId = new JSONObject(parameters);
+
+						JSONObject jsonRoomDaoDelete = roomDao.delete(jsonDeleteId);
+
+						toSend = jsonRoomDaoDelete.get("successDelete").toString();
+						break;
+
+					case "UPDATE":
+						JSONObject jsonUpdate = new JSONObject(parameters);
+
+						JSONObject jsonRoomDaoUpdate = roomDao.update(jsonUpdate);
+
+						toSend = jsonRoomDaoUpdate.get("successUpdate").toString();
+						break;
+						
+					default:
+						toSend = "Commande inconnue !";
+						break;
+					}
+					break;
+					
+				case "BUILDING":
+					BuildingDao buildingDao = new BuildingDao();
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						JSONObject json = buildingDao.findAll();
+
+						toSend = json.get("buildingList").toString();
+						break;
+
+					case "FINDBYID":
+						JSONObject jsonId = new JSONObject(parameters);
+
+						JSONObject buildingFound = buildingDao.find(jsonId);
+
+						toSend = buildingFound.getString("buildingFound");
+						break;
+
+					case "CREATE":
+						JSONObject jsonCreate = new JSONObject(parameters);
+
+						JSONObject jsonBuildingDaoCreate = buildingDao.create(jsonCreate);
+
+						toSend = jsonBuildingDaoCreate.get("successCreate").toString();
+						break;
+
+					case "DELETE":
+						JSONObject jsonDeleteId = new JSONObject(parameters);
+
+						JSONObject jsonBuildingDaoDelete = buildingDao.delete(jsonDeleteId);
+
+						toSend = jsonBuildingDaoDelete.get("successDelete").toString();
+						break;
+
+					case "UPDATE":
+						JSONObject jsonUpdate = new JSONObject(parameters);
+
+						JSONObject jsonBuildingDaoUpdate = buildingDao.update(jsonUpdate);
+
+						toSend = jsonBuildingDaoUpdate.get("successUpdate").toString();
+						break;
+						
+					default:
+						toSend = "Commande inconnue !";
+						break;
+					}
+					break;
+					
+				case "FLOOR":
+					FloorDao floorDao = new FloorDao();
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						JSONObject json = floorDao.findAll();
+
+						toSend = json.get("floorList").toString();
+						break;
+
+					case "FINDBYID":
+						JSONObject jsonId = new JSONObject(parameters);
+
+						JSONObject floorFound = floorDao.find(jsonId);
+
+						toSend = floorFound.getString("floorFound");
+						break;
+
+					case "CREATE":
+						JSONObject jsonCreate = new JSONObject(parameters);
+
+						JSONObject floorCreate = floorDao.create(jsonCreate);
+
+						toSend = floorCreate.get("successCreate").toString();
+						break;
+
+					case "DELETE":
+						JSONObject jsonDeleteId = new JSONObject(parameters);
+
+						JSONObject floorDelete = floorDao.delete(jsonDeleteId);
+
+						toSend = floorDelete.get("successDelete").toString();
+						break;
+
+					case "UPDATE":
+						JSONObject jsonUpdate = new JSONObject(parameters);
+
+						JSONObject floorUpdate = floorDao.update(jsonUpdate);
+
+						toSend = floorUpdate.get("successUpdate").toString();
+						break;
+						
+					default:
+						toSend = "Commande inconnue !";
+						break;
+					}
+					break;
+					
 				default:
 					toSend = "Commande inconnue !";
 					break;
 				}
+
 
 				// On envoie la réponse au client
 				writer.write(toSend);
@@ -197,19 +325,25 @@ public class RequestHandler implements Runnable {
 				// et il attendra indéfiniment
 				writer.flush();
 
-				if (closeConnexion) {
+				switch (close.toUpperCase()) {
+				case "CLOSE" :
 					System.err.println("COMMANDE CLOSE DETECTEE ! ");
 					writer = null;
 					reader = null;
 					sock.close();
 					break;
 				}
+
 			} catch (SocketException e) {
 				System.err.println("LA CONNEXION A ETE INTERROMPUE ! ");
 				break;
 			} catch (IOException e) {
 				e.printStackTrace();
 
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		}
 	}

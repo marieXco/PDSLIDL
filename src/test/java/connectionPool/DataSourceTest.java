@@ -1,22 +1,21 @@
 package connectionPool;
 
 import static org.junit.Assert.assertNotNull;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.junit.Test;
 
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-import fr.pds.floralis.gui.*;
 
 public class DataSourceTest {
 
 	
-	public void TestConnection() throws ClassNotFoundException {
-		JDBCConnectionPool jdbc;
+	public void TestConnection() throws ClassNotFoundException, SQLException {
+		JDBCConnectionPool jdbc = new JDBCConnectionPool();
 
 		try {
-			jdbc = OpenDatabase.database();			
+			DataSource.createPool(jdbc);
 			for (int i = 1; i < 10; i++) {
 				Connection connection = DataSource.getConnectionFromPool(jdbc);
 				System.out.println("Connection " + i + " Used: " + connection);

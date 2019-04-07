@@ -2,19 +2,16 @@ package fr.pds.floralis.gui.tablemodel;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.table.AbstractTableModel;
-
-
 import fr.pds.floralis.commons.bean.entity.Sensor;
 
-
 public class SensorsTableModel extends AbstractTableModel {
-
-
+	// Adding a serialVersionUID as the AbstractTableModel class extend Serializable
+	private static final long serialVersionUID = 4371698137427718534L;
+	
 	private List<Sensor> userData = new ArrayList<Sensor>();
 	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
-			"Caractéristiques" };
+			"Caractéristiques"};
 
 	public SensorsTableModel() {
 	}
@@ -43,6 +40,28 @@ public class SensorsTableModel extends AbstractTableModel {
 	public Object getValueAt(int row, int column) {
 		Object userAttribute = null;
 		Sensor userObject = userData.get(row);
+		String on = "";
+		
+		// TODO : tableaux dans Sensor ? --> Pannes et alertes
+		
+		if(userObject.getState() == true) {
+			on = "Allumé";
+		} else {
+			on = "Eteint";
+		}
+		
+		String state = "";
+		
+		if(userObject.getAlerts() != null) {
+			state = "Alerte";
+		} else {
+			state = "RAS";
+		}
+		
+		if(userObject.getBreakdowns() != null) {
+			state = "En panne";
+		}
+		
 		switch (column) {
 		case 0: 
 			userAttribute = userObject.getId();
@@ -57,11 +76,14 @@ public class SensorsTableModel extends AbstractTableModel {
 			userAttribute = userObject.getInstallation();
 			break;
 		case 4:
-			userAttribute = userObject.getState();
+			userAttribute = on;
 			break;
 		case 5:
 			userAttribute = userObject.getCaracteristics();
 			break;
+//		case 6:
+//			userAttribute = state;
+//			break;
 		default:
 			break;
 		}

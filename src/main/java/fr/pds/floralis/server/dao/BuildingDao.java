@@ -8,17 +8,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Building;
 
-public class LocationDao extends DAO<Location> {
+public class BuildingDao extends DAO<Building> {
 
-	public LocationDao() throws ClassNotFoundException, SQLException {
+	public BuildingDao() throws ClassNotFoundException, SQLException {
 		connect = super.connect;
 	}
 
@@ -41,7 +40,7 @@ public class LocationDao extends DAO<Location> {
 			connect.setAutoCommit(false);
 
 			//requete 
-			String sql = "INSERT INTO location (data) VALUES (?);";
+			String sql = "INSERT INTO buildings (data) VALUES (?);";
 
 			// On utilise un PreparedStatement pour pouvoir précompilé 
 			// avant d'ajouter la colonne 
@@ -63,22 +62,22 @@ public class LocationDao extends DAO<Location> {
 		}
 		
 		//JSON 
-		JSONObject locationCreated = new JSONObject();
-		locationCreated.put("successCreate", success);
-		System.out.println(locationCreated.toString());
-		return locationCreated;
+		JSONObject buildingCreated = new JSONObject();
+		buildingCreated.put("successCreate", success);
+		System.out.println(buildingCreated.toString());
+		return buildingCreated;
 	}
 
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
 		int success = 0;
-		int locationId = jsonObject.getInt("id"); //traduction de mon id en int 
+		int buildingId = jsonObject.getInt("id"); //traduction de mon id en int 
 
 		//la suppression de ma ligne, fonctionne de la meme manière que pour le create
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM location where (data -> 'id')::json::text = '" + locationId + "'::json::text;";
+			String sql = "DELETE FROM buildings where (data -> 'id')::json::text = '" + buildingId + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -95,21 +94,21 @@ public class LocationDao extends DAO<Location> {
 			System.out.println("delete success");
 		}
 		// la partie JSON 
-		JSONObject locationDeleted = new JSONObject();
-		locationDeleted.put("successDelete", success);
-		System.out.println(locationDeleted.toString());
-		return locationDeleted;
+		JSONObject buildingDeleted = new JSONObject();
+		buildingDeleted.put("successDelete", success);
+		System.out.println(buildingDeleted.toString());
+		return buildingDeleted;
 	}
 
 	@Override
 	public JSONObject update(JSONObject jsonObject) {
 		int success = 0;
 		
-		int locationId = jsonObject.getInt("id");
+		int buildingId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE location SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + locationId + "'::json::text;";
+			String sql = "UPDATE buildings SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + buildingId + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -128,28 +127,28 @@ public class LocationDao extends DAO<Location> {
 			System.out.println("update success");
 		}
 
-		JSONObject locationUpdated = new JSONObject();
-		locationUpdated.put("successUpdate", success);
-		System.out.println(locationUpdated.toString());
-		return locationUpdated;
+		JSONObject buildingUpdated = new JSONObject();
+		buildingUpdated.put("successUpdate", success);
+		System.out.println(buildingUpdated.toString());
+		return buildingUpdated;
 	}
 
 	@Override
 	public JSONObject find(JSONObject jsonObject) {
 		ObjectMapper mapper = new ObjectMapper();
-		Location location = new Location(0, null, null, null, null);
+		Building building = new Building(0, null);
 
 		int locationId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM location where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM buildings where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
 
 			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
 				//Poser questions sur ça 
-				location = mapper.readValue(rs.getObject(1).toString(), Location.class);
+				building = mapper.readValue(rs.getObject(1).toString(), Building.class);
 			}			
 
 			rs.close();
@@ -160,31 +159,31 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (location.getRoom()!= null) { // a vérifier je suis pas sur 
+		 if (building.getTypeBuilding() != null) { // a vérifier je suis pas sur 
 			System.out.println("find success");
 		}
 		
-		JSONObject locationFound = new JSONObject();
-		locationFound.put("locationFound", location.toString());
-		return locationFound;
+		JSONObject buildingFound = new JSONObject();
+		buildingFound.put("buildingFound", building.toString());
+		return buildingFound;
 	}
 
 	@Override
 	public JSONObject findAll() {
 		ObjectMapper mapper = new ObjectMapper();
-		List<Location> allLocation = new ArrayList<Location>();
-		Location location = new Location();
+		List<Building> buidings = new ArrayList<Building>();
+		Building buiding = new Building(0, null);
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery("SELECT data FROM location;");
+			ResultSet rs = stmt.executeQuery("SELECT data FROM buildings;");
 
 
 			while (rs.next()) {
-				location = mapper.readValue(rs.getObject(1).toString(), Location.class);
-				allLocation.add(location);
+				buiding = mapper.readValue(rs.getObject(1).toString(), Building.class);
+				buidings.add(buiding);
 			}
 
 			rs.close();
@@ -195,14 +194,14 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}	
 		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné 
-		if (allLocation != null) {
+		if (buidings != null) {
 			System.out.println("findAll success");
 		}
 
-		JSONObject locationList = new JSONObject();
-		locationList.put("locationList", allLocation.toString());
+		JSONObject buildingList = new JSONObject();
+		buildingList.put("buildingList", buidings.toString());
 		
-		return locationList;
+		return buildingList;
 	}
 	
 

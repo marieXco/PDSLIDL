@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Random;
 
 public class ConnectionClient implements Runnable{
 
@@ -20,6 +19,7 @@ public class ConnectionClient implements Runnable{
 	private String command;   
 	private String response;
 	private String parameters;
+	private String close;
 
 	public ConnectionClient(String host, int port, String table, String command, String parameters){
 		name += ++count;
@@ -51,6 +51,9 @@ public class ConnectionClient implements Runnable{
 			
 			String parameters = getParameters();
 			writer.println(parameters);
+
+			writer.println("CLOSE");
+			
 			//TOUJOURS UTILISER flush() POUR ENVOYER RÉELLEMENT DES INFOS AU SERVEUR
 			writer.flush();  
 
@@ -65,16 +68,20 @@ public class ConnectionClient implements Runnable{
 		}
 
 		try {
-			Thread.currentThread().sleep(1000);
+			Thread.currentThread();
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
-
-		//writer.write("CLOSE");
-		//writer.flush();
-		//writer.close();
+		// FIXME : gérer les close
+		writer.close();
 	}
+
+	private String getClose() {
+		return close;
+	}
+
 
 	//Méthode qui permet d'envoyer la commande demandée
 	private String getCommand(){

@@ -9,6 +9,7 @@ public class Sensor {
 
 	private int id;
 	private TypeSensor type;
+	private int idLocation;
 	private Boolean state;
 	private Alert alerts[];
 	private String brand;
@@ -24,6 +25,15 @@ public class Sensor {
 	public void setId(int id) {
 		this.id = id;
 	}
+	
+	public int getIdLocation() {
+		return idLocation;
+	}
+
+	public void setIdLocation(int idLocation) {
+		this.idLocation = idLocation;
+	}
+
 
 	public TypeSensor getType() {
 		return type;
@@ -89,11 +99,12 @@ public class Sensor {
 		this.breakdowns = breakdowns;
 	}
 
-	public Sensor(int id, TypeSensor type, Boolean state, Alert[] alerts,
+	public Sensor(int id, int idLocation, TypeSensor type, Boolean state, Alert[] alerts,
 			String brand, String macAdress, Date installation,
 			String caracteristics, Breakdown[] breakdowns) {
 		super();
 		this.id = id;
+		this.idLocation = idLocation;
 		this.type = type;
 		this.state = state;
 		this.alerts = alerts;
@@ -110,10 +121,8 @@ public class Sensor {
 
 	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"type\" : " + type + ", \"state\" :" + state + ", \"alerts\" : " + Arrays.toString(alerts)
+		return "{ \"id\" : " + id + ", \"idLocation\" : " + idLocation + ", \"type\" : " + type + ", \"state\" :" + state + ", \"alerts\" : " + Arrays.toString(alerts)
 				+ ", \"brand\" : \"" + brand + "\", \"macAdress\" : \"" + macAdress + "\", \"installation\" : \"" + installation
 				+ "\", \"caracteristics\" : \"" + caracteristics + "\", \"breakdowns\" : " + Arrays.toString(breakdowns) + "}";
 	}
-	
-
 }

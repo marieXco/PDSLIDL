@@ -7,7 +7,4 @@ public class Personnel extends Staff{
 		super(id, lastName, firstName, code);
 	}
 
-	
-
-	
 }

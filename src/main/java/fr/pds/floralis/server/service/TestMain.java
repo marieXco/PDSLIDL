@@ -1,5 +1,9 @@
 package fr.pds.floralis.server.service;
 
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class TestMain {
@@ -9,13 +13,22 @@ public class TestMain {
 		String host = "127.0.0.1";
 		int port = 2345;
 
-		TimeServer ts = new TimeServer(host, port);
+		TimeServer ts = new TimeServer();
 		ts.open();
-
+		
+		JFrame jf = new JFrame();
+		jf.setVisible(true);
+		
 		System.out.println("Serveur initialisé.");
+		
+		jf.setBounds(0, 0, 300, 300);
+		jf.add(new JLabel("Serveur initialisé"));
+		jf.setTitle("Floralis");
+		jf.setLocationRelativeTo(null);
 
-		Thread t = new Thread(new ConnectionClient(host, port, "SENSOR", "FINDALL", null));
-		t.start();
-
+		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de
+		// déconnection
+		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.setVisible(true);
 	}
 }
