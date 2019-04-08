@@ -1,5 +1,7 @@
 package fr.pds.floralis.server.service;
 
+import java.sql.SQLException;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -8,7 +10,7 @@ import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class TestMain {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 
 		String host = "127.0.0.1";
 		int port = 2345;

@@ -62,6 +62,8 @@ public class ConnectionClient implements Runnable{
 			//On attend la réponse
 			response = read();
 			System.out.println("\t * " + name + " : Réponse reçue " + response.toString());
+			
+			connexion.close();
 
 		} catch (IOException e1) {
 			e1.printStackTrace();

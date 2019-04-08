@@ -9,10 +9,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.json.JSONObject;
 
+import fr.pds.floralis.server.configurationpool.DataSource;
+import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 import fr.pds.floralis.server.dao.BuildingDao;
 import fr.pds.floralis.server.dao.FloorDao;
 import fr.pds.floralis.server.dao.LocationDao;
@@ -24,11 +27,17 @@ public class RequestHandler implements Runnable {
 	// TODO : quand est-ce qu'on close la socket ?
 
 	private Socket sock;
-
-
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
 	private BufferedReader readerLine =  null;
+	private JDBCConnectionPool jdbc;
+	
+
+	TimeServer ts = new TimeServer();
+	
+	DataSource ds = new DataSource();
+	
+	
 
 	public RequestHandler(Socket pSock) {
 		sock = pSock;
@@ -37,7 +46,14 @@ public class RequestHandler implements Runnable {
 	// Le traitement lancé dans un thread séparé
 	public void run() {
 		System.err.println("Lancement du traitement de la connexion cliente");
-
+		
+		
+		try {
+			setJdbc(DataSource.createPool());
+		} catch (ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		boolean closeConnexion = false;
 		// tant que la connexion est active, on traite les demandes
 
@@ -72,7 +88,8 @@ public class RequestHandler implements Runnable {
 				switch (table.toUpperCase()) {
 
 				case "SENSOR":
-					SensorDao sensorDao = new SensorDao();
+					Connection sensorConnection = DataSource.getConnectionFromPool(getJdbc());	
+					SensorDao sensorDao = new SensorDao(sensorConnection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -119,7 +136,8 @@ public class RequestHandler implements Runnable {
 					break;
 
 				case "LOCATION":
-					LocationDao locationDao = new LocationDao();
+					Connection locationConnection = DataSource.getConnectionFromPool(getJdbc());	
+					LocationDao locationDao = new LocationDao(locationConnection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -168,7 +186,8 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "ROOM":
-					RoomDao roomDao = new RoomDao();
+					Connection roomConnection = DataSource.getConnectionFromPool(getJdbc());	
+					RoomDao roomDao = new RoomDao(roomConnection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -217,7 +236,8 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "BUILDING":
-					BuildingDao buildingDao = new BuildingDao();
+					Connection buildingConnection = DataSource.getConnectionFromPool(getJdbc());	
+					BuildingDao buildingDao = new BuildingDao(buildingConnection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -265,7 +285,8 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "FLOOR":
-					FloorDao floorDao = new FloorDao();
+					Connection floorConnection = DataSource.getConnectionFromPool(getJdbc());	
+					FloorDao floorDao = new FloorDao(floorConnection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -370,5 +391,13 @@ public class RequestHandler implements Runnable {
 
 	public void setReader(BufferedInputStream reader) {
 		this.reader = reader;
+	}
+	
+	public JDBCConnectionPool getJdbc() {
+		return jdbc;
+	}
+
+	public void setJdbc(JDBCConnectionPool jdbc) {
+		this.jdbc = jdbc;
 	}
 }
