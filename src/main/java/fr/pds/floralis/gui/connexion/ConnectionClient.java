@@ -108,7 +108,7 @@ public class ConnectionClient implements Runnable{
 		int stream;
 		byte[] b = new byte[4096];
 		stream = reader.read(b);
-		response = new String(b, 0, stream);      
+		response = new String(b, 0, stream + 1);      
 		return response;
 	}   
 }

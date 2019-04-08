@@ -32,35 +32,21 @@ public class RequestHandler implements Runnable {
 	private BufferedReader readerLine =  null;
 	private JDBCConnectionPool jdbc;
 	
-
-	TimeServer ts = new TimeServer();
-	
-	DataSource ds = new DataSource();
-	
-	
-
-	public RequestHandler(Socket pSock) {
-		sock = pSock;
+	public RequestHandler(Socket pSock, JDBCConnectionPool jdbc) throws ClassNotFoundException, SQLException {
+		this.sock = pSock;
+		this.jdbc = jdbc;
 	}
 
 	// Le traitement lancé dans un thread séparé
 	public void run() {
 		System.err.println("Lancement du traitement de la connexion cliente");
 		
-		
-		try {
-			setJdbc(DataSource.createPool());
-		} catch (ClassNotFoundException | SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		boolean closeConnexion = false;
 		// tant que la connexion est active, on traite les demandes
 
 		while (!sock.isClosed()) {
 
 			try {
-
 				// Ici, nous n'utilisons pas les mêmes objets que précédemment
 				// Je vous expliquerai pourquoi ensuite
 				writer = new PrintWriter(sock.getOutputStream());
@@ -88,7 +74,7 @@ public class RequestHandler implements Runnable {
 				switch (table.toUpperCase()) {
 
 				case "SENSOR":
-					Connection sensorConnection = DataSource.getConnectionFromPool(getJdbc());	
+					Connection sensorConnection = DataSource.getConnectionFromPool(getJdbc());
 					SensorDao sensorDao = new SensorDao(sensorConnection);
 
 					switch (command.toUpperCase()) {
@@ -133,10 +119,11 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
+					DataSource.backConnection(getJdbc(), sensorConnection);
 					break;
 
 				case "LOCATION":
-					Connection locationConnection = DataSource.getConnectionFromPool(getJdbc());	
+					Connection locationConnection = DataSource.getConnectionFromPool(getJdbc());
 					LocationDao locationDao = new LocationDao(locationConnection);
 
 					switch (command.toUpperCase()) {
@@ -182,7 +169,7 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-
+					DataSource.backConnection(getJdbc(), locationConnection);
 					break;
 					
 				case "ROOM":
@@ -233,6 +220,7 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
+					DataSource.backConnection(getJdbc(), roomConnection);
 					break;
 					
 				case "BUILDING":
@@ -282,6 +270,7 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
+					DataSource.backConnection(getJdbc(), buildingConnection);
 					break;
 					
 				case "FLOOR":
@@ -331,6 +320,7 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
+					DataSource.backConnection(getJdbc(), floorConnection);
 					break;
 					
 				default:

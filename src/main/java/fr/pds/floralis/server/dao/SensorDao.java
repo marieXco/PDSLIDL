@@ -19,7 +19,7 @@ public class SensorDao extends DAO<Sensor> {
 	Connection connect = null;
 	
 	public SensorDao(Connection connect) throws ClassNotFoundException, SQLException {
-		connect = this.connect;
+		this.connect = connect;
 	}
 
 	public JSONObject create(JSONObject jsonObject) {

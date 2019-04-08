@@ -44,7 +44,7 @@ public class TimeServer {
 
 	//On lance notre serveur
 	public void open() throws ClassNotFoundException, SQLException{
-		
+		JDBCConnectionPool jdbc = DataSource.createPool();
 		//Toujours dans un thread à part vu qu'il est dans une boucle infinie
 		Thread t = new Thread(new Runnable(){
 			public void run(){
@@ -56,10 +56,16 @@ public class TimeServer {
 
 						//Une fois reçue, on la traite dans un thread séparé
 						System.out.println("Connexion cliente reçue.");                  
-						Thread t = new Thread(new RequestHandler(client));
+						Thread t = new Thread(new RequestHandler(client, jdbc));
 						t.start();
 
 					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
