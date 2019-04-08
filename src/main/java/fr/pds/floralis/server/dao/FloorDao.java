@@ -16,9 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Floor;
 
 public class FloorDao extends DAO<Floor> {
-
-	public FloorDao() throws ClassNotFoundException, SQLException {
-		connect = super.connect;
+	Connection connect = null;
+	
+	public FloorDao(Connection connect) throws ClassNotFoundException, SQLException {
+		this.connect = connect;
 	}
 
 	@Override

@@ -10,13 +10,8 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public abstract class DAO<T> {
 
-	protected JDBCConnectionPool jdbc = new JDBCConnectionPool();
-	protected Connection connect = null;
-	
-
 	public DAO() throws ClassNotFoundException, SQLException {
-		DataSource.createPool(jdbc);
-		connect = DataSource.getConnectionFromPool(jdbc);	
+		
 	}
 
 	/**
@@ -76,21 +71,4 @@ public abstract class DAO<T> {
 	 * @return List<T>
 	 */
 	public abstract JSONObject findAll();
-
-	public JDBCConnectionPool getJdbc() {
-		return jdbc;
-	}
-
-	public void setJdbc(JDBCConnectionPool jdbc) {
-		this.jdbc = jdbc;
-	}
-
-	public Connection getConnect() {
-		return connect;
-	}
-
-	public void setConnect(Connection connect) {
-		this.connect = connect;
-	}
-	
 }

@@ -16,9 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Room;
 
 public class RoomDao extends DAO<Room> {
-
-	public RoomDao() throws ClassNotFoundException, SQLException {
-		connect = super.connect;
+	Connection connect = null;
+	
+	public RoomDao(Connection connect) throws ClassNotFoundException, SQLException {
+		this.connect = connect;
 	}
 
 	@Override

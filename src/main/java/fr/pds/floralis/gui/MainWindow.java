@@ -11,8 +11,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -278,11 +280,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				locationsFound.get("locationsFound").toString(), Location[].class);
 
 		// On passe notre tableau en liste
-		List <Location>locationsFoundList = Arrays.asList(locationsFoundTab);
+		List <Location> locationsFoundList = Arrays.asList(locationsFoundTab);
+		
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+			if(!(locationsFoundTab[listIndex].getSensorId().isEmpty())) {
+				String sensorsIdString = locationsFoundTab[listIndex].getSensorId().stream().map(Object::toString)
+	                    .collect(Collectors.joining(", "));
 			locationList.add(new JLabel(locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName() + 
-					" - Identifiants des capteurs à cet endroit : " + Arrays.toString(locationsFoundTab[listIndex].getSensorId())));
+					" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+			}
 		}
 		// Fin de la récupération des localisations
 
@@ -382,8 +389,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 						locationsFound.get("locationsFound").toString(), Location[].class);
 
 				for (int listIndex = 0; listIndex < locationsFoundTab.length; listIndex++) {
+					if(!(locationsFoundTab[listIndex].getSensorId().isEmpty())) {
+						String sensorsIdString = locationsFoundTab[listIndex].getSensorId().stream().map(Object::toString)
+			                    .collect(Collectors.joining(", "));
 					locationList.add(new JLabel(locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName() + 
-							" - Identifiants des capteurs à cet endroit : " + Arrays.toString(locationsFoundTab[listIndex].getSensorId())));
+							" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+					}
 				}
 
 				// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
@@ -501,7 +512,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, "SENSOR", "DELETE", objSensorDelete.toString());
 					ccSensorDelete.run();
 
-					// TODO : modifier les noms 
 					// Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
 					ConnectionClient ccLocationFindById = new ConnectionClient(host, port, "LOCATION", "FINDBYID", sensorFoundDelete.toString());
@@ -519,17 +529,18 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 								locationFoundJson.get("retourLocation").toString(), Location.class);
 
 						// Ici, on récupère tous les id des sensors de la localisation trouvée
-						int sensorsCount = locationFound.getSensorId().length;
+						List <Integer> oldListSensorLocation = new ArrayList<Integer>();
 						// On créer un nouveau tableau
-						int[] newListSensorLocation = new int[sensorsCount];
+						List <Integer> newListSensorLocation = new ArrayList<Integer>();
+						
 
 						// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
-						// FIXME : j'arrive pas à totalement le supprimer, alors pour l'instant, il devient juste 0
-						for (int i = 0; i < sensorsCount; i++) {
-							newListSensorLocation[i] = locationFound.getSensorId()[i];
-							if(newListSensorLocation[i] == idSensorDelete) {
-								newListSensorLocation[i] = 0;
-							}
+						if(!oldListSensorLocation.contains(idSensorDelete)) {
+							newListSensorLocation.addAll(oldListSensorLocation);
+						}
+						else {
+							newListSensorLocation.addAll(oldListSensorLocation);
+							newListSensorLocation.add(idSensorDelete);
 						}
 
 						// On modifie en mettant notre nouveau tableau puis on fait l'update sur la table des localisations

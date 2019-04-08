@@ -380,7 +380,6 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("Veuillez selectionner une localisation valide");
 			}
 			else {
-
 				// Début de location Find By Id, ici, on vérifie que l'identifiant pour 
 				// la nouvelle localisation n'est pas déja utilisé (voir WindowWorker lignes 269-287)
 				JSONObject locationFindById = new JSONObject();
@@ -398,6 +397,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 				ObjectMapper objectMapper = new ObjectMapper();
 				// On ne trouve plus un tableau mais une localisation unique
 				Location locationFound;
+				System.out.println("toto");
 				try {
 					locationFound = objectMapper.readValue(
 							locationFoundJson.get("locationFoundJson").toString(), Location.class);
@@ -428,7 +428,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						
 						// En créant la localisation, elle n'a pas encore de capteur attitrée donc on lui met un tableau 
 						// vide de capteursId 
-						int[] locationSensors = new int[0];
+						List<Integer> locationSensors = new ArrayList<Integer>();
 
 						// On créer une localisation avec le tout puis on l'insère dans un Json puis dans le ccLocationCreate
 						Location locationCreate = new Location();
@@ -477,6 +477,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 			else if (location.getSelectedIndex() <= 0 ) {
 				infos.setText("Veuillez selectionner une localisation valable");
 			}
+			
 			else {
 				// Début de sensor Find By Id, ici, voir lignes 384-412
 				JSONObject sensorIdFindById = new JSONObject();
@@ -519,7 +520,6 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 						dayInstallation = day.getSelectedIndex();
 						monthInstallation = month.getSelectedIndex() - 1;
-						// FIXME : pourquoi ? 
 						yearInstallation = Integer.parseInt(years[year.getSelectedIndex()]);
 						
 						// on créé une Date, - 1900 car le champ 'Year' de date commence en 1900
@@ -544,19 +544,10 @@ public class WindowAdd extends JFrame implements ActionListener {
 						locationUpdate.setFloor(locationsFoundTab[location.getSelectedIndex() - 1].getFloor());
 
 						// On récupère tous les anciens capteurs de la localisation 
-						int[] locationSensorsId  = locationsFoundTab[location.getSelectedIndex() - 1].getSensorId();
-						// On créer un tableau avec une rangée en plus
-						int[] locationNewSensorsId = new int[locationSensorsId.length + 1];
-
-						// On mets les anciennes valeurs dans le nouveau
-						for(int i = 0; i < locationSensorsId.length; i++) {
-							locationNewSensorsId[i] = locationSensorsId[i];
-						}
+						List <Integer> locationSensorsId  = locationsFoundTab[location.getSelectedIndex() - 1].getSensorId();
+						locationSensorsId.add(sensorCreate.getId());
 						
-						// On ajoute au nouveau tableau, l'identifiant du capteur tout juste créer
-						// puis on ajoute ses nouveaux capteurs dans la localisation
-						locationNewSensorsId[locationSensorsId.length] = sensorCreate.getId();
-						locationUpdate.setSensorId(locationNewSensorsId);
+						locationUpdate.setSensorId(locationSensorsId);
 						
 						JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
 						try {

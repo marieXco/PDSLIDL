@@ -1,11 +1,14 @@
 package fr.pds.floralis.commons.bean.entity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Location {
 	
 	private int id;
-	private int sensorId[];
+	private List <Integer> sensorId = new ArrayList<Integer>();
 	private Room room;
 	private Floor floor;
 	private Building building;
@@ -16,14 +19,6 @@ public class Location {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public int[] getSensorId() {
-		return sensorId;
-	}
-
-	public void setSensorId(int[] sensor) {
-		this.sensorId = sensor;
 	}
 
 	public Room getRoom() {
@@ -50,11 +45,19 @@ public class Location {
 		this.building = building;
 	}
 	
+	public List<Integer> getSensorId() {
+		return sensorId;
+	}
+
+	public void setSensorId(List<Integer> sensorId) {
+		this.sensorId = sensorId;
+	}
+	
 	// TODO : TEST : ne fonctionne que si il y a un constructeur vide ? 
 	public Location() {
 	}
 
-	public Location(int id, int[] sensor, Room room, Floor floor,
+	public Location(int id, List <Integer> sensor, Room room, Floor floor,
 			Building building) {
 		super();
 		this.id = id;
@@ -64,9 +67,11 @@ public class Location {
 		this.building = building;
 	}
 
+	
+
 	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"sensorId\" : " + Arrays.toString(sensorId) + ", \"room\" :" + room + ", \"floor\" : " + floor
+		return "{ \"id\" : " + id + ", \"sensorId\" : " + sensorId + ", \"room\" :" + room + ", \"floor\" : " + floor
 				+ ", \"building\" : "+ building + "}";
 	}
 }

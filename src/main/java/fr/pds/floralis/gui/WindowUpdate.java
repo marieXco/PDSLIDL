@@ -116,7 +116,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	Location[] locationsFoundTab = null;
 
 	JComboBox location = null;
-	
+
 	int sensorFoundLocationId;
 
 	public void initUpdatePatient(int id) throws SQLException {
@@ -231,7 +231,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		monthComboBox.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
 		yearComboBox.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
 		caracteristics.setText(sensorFound.getCaracteristics());
-		
+
 		sensorFoundLocationId = sensorFound.getIdLocation();
 
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
@@ -287,7 +287,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 				int dayInstallation = daysComboBox.getSelectedIndex();
 				int monthInstallation = monthComboBox.getSelectedIndex() - 1;
-				// FIXME : pourquoi le parse ? 
 				int yearInstallation = Integer.parseInt(yearsTab[yearComboBox.getSelectedIndex()]);
 
 				@SuppressWarnings("deprecation")
@@ -300,10 +299,10 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, "SENSOR", "UPDATE", sensorUpdateJson.toString());
 				ccSensorUpdate.run();
 				// Fin du sensorUpdate 
-				
+
 				// Début du old Location Update
 				JSONObject objOldLocation = new JSONObject();
-				
+
 				objOldLocation.put("id", getSensorFoundLocationId()); 
 				System.out.println("id :" + objOldLocation.toString());
 
@@ -324,17 +323,18 @@ public class WindowUpdate extends JFrame implements ActionListener {
 							retourOldLocationJson.get("retourLocation").toString(), Location.class);
 
 					// Ici, on récupère tous les id des sensors de la localisation trouvée
-					int sensorsCount = oldLocation.getSensorId().length;
+					List <Integer> oldListSensorLocation = new ArrayList<Integer>();
 					// On créer un nouveau tableau
-					int[] newListSensorLocation = new int[sensorsCount];
+					List <Integer> newListSensorLocation = new ArrayList<Integer>();
+
 
 					// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
-					// FIXME : j'arrive pas à totalement le supprimer, alors pour l'instant, il devient juste 0
-					for (int i = 0; i < sensorsCount; i++) {
-						newListSensorLocation[i] = oldLocation.getSensorId()[i];
-						if(newListSensorLocation[i] == getId()) {
-							newListSensorLocation[i] = 0;
-						}
+					if(!oldListSensorLocation.contains(getId())) {
+						newListSensorLocation.addAll(oldListSensorLocation);
+					}
+					else {
+						newListSensorLocation.addAll(oldListSensorLocation);
+						newListSensorLocation.add(getId());
 					}
 
 					// On modifie en mettant notre nouveau tableau puis on fait l'update sur la table des localisations
@@ -348,7 +348,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				} catch (JSONException | IOException e1) {
 					e1.printStackTrace();
 				}
-				
+
 
 				// Début du location Update, voir Window Add lignes 537
 				Location locationUpdate = new Location();
@@ -357,21 +357,22 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				locationUpdate.setId(locationsFoundTab[location.getSelectedIndex() - 1].getId());
 				locationUpdate.setFloor(locationsFoundTab[location.getSelectedIndex() - 1].getFloor());
 
-				int[] locationSensorsId  = locationsFoundTab[location.getSelectedIndex() - 1].getSensorId();
-				int[] locationNewSensorsId = new int[locationSensorsId.length + 1];
+				List <Integer> oldListSensorLocation = new ArrayList<Integer>();
+				// On créer un nouveau tableau
+				List <Integer> newListSensorLocation = new ArrayList<Integer>();
 
-				for(int i = 0; i < locationSensorsId.length; i++) {
-					if(locationSensorsId[i] != sensorUpdate.getId()) {
-						locationNewSensorsId[i] = locationSensorsId[i];
-					} 
-					if (locationSensorsId[i] == sensorUpdate.getId()){
-						locationNewSensorsId[i] = 0;
-					}			
+
+				// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
+				if(!oldListSensorLocation.contains(getId())) {
+					newListSensorLocation.addAll(oldListSensorLocation);
 				}
-				
-				locationNewSensorsId[locationSensorsId.length] = sensorUpdate.getId();
+				else {
+					newListSensorLocation.addAll(oldListSensorLocation);
+					newListSensorLocation.add(getId());
+				}		
 
-				locationUpdate.setSensorId(locationNewSensorsId);
+
+				locationUpdate.setSensorId(newListSensorLocation);
 				JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
 
 				ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", locationUpdateJson.toString());
@@ -394,7 +395,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+
 	public int getSensorFoundLocationId() {
 		return sensorFoundLocationId;
 	}

@@ -18,8 +18,8 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 public class SensorDao extends DAO<Sensor> {
 	Connection connect = null;
 	
-	public SensorDao() throws ClassNotFoundException, SQLException {
-		connect = super.connect;
+	public SensorDao(Connection connect) throws ClassNotFoundException, SQLException {
+		connect = this.connect;
 	}
 
 	public JSONObject create(JSONObject jsonObject) {

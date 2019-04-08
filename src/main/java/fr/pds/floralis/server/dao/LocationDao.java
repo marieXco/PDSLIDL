@@ -17,9 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Location;
 
 public class LocationDao extends DAO<Location> {
-
-	public LocationDao() throws ClassNotFoundException, SQLException {
-		connect = super.connect;
+	Connection connect = null;
+	
+	public LocationDao(Connection connect) throws ClassNotFoundException, SQLException {
+		this.connect = connect;
 	}
 
 	@Override
@@ -137,7 +138,10 @@ public class LocationDao extends DAO<Location> {
 	@Override
 	public JSONObject find(JSONObject jsonObject) {
 		ObjectMapper mapper = new ObjectMapper();
-		Location location = new Location(0, null, null, null, null);
+		List<Integer> emptyList = new ArrayList<Integer>();
+		emptyList.add(0);
+		emptyList.add(0);
+		Location location = new Location(0, emptyList, null, null, null);
 
 		int locationId = jsonObject.getInt("id");
 
@@ -160,7 +164,7 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (location.getRoom()!= null) { // a vérifier je suis pas sur 
+		 if (location.getId()!= 0) { // a vérifier je suis pas sur 
 			System.out.println("find success");
 		}
 		

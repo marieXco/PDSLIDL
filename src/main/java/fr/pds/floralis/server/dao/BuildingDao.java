@@ -16,9 +16,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Building;
 
 public class BuildingDao extends DAO<Building> {
-
-	public BuildingDao() throws ClassNotFoundException, SQLException {
-		connect = super.connect;
+	Connection connect = null;
+	
+	public BuildingDao(Connection connect) throws ClassNotFoundException, SQLException {
+		this.connect = connect;
 	}
 
 	@Override

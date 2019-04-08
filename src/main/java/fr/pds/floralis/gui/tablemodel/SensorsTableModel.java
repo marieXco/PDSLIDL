@@ -42,8 +42,6 @@ public class SensorsTableModel extends AbstractTableModel {
 		Sensor userObject = userData.get(row);
 		String on = "";
 		
-		// TODO : tableaux dans Sensor ? --> Pannes et alertes
-		
 		if(userObject.getState() == true) {
 			on = "Allumé";
 		} else {
