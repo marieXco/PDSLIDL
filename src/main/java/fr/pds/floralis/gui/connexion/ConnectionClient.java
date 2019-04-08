@@ -75,7 +75,7 @@ public class ConnectionClient implements Runnable{
 		}
 
 		// FIXME : gérer les close
-		writer.close();
+		//writer.close();
 	}
 
 	private String getClose() {

@@ -27,6 +27,7 @@ import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -115,6 +116,8 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	Location[] locationsFoundTab = null;
 
 	JComboBox location = null;
+	
+	int sensorFoundLocationId;
 
 	public void initUpdatePatient(int id) throws SQLException {
 
@@ -228,6 +231,8 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		monthComboBox.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
 		yearComboBox.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
 		caracteristics.setText(sensorFound.getCaracteristics());
+		
+		sensorFoundLocationId = sensorFound.getIdLocation();
 
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
@@ -251,6 +256,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		this.setVisible(true);
 	}
 
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonUpdateSensor) {
 			// Voir WindowAdd ligne 459
@@ -264,6 +270,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			} 
 			else {
+				// Début du sensor Update
 				Sensor sensorUpdate = new Sensor();
 				sensorUpdate.setBrand(brand.getText().trim());
 				sensorUpdate.setMacAdress(macAddress.getText().trim());
@@ -293,9 +300,57 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, "SENSOR", "UPDATE", sensorUpdateJson.toString());
 				ccSensorUpdate.run();
 				// Fin du sensorUpdate 
+				
+				// Début du old Location Update
+				JSONObject objOldLocation = new JSONObject();
+				
+				objOldLocation.put("id", getSensorFoundLocationId()); 
+				System.out.println("id :" + objOldLocation.toString());
+
+				// Ici, il faut récupérer la localisation qui est associée au capteur pour 
+				// supprimer dans cette localisation l'occurence du capteur supprimé
+				ConnectionClient ccLocation = new ConnectionClient(host, port, "LOCATION", "FINDBYID", objOldLocation.toString());
+				ccLocation.run();
+
+				String retoursOldLocation = ccLocation.getResponse();
+				JSONObject retourOldLocationJson = new JSONObject();	
+				retourOldLocationJson.put("retourLocation", retoursOldLocation);
+
+				ObjectMapper objectMapper = new ObjectMapper();
+				Location oldLocation;
+
+				try {
+					oldLocation = objectMapper.readValue(
+							retourOldLocationJson.get("retourLocation").toString(), Location.class);
+
+					// Ici, on récupère tous les id des sensors de la localisation trouvée
+					int sensorsCount = oldLocation.getSensorId().length;
+					// On créer un nouveau tableau
+					int[] newListSensorLocation = new int[sensorsCount];
+
+					// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
+					// FIXME : j'arrive pas à totalement le supprimer, alors pour l'instant, il devient juste 0
+					for (int i = 0; i < sensorsCount; i++) {
+						newListSensorLocation[i] = oldLocation.getSensorId()[i];
+						if(newListSensorLocation[i] == getId()) {
+							newListSensorLocation[i] = 0;
+						}
+					}
+
+					// On modifie en mettant notre nouveau tableau puis on fait l'update sur la table des localisations
+					oldLocation.setSensorId(newListSensorLocation);
+					JSONObject parametersOldLocation = new JSONObject(oldLocation);	
+
+					ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", parametersOldLocation.toString());
+					ccLocationUpdate.run();
+					// Fin du old location Update
+
+				} catch (JSONException | IOException e1) {
+					e1.printStackTrace();
+				}
+				
 
 				// Début du location Update, voir Window Add lignes 537
-				// FIXME : faire comme pour les delete, enlever dans l'ancienne localisation
 				Location locationUpdate = new Location();
 				locationUpdate.setBuilding(locationsFoundTab[location.getSelectedIndex() - 1].getBuilding());
 				locationUpdate.setRoom(locationsFoundTab[location.getSelectedIndex() - 1].getRoom());
@@ -306,9 +361,14 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				int[] locationNewSensorsId = new int[locationSensorsId.length + 1];
 
 				for(int i = 0; i < locationSensorsId.length; i++) {
-					locationNewSensorsId[i] = locationSensorsId[i];
+					if(locationSensorsId[i] != sensorUpdate.getId()) {
+						locationNewSensorsId[i] = locationSensorsId[i];
+					} 
+					if (locationSensorsId[i] == sensorUpdate.getId()){
+						locationNewSensorsId[i] = 0;
+					}			
 				}
-
+				
 				locationNewSensorsId[locationSensorsId.length] = sensorUpdate.getId();
 
 				locationUpdate.setSensorId(locationNewSensorsId);
@@ -334,5 +394,14 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	public void setId(int id) {
 		this.id = id;
 	}
+	
+	public int getSensorFoundLocationId() {
+		return sensorFoundLocationId;
+	}
+
+	public void setSensorFoundLocationId(int sensorFoundLocationId) {
+		this.sensorFoundLocationId = sensorFoundLocationId;
+	}
+
 
 }

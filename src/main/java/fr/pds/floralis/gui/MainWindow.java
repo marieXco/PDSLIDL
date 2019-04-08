@@ -156,7 +156,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		sensorsFound.put("sensorsFound", retoursCcSensorFindAll);
 
 		// On récupère les varaibles de notre retour et on les "map" avec la classe Sensor
-		// TODO : exemple
+		// retour { "id" : 1, "idLocation" : 3, "type" : null, "state" :true, "alerts" : null, "brand" : "Thomson", "macAdress" : "1323:23:EZ:1223", "installation" : "2019-01-01", "caracteristics" : "ze", "breakdowns" : null}
 		Sensor[] sensorsFoundTab =  objectMapper.readValue(
 				sensorsFound.get("sensorsFound").toString(), Sensor[].class);
 
@@ -470,15 +470,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				// - 1
 				// Index checkbox : 3 est équivalant à l'index 2 du tableau des
 				// capteurs
-				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
+				int idSensorDelete = sensorsFoundList.get(indexSensor - 1).getId();
 
 				// On créer un object de JSON
-				JSONObject obj = new JSONObject();
+				JSONObject objSensorDelete = new JSONObject();
 
 				// On ajout dans cet object une clé "id" dont la valeur est
 				// idSensor
 				// { "id" : idSensor valeur } ;
-				obj.put("id", idSensor);
+				objSensorDelete.put("id", idSensorDelete);
 
 				// On lance une fênetre de confirmation qui renvoie 'true' si on
 				// clique sur oui
@@ -486,55 +486,55 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				boolean sure = new WindowConfirm()
 						.init("supprimer ce capteur");
 
-				int idLocation = sensorsFoundList.get(indexSensor - 1).getIdLocation();
+				int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
 
-				JSONObject objLocation = new JSONObject();
+				JSONObject sensorFoundDelete = new JSONObject();
 
 				// On ajout dans cet object une clé "id" dont la valeur est
 				// idSensor
 				// { "id" : idSensor valeur } ;
-				objLocation.put("id", idLocation);
+				sensorFoundDelete.put("id", idLocationUpdate);
 
 				// Si sure est à true alors on lance la supression en insérant
 				// l'object JSON contenant l'id
 				if (sure) {
-					ConnectionClient cc = new ConnectionClient(host, port, "SENSOR", "DELETE", obj.toString());
-					cc.run();
+					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, "SENSOR", "DELETE", objSensorDelete.toString());
+					ccSensorDelete.run();
 
 					// TODO : modifier les noms 
 					// Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
-					ConnectionClient ccLocation = new ConnectionClient(host, port, "LOCATION", "FINDBYID", objLocation.toString());
-					ccLocation.run();
+					ConnectionClient ccLocationFindById = new ConnectionClient(host, port, "LOCATION", "FINDBYID", sensorFoundDelete.toString());
+					ccLocationFindById.run();
 
-					String retoursLocation = ccLocation.getResponse();
-					JSONObject retourLocation = new JSONObject(retoursLocation);	
-					retourLocation.put("retourLocation", retoursLocation);
+					String retoursLocationFindById = ccLocationFindById.getResponse();
+					JSONObject locationFoundJson = new JSONObject();	
+					locationFoundJson.put("retourLocation", retoursLocationFindById);
 
 					ObjectMapper objectMapper = new ObjectMapper();
-					Location location;
+					Location locationFound;
 
 					try {
-						location = objectMapper.readValue(
-								retourLocation.get("retourLocation").toString(), Location.class);
+						locationFound = objectMapper.readValue(
+								locationFoundJson.get("retourLocation").toString(), Location.class);
 
 						// Ici, on récupère tous les id des sensors de la localisation trouvée
-						int sensorsCount = location.getSensorId().length;
+						int sensorsCount = locationFound.getSensorId().length;
 						// On créer un nouveau tableau
 						int[] newListSensorLocation = new int[sensorsCount];
 
 						// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
 						// FIXME : j'arrive pas à totalement le supprimer, alors pour l'instant, il devient juste 0
 						for (int i = 0; i < sensorsCount; i++) {
-							newListSensorLocation[i] = location.getSensorId()[i];
-							if(newListSensorLocation[i] == idSensor) {
+							newListSensorLocation[i] = locationFound.getSensorId()[i];
+							if(newListSensorLocation[i] == idSensorDelete) {
 								newListSensorLocation[i] = 0;
 							}
 						}
 
 						// On modifie en mettant notre nouveau tableau puis on fait l'update sur la table des localisations
-						location.setSensorId(newListSensorLocation);
-						JSONObject parametersLocation = new JSONObject(location);	
+						locationFound.setSensorId(newListSensorLocation);
+						JSONObject parametersLocation = new JSONObject(locationFound);	
 
 						ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", parametersLocation.toString());
 						ccLocationUpdate.run();

@@ -1,10 +1,7 @@
 package fr.pds.floralis.gui;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-
-import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public class PostgreSQLJDBC extends Thread {
 

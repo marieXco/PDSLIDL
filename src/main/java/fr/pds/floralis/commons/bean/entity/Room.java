@@ -1,7 +1,5 @@
 package fr.pds.floralis.commons.bean.entity;
 
-import java.util.Arrays;
-
 public class Room {
 
 	private int id;

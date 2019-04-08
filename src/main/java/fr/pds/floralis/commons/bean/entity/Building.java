@@ -1,7 +1,5 @@
 package fr.pds.floralis.commons.bean.entity;
 
-import fr.pds.floralis.commons.bean.entity.type.TypeBuilding;
-
 public class Building {
 
 	private int id;
