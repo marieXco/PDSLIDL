@@ -6,7 +6,7 @@ import fr.pds.floralis.commons.bean.entity.type.TypeFonction;
 
 public abstract class Staff extends Person {
 
-	public Staff(int id, String lastname, String firstname, Code code) {
+	public Staff(int id, String lastname, String firstname, int code) {
 		super(id, lastname, firstname, code);
 	}
 

@@ -8,11 +8,11 @@ public class Breakdown {
 
 	private int id;
 	private TypeBreakdown type;
-	private Sensor sensor;
+	private int sensor;
 	private Date start;
 	private Date end;
 
-	public Breakdown(int id, TypeBreakdown type, Sensor sensor, Date start,
+	public Breakdown(int id, TypeBreakdown type, int sensor, Date start,
 			Date end) {
 		super();
 		this.id = id;
@@ -38,11 +38,11 @@ public class Breakdown {
 		this.type = type;
 	}
 
-	public Sensor getSensor() {
+	public int getSensor() {
 		return sensor;
 	}
 
-	public void setSensor(Sensor sensor) {
+	public void setSensor(int sensor) {
 		this.sensor = sensor;
 	}
 

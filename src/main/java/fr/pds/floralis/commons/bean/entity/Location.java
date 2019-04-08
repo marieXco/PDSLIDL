@@ -1,14 +1,16 @@
 package fr.pds.floralis.commons.bean.entity;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Location {
 	
 	private int id;
-	private int sensorId[];
-	private Room room;
-	private Floor floor;
-	private Building building;
+	private List<Integer> sensorId = new ArrayList<Integer>();
+	private int room;
+	private int floor;
+	private int building;
 
 	public int getId() {
 		return id;
@@ -18,35 +20,35 @@ public class Location {
 		this.id = id;
 	}
 
-	public int[] getSensorId() {
+	public List<Integer> getSensorId() {
 		return sensorId;
 	}
 
-	public void setSensorId(int[] sensor) {
+	public void setSensorId(List<Integer> sensor) {
 		this.sensorId = sensor;
 	}
 
-	public Room getRoom() {
+	public int getRoom() {
 		return room;
 	}
 
-	public void setRoom(Room room) {
+	public void setRoom(int room) {
 		this.room = room;
 	}
 
-	public Floor getFloor() {
+	public int getFloor() {
 		return floor;
 	}
 
-	public void setFloor(Floor floor) {
+	public void setFloor(int floor) {
 		this.floor = floor;
 	}
 
-	public Building getBuilding() {
+	public int getBuilding() {
 		return building;
 	}
 
-	public void setBuilding(Building building) {
+	public void setBuilding(int building) {
 		this.building = building;
 	}
 	
@@ -54,8 +56,8 @@ public class Location {
 	public Location() {
 	}
 
-	public Location(int id, int[] sensor, Room room, Floor floor,
-			Building building) {
+	public Location(int id, List<Integer> sensor, int room, int floor,
+			int building) {
 		super();
 		this.id = id;
 		this.sensorId = sensor;
@@ -66,7 +68,7 @@ public class Location {
 
 	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"sensorId\" : " + Arrays.toString(sensorId) + ", \"room\" :" + room + ", \"floor\" : " + floor
+		return "{ \"id\" : " + id + ", \"sensorId\" : " + sensorId.stream().map(Object::toString).collect(Collectors.joining(", ")) + ", \"room\" :" + room + ", \"floor\" : " + floor
 				+ ", \"building\" : "+ building + "}";
 	}
 }

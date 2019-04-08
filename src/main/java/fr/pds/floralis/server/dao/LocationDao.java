@@ -1,6 +1,5 @@
 package fr.pds.floralis.server.dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +7,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
@@ -24,9 +22,9 @@ public class LocationDao extends DAO<Location> {
 
 	@Override
 	public JSONObject create(JSONObject jsonObject) {
-		// retourner un int pour évaluer le succès 
+		// retourner un int pour évaluer le succès
 		int success = 0;
-		
+
 		// création d'un objet de type PostGresSQL
 		PGobject object = new PGobject();
 		try {
@@ -35,34 +33,34 @@ public class LocationDao extends DAO<Location> {
 			e1.printStackTrace();
 		}
 		object.setType("json");
-		
-		// Faire notre insertion 
+
+		// Faire notre insertion
 		try {
 			connect.setAutoCommit(false);
 
-			//requete 
+			// requete
 			String sql = "INSERT INTO location (data) VALUES (?);";
 
-			// On utilise un PreparedStatement pour pouvoir précompilé 
-			// avant d'ajouter la colonne 
+			// On utilise un PreparedStatement pour pouvoir précompilé
+			// avant d'ajouter la colonne
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.setObject(1, object);
-			 // calcule le nombre de ligne exécuter
-			success = statement.executeUpdate(); 
+			// calcule le nombre de ligne exécuter
+			success = statement.executeUpdate();
 			connect.commit();
 			statement.close();
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		//vérifier le fonctionnement 
-		if(success > 0) { //si on a plus d'une ligne exécuté 
+
+		// vérifier le fonctionnement
+		if (success > 0) { // si on a plus d'une ligne exécuté
 			System.out.println("create success");
 		}
-		
-		//JSON 
+
+		// JSON
 		JSONObject locationCreated = new JSONObject();
 		locationCreated.put("successCreate", success);
 		System.out.println(locationCreated.toString());
@@ -72,13 +70,15 @@ public class LocationDao extends DAO<Location> {
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
 		int success = 0;
-		int locationId = jsonObject.getInt("id"); //traduction de mon id en int 
+		int locationId = jsonObject.getInt("id"); // traduction de mon id en int
 
-		//la suppression de ma ligne, fonctionne de la meme manière que pour le create
+		// la suppression de ma ligne, fonctionne de la meme manière que pour le
+		// create
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM location where (data -> 'id')::json::text = '" + locationId + "'::json::text;";
+			String sql = "DELETE FROM location where (data -> 'id')::json::text = '"
+					+ locationId + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -90,11 +90,11 @@ public class LocationDao extends DAO<Location> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		// on regarde si la requète fonctionne 
-		if(success > 0) {
+		// on regarde si la requète fonctionne
+		if (success > 0) {
 			System.out.println("delete success");
 		}
-		// la partie JSON 
+		// la partie JSON
 		JSONObject locationDeleted = new JSONObject();
 		locationDeleted.put("successDelete", success);
 		System.out.println(locationDeleted.toString());
@@ -104,18 +104,19 @@ public class LocationDao extends DAO<Location> {
 	@Override
 	public JSONObject update(JSONObject jsonObject) {
 		int success = 0;
-		
+
 		int locationId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE location SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + locationId + "'::json::text;";
+			String sql = "UPDATE location SET data = '" + jsonObject
+					+ "' WHERE (data -> 'id')::json::text = '" + locationId
+					+ "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			success = statement.executeUpdate();
 			connect.commit();
-
 
 			statement.close();
 
@@ -124,7 +125,7 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 
-		if(success > 0) {
+		if (success > 0) {
 			System.out.println("update success");
 		}
 
@@ -137,20 +138,23 @@ public class LocationDao extends DAO<Location> {
 	@Override
 	public JSONObject find(JSONObject jsonObject) {
 		ObjectMapper mapper = new ObjectMapper();
-		Location location = new Location(0, null, null, null, null);
+		Location location = new Location(0, null, 0, 0, 0);
 
 		int locationId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM location where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
+			ResultSet rs = stmt
+					.executeQuery("SELECT data FROM location where (data -> 'id')::json::text = '"
+							+ locationId + "'::json::text;");
 
 			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
-				//Poser questions sur ça 
-				location = mapper.readValue(rs.getObject(1).toString(), Location.class);
-			}			
+				// Poser questions sur ça
+				location = mapper.readValue(rs.getObject(1).toString(),
+						Location.class);
+			}
 
 			rs.close();
 			stmt.close();
@@ -159,11 +163,11 @@ public class LocationDao extends DAO<Location> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (location.getRoom()!= null) { // a vérifier je suis pas sur 
+		// on vérifie qu'on ai bien trouver ce que l'on recherche
+		if (location.getRoom() != 0) { // a vérifier je suis pas sur
 			System.out.println("find success");
 		}
-		
+
 		JSONObject locationFound = new JSONObject();
 		locationFound.put("locationFound", location.toString());
 		return locationFound;
@@ -181,9 +185,9 @@ public class LocationDao extends DAO<Location> {
 
 			ResultSet rs = stmt.executeQuery("SELECT data FROM location;");
 
-
 			while (rs.next()) {
-				location = mapper.readValue(rs.getObject(1).toString(), Location.class);
+				location = mapper.readValue(rs.getObject(1).toString(),
+						Location.class);
 				allLocation.add(location);
 			}
 
@@ -193,17 +197,16 @@ public class LocationDao extends DAO<Location> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}	
-		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné 
+		}
+		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné
 		if (allLocation != null) {
 			System.out.println("findAll success");
 		}
 
 		JSONObject locationList = new JSONObject();
 		locationList.put("locationList", allLocation.toString());
-		
+
 		return locationList;
 	}
-	
 
 }
