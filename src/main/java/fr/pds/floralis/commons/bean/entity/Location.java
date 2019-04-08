@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class Location {
 	
 	private int id;
-	private List <Integer> sensorId = new ArrayList<Integer>();
+	private List<Integer> sensorId = new ArrayList<Integer>();
 	private Room room;
 	private Floor floor;
 	private Building building;
@@ -19,6 +19,14 @@ public class Location {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public List<Integer> getSensorId() {
+		return sensorId;
+	}
+
+	public void setSensorId(List<Integer> sensor) {
+		this.sensorId = sensor;
 	}
 
 	public Room getRoom() {
@@ -45,17 +53,11 @@ public class Location {
 		this.building = building;
 	}
 	
-	public List<Integer> getSensorId() {
-		return sensorId;
-	}
-
-	public void setSensorId(List<Integer> sensorId) {
-		this.sensorId = sensorId;
-	}
 	
 	// TODO : TEST : ne fonctionne que si il y a un constructeur vide ? 
 	public Location() {
 	}
+
 
 	public Location(int id, List <Integer> sensor, Room room, Floor floor,
 			Building building) {
@@ -66,8 +68,6 @@ public class Location {
 		this.floor = floor;
 		this.building = building;
 	}
-
-	
 
 	@Override
 	public String toString() {

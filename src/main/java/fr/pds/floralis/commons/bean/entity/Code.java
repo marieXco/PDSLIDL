@@ -1,11 +1,15 @@
 package fr.pds.floralis.commons.bean.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Code {
 
 	private int id = 0;
-	private Person person;
+	private int person;
 	private String code = "";
-	private Code tabCode[];
+
+	private List<Integer> tabCode = new ArrayList<Integer>();
 
 	public int getId() {
 		return id;
@@ -15,11 +19,11 @@ public class Code {
 		this.id = id;
 	}
 
-	public Person getPerson() {
+	public int getPerson() {
 		return person;
 	}
 
-	public void setPerson(Person person) {
+	public void setPerson(int person) {
 		this.person = person;
 	}
 
@@ -31,20 +35,24 @@ public class Code {
 		this.code = code;
 	}
 
-	public Code[] getTabCode() {
+	
+
+	public List<Integer> getTabCode() {
 		return tabCode;
 	}
 
-	public void setTabCode(Code tabCode[]) {
+	public void setTabCode(List<Integer> tabCode) {
 		this.tabCode = tabCode;
 	}
 
-	public Code(int id, Person person, String code, Code[] tabCode) {
+	public Code(int id, int person, String code, List<Integer> tabCode) {
 		super();
 		this.id = id;
 		this.person = person;
 		this.code = code;
 		this.tabCode = tabCode;
 	}
+
+	
 
 }

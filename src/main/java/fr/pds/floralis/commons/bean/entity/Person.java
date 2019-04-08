@@ -4,7 +4,7 @@ public abstract class Person {
 	private int id;
 	private String lastname;
 	private String firstname;
-	private Code code;
+	private int code;
 
 	public int getId() {
 		return id;
@@ -30,15 +30,15 @@ public abstract class Person {
 		this.firstname = firstname;
 	}
 
-	public Code getCode() {
+	public int getCode() {
 		return code;
 	}
 
-	public void setCode(Code code) {
+	public void setCode(int code) {
 		this.code = code;
 	}
 
-	public Person(int id, String lastName, String firstName, Code code) {
+	public Person(int id, String lastName, String firstName, int code) {
 		super();
 		this.id = id;
 		this.lastname = lastName;
