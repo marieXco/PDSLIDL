@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +73,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	// Boutons pour les capteurs
 	Button buttonDeleteSensor = new Button("Supprimer le capteur");
 	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
+	Button buttonUpdateSensorState = new Button("Allumer/Eteindre");
+	Button buttonRefreshSensor = new Button("Refresh");
 
 	// Panel des patients : info contenant les boutons et la comboBox + la
 	// tableau
@@ -81,7 +84,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	// Boutons pour les patients
 	Button buttonDeletePatient = new Button("Supprimer le patient");
 	Button buttonUpdatePatient = new Button("Modifier les infos du patient");
-	Button buttonRefreshSensor = new Button("Rafraichir");
 
 	JMenuBar menuBar = new JMenuBar();
 
@@ -207,6 +209,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
+		infoSensorsPanel.add(buttonUpdateSensorState);
 		infoSensorsPanel.add(buttonRefreshSensor);
 
 		// Mise en place des raccourcis
@@ -229,6 +232,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
+		buttonUpdateSensorState.addActionListener(this);
 		buttonRefreshSensor.addActionListener(this);
 
 		accountDisconnect.addActionListener(this);
@@ -254,6 +258,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		// Les panneaux se mettent les uns en dessous des autres : plan + listes
 		locationList.setLayout(new BoxLayout(locationList, BoxLayout.Y_AXIS));
+		locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
 		container1.setLayout(new BoxLayout(container1, BoxLayout.Y_AXIS));
 
 		// Récupère la taille de l'écran
@@ -262,6 +267,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		window.setBounds(0, 0, screenSize.width, screenSize.height);
 
 		// Bloque la taille des panneaux
+		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
+		locationList.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
 		locationPanel.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
 		sensorsPanel.setMaximumSize(new Dimension(900, screenSize.height - 400));
 		northPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
@@ -448,6 +455,22 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 			// On déclare le nouveau model comme étant le model de notre sensorTable
 			sensorsTable.setModel(sensorModelRefresh);
 
+		}
+		
+		if (e.getSource() == buttonUpdateSensorState) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			
+			Sensor sensorUpdateState = sensorsFoundList.get(indexSensor - 1);
+			if (sensorUpdateState.getState() == true) {
+				sensorUpdateState.setState(false);
+			} else {
+				sensorUpdateState.setState(true);
+			}
+
+			JSONObject sensorUpdateStateJson = new JSONObject(sensorUpdateState);
+			ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, "SENSOR", "UPDATE", sensorUpdateStateJson.toString());
+			ccSensorUpdateState.run();
+			// Fin du sensorUpdate 
 		}
 
 		if (e.getSource() == accountModifyCode) {

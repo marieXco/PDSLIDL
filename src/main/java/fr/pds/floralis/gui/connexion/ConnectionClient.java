@@ -75,9 +75,6 @@ public class ConnectionClient implements Runnable{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
-		// FIXME : gérer les close
-		//writer.close();
 	}
 
 	private String getClose() {

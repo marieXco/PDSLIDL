@@ -24,8 +24,6 @@ import fr.pds.floralis.server.dao.SensorDao;
 
 public class RequestHandler implements Runnable {
 
-	// TODO : quand est-ce qu'on close la socket ?
-
 	private Socket sock;
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
@@ -74,7 +72,7 @@ public class RequestHandler implements Runnable {
 				switch (table.toUpperCase()) {
 
 				case "SENSOR":
-					Connection sensorConnection = DataSource.getConnectionFromPool(getJdbc());
+					Connection sensorConnection = DataSource.getConnectionFromPool(jdbc);
 					SensorDao sensorDao = new SensorDao(sensorConnection);
 
 					switch (command.toUpperCase()) {
@@ -123,7 +121,7 @@ public class RequestHandler implements Runnable {
 					break;
 
 				case "LOCATION":
-					Connection locationConnection = DataSource.getConnectionFromPool(getJdbc());
+					Connection locationConnection = DataSource.getConnectionFromPool(jdbc);
 					LocationDao locationDao = new LocationDao(locationConnection);
 
 					switch (command.toUpperCase()) {
@@ -173,7 +171,7 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "ROOM":
-					Connection roomConnection = DataSource.getConnectionFromPool(getJdbc());	
+					Connection roomConnection = DataSource.getConnectionFromPool(jdbc);	
 					RoomDao roomDao = new RoomDao(roomConnection);
 
 					switch (command.toUpperCase()) {
@@ -224,7 +222,7 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "BUILDING":
-					Connection buildingConnection = DataSource.getConnectionFromPool(getJdbc());	
+					Connection buildingConnection = DataSource.getConnectionFromPool(jdbc);	
 					BuildingDao buildingDao = new BuildingDao(buildingConnection);
 
 					switch (command.toUpperCase()) {
@@ -274,7 +272,7 @@ public class RequestHandler implements Runnable {
 					break;
 					
 				case "FLOOR":
-					Connection floorConnection = DataSource.getConnectionFromPool(getJdbc());	
+					Connection floorConnection = DataSource.getConnectionFromPool(jdbc);	
 					FloorDao floorDao = new FloorDao(floorConnection);
 
 					switch (command.toUpperCase()) {

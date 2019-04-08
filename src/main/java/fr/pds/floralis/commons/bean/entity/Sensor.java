@@ -131,8 +131,7 @@ public class Sensor {
 				+ ", \"state\" :"
 				+ state
 				+ ", \"alerts\" : "
-				+ alerts.stream().map(Object::toString)
-						.collect(Collectors.joining(", "))
+				+ alerts
 				+ ", \"brand\" : \""
 				+ brand
 				+ "\", \"macAdress\" : \""
@@ -142,7 +141,7 @@ public class Sensor {
 				+ "\", \"caracteristics\" : \""
 				+ caracteristics
 				+ "\", \"breakdowns\" : "
-				+ breakdowns.stream().map(Object::toString)
-						.collect(Collectors.joining(", ")) + "}";
+				+ breakdowns
+				+ "}";
 	}
 }

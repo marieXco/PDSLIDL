@@ -534,17 +534,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 						ccSensorCreate.run();
 						// Fin du sensor Create
 						
+						// TODO : problème : arraylist ne se metx pas à jours
 						// début du location Update, fait ici car en ajoutant un capteur
 						// on lui attribue une localisation et il faut donc ajouter notre nouveau 
 						// capteur au tableau d'identifiants de capteurs de la localisation selectionnée
-						Location locationUpdate = new Location();
-						locationUpdate.setBuilding(locationsFoundTab[location.getSelectedIndex() - 1].getBuilding());
-						locationUpdate.setRoom(locationsFoundTab[location.getSelectedIndex() - 1].getRoom());
-						locationUpdate.setId(locationsFoundTab[location.getSelectedIndex() - 1].getId());
-						locationUpdate.setFloor(locationsFoundTab[location.getSelectedIndex() - 1].getFloor());
+						Location locationUpdate = locationsFoundTab[location.getSelectedIndex() - 1];
 
 						// On récupère tous les anciens capteurs de la localisation 
-						List <Integer> locationSensorsId  = locationsFoundTab[location.getSelectedIndex() - 1].getSensorId();
+						List <Integer> locationSensorsId  = locationUpdate.getSensorId();
 						locationSensorsId.add(sensorCreate.getId());
 						
 						locationUpdate.setSensorId(locationSensorsId);

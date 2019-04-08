@@ -281,9 +281,8 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				// Pour l'instant pas d'alertes, pas de pannes
 				sensorUpdate.setAlerts(null);
 				sensorUpdate.setBreakdowns(null);
-				// TODO : l'état du capteur, automatiquement allumé ? 
 				// bouton qui switch l'état du capteur selectionné dans la JComboBox
-				sensorUpdate.setState(true);
+				sensorUpdate.setState(false);
 
 				int dayInstallation = daysComboBox.getSelectedIndex();
 				int monthInstallation = monthComboBox.getSelectedIndex() - 1;
