@@ -15,7 +15,7 @@ public class DataSourceTest {
 		JDBCConnectionPool jdbc = new JDBCConnectionPool();
 
 		try {
-			DataSource.createPool(jdbc);
+			DataSource.createPool();
 			for (int i = 1; i < 10; i++) {
 				Connection connection = DataSource.getConnectionFromPool(jdbc);
 				System.out.println("Connection " + i + " Used: " + connection);
