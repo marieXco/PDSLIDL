@@ -55,7 +55,7 @@ public class TimeServer {
 						Socket client = server.accept();
 
 						//Une fois reçue, on la traite dans un thread séparé
-						System.out.println("Connexion cliente reçue.");                  
+						TestMain.prompt("Connexion cliente reçue.");                  
 						Thread t = new Thread(new RequestHandler(client, jdbc));
 						t.start();
 
