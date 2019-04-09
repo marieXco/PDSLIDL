@@ -1,33 +1,22 @@
 package fr.pds.floralis.gui;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-
 public class WindowConfirm extends JFrame{
-	private JDBCConnectionPool jdb;
-	private Connection connect;
+	// Adding a serialVersionUID as the JFrame class extend Serializable
+	// https://www.commentcamarche.net/forum/affich-1928411-serialversionuid
+	private static final long serialVersionUID = 1L;
 
-	public WindowConfirm(JDBCConnectionPool jdbc, Connection connection) {
-		jdb = jdbc;
-		connect = connection;		
-	}
-
-	
+	// Fenêtre de confirmation modulable, on y rentre la phrase voulue
 	public boolean init(String phrase) {
 		ImageIcon img = new ImageIcon("src/main/resources/images/info-icon.png");
 
 		int input = JOptionPane.showConfirmDialog(null, "Voulez-vous vraiment " + phrase + " ?", "Confirmation",
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, img);
 		
-		
-		System.out.println(input);  // 0=yes, 1=no, 2=cancel
-
+		// if input equals : 0 --> cliqued on yes, 1 --> cliqued on no, 2 --> cliqued on cancel
 		if (input == 0) {
 			return true;
 		}
@@ -35,19 +24,5 @@ public class WindowConfirm extends JFrame{
 			return false;
 		}
 	}
-	
-	public void initDeletePatient(int id) throws SQLException {
-		ImageIcon img = new ImageIcon("src/main/resources/images/info-icon.png");
-		
-		String databaseName = "patients";
 
-		int input = JOptionPane.showConfirmDialog(null, "Voulez-vous vraiment supprimer ce patient ?", "Confirmation",
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, img);
-		
-		System.out.println(input);
-
-		if (input == 0) {
-			new Delete(jdb, connect, databaseName, id);
-		}
-	}
 }

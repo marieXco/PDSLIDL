@@ -5,17 +5,18 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import fr.pds.floralis.commons.bean.entity.Patients;
+import fr.pds.floralis.commons.bean.entity.Patient;
 
 public class PatientsTableModel extends AbstractTableModel {
-
-	private List<Patients> userData = new ArrayList<Patients>();
+	// Adding a serialVersionUID as the AbstractTableModel class extend Serializable
+	private static final long serialVersionUID = -5101989079624145067L;
+	private List<Patient> userData = new ArrayList<Patient>();
 	private String[] columnNames = { "Id", "Prénom", "Nom", "Code" };
 
 	public PatientsTableModel() {
 	}
 
-	public PatientsTableModel(List<Patients> userData) {
+	public PatientsTableModel(List<Patient> userData) {
 		this.userData = userData;
 	}
 
@@ -37,7 +38,7 @@ public class PatientsTableModel extends AbstractTableModel {
 	@Override
 	public Object getValueAt(int row, int column) {
 		Object userAttribute = null;
-		Patients userObject = userData.get(row);
+		Patient userObject = userData.get(row);
 		switch (column) {
 		case 0:
 			userAttribute = userObject.getId();
@@ -57,7 +58,7 @@ public class PatientsTableModel extends AbstractTableModel {
 		return userAttribute;
 	}
 
-	public void addUser(Patients user) {
+	public void addUser(Patient user) {
 		userData.add(user);
 		fireTableDataChanged();
 	}

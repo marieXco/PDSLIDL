@@ -5,118 +5,84 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
+
+import fr.pds.floralis.server.configurationpool.DataSource;
+import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public class TimeServer {
 
-	// On initialise des valeurs par défaut
-
-	private int port = 2345 ; 
-
+	//On initialise des valeurs par défaut
+	private int port = 2345;
 	private String host = "127.0.0.1";
-
 	private ServerSocket server = null;
-
 	private boolean isRunning = true;
 
-	public TimeServer() {
-		System.out.println("constructeur");
+
+	public TimeServer(){
 		try {
-
 			server = new ServerSocket(port, 100, InetAddress.getByName(host));
-
 		} catch (UnknownHostException e) {
-			System.out.println("unknow");
 			e.printStackTrace();
-
 		} catch (IOException e) {
-			System.out.println("autre");
 			e.printStackTrace();
-
 		}
-
 	}
 
-	public TimeServer(String pHost, int pPort) {
-		System.out.println("constructeur");
+	public TimeServer(String pHost, int pPort){
 		host = pHost;
-
 		port = pPort;
-
 		try {
-			//ERROR
 			server = new ServerSocket(port, 100, InetAddress.getByName(host));
-
 		} catch (UnknownHostException e) {
-			System.out.println("catch unknow");
 			e.printStackTrace();
-
 		} catch (IOException e) {
-			System.out.println("catch IOex");
 			e.printStackTrace();
-
 		}
-
 	}
 
-	// On lance notre serveur
 
-	public void open() {
-
-		// Toujours dans un thread à part vu qu'il est dans une boucle infinie
-
-		Thread t = new Thread(new Runnable() {
-
-			public void run() {
-
-				while (isRunning == true) {
+	//On lance notre serveur
+	public void open() throws ClassNotFoundException, SQLException{
+		JDBCConnectionPool jdbc = DataSource.createPool();
+		//Toujours dans un thread à part vu qu'il est dans une boucle infinie
+		Thread t = new Thread(new Runnable(){
+			public void run(){
+				while(isRunning == true){
 
 					try {
-
-						// On attend une connexion d'un client
-						//ERROR
+						//On attend une connexion d'un client
 						Socket client = server.accept();
 
-						// Une fois reçue, on la traite dans un thread séparé
-
-						System.out.println("Connexion cliente reçue.");
-
-						Thread t = new Thread(new RequestHandler(client));
-
+						//Une fois reçue, on la traite dans un thread séparé
+						TestMain.prompt("Connexion cliente reçue.");                  
+						Thread t = new Thread(new RequestHandler(client, jdbc));
 						t.start();
 
 					} catch (IOException e) {
-
-						System.out.println("catch ici");
 						e.printStackTrace();
-
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-
 				}
 
 				try {
-
 					server.close();
-
 				} catch (IOException e) {
-
 					e.printStackTrace();
-
 					server = null;
-
 				}
-
 			}
-
 		});
 
 		t.start();
-
 	}
 
-	public void close() {
-
+	public void close(){
 		isRunning = false;
-
-	}
-
+	}   
 }

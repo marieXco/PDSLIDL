@@ -6,8 +6,16 @@ import fr.pds.floralis.commons.bean.entity.type.TypePassage;
 
 public class Passage {
 
+	public Passage(int id, int building, TypePassage type, Date date) {
+		super();
+		this.id = id;
+		this.building = building;
+		this.type = type;
+		this.date = date;
+	}
+
 	private int id;
-	private Building building;
+	private int building;
 	private TypePassage type;
 	private Date date;
 
@@ -19,11 +27,11 @@ public class Passage {
 		this.id = id;
 	}
 
-	public Building getBuilding() {
+	public int getBuilding() {
 		return building;
 	}
 
-	public void setBuilding(Building building) {
+	public void setBuilding(int building) {
 		this.building = building;
 	}
 

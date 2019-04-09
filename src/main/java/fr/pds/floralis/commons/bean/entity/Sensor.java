@@ -1,6 +1,9 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 
@@ -8,13 +11,14 @@ public class Sensor {
 
 	private int id;
 	private TypeSensor type;
+	private int idLocation;
 	private Boolean state;
-	private Alert alerts[];
+	private List<Integer> alerts = new ArrayList<Integer>();
 	private String brand;
 	private String macAdress;
 	private Date installation;
 	private String caracteristics;
-	private Breakdown breakdowns[];
+	private List<Integer> breakdowns = new ArrayList<Integer>();
 
 	public int getId() {
 		return id;
@@ -22,6 +26,14 @@ public class Sensor {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public int getIdLocation() {
+		return idLocation;
+	}
+
+	public void setIdLocation(int idLocation) {
+		this.idLocation = idLocation;
 	}
 
 	public TypeSensor getType() {
@@ -72,27 +84,28 @@ public class Sensor {
 		this.caracteristics = caracteristics;
 	}
 
-	public Alert[] getAlerts() {
+	public List<Integer> getAlerts() {
 		return alerts;
 	}
 
-	public void setAlerts(Alert[] alerts) {
+	public void setAlerts(List<Integer> alerts) {
 		this.alerts = alerts;
 	}
 
-	public Breakdown[] getBreakdowns() {
+	public List<Integer> getBreakdowns() {
 		return breakdowns;
 	}
 
-	public void setBreakdowns(Breakdown[] breakdowns) {
+	public void setBreakdowns(List<Integer> breakdowns) {
 		this.breakdowns = breakdowns;
 	}
 
-	public Sensor(int id, TypeSensor type, Boolean state, Alert[] alerts,
-			String brand, String macAdress, Date installation,
-			String caracteristics, Breakdown[] breakdowns) {
+	public Sensor(int id, int idLocation, TypeSensor type, Boolean state,
+			List<Integer> alerts, String brand, String macAdress,
+			Date installation, String caracteristics, List<Integer> breakdowns) {
 		super();
 		this.id = id;
+		this.idLocation = idLocation;
 		this.type = type;
 		this.state = state;
 		this.alerts = alerts;
@@ -102,12 +115,33 @@ public class Sensor {
 		this.caracteristics = caracteristics;
 		this.breakdowns = breakdowns;
 	}
-	
-	public Sensor() {
-		
-	}
-	
-	
-	
 
+	public Sensor() {
+
+	}
+
+	@Override
+	public String toString() {
+		return "{ \"id\" : "
+				+ id
+				+ ", \"idLocation\" : "
+				+ idLocation
+				+ ", \"type\" : "
+				+ type
+				+ ", \"state\" :"
+				+ state
+				+ ", \"alerts\" : "
+				+ alerts
+				+ ", \"brand\" : \""
+				+ brand
+				+ "\", \"macAdress\" : \""
+				+ macAdress
+				+ "\", \"installation\" : \""
+				+ installation
+				+ "\", \"caracteristics\" : \""
+				+ caracteristics
+				+ "\", \"breakdowns\" : "
+				+ breakdowns
+				+ "}";
+	}
 }

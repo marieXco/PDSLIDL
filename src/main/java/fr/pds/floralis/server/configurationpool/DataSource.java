@@ -16,13 +16,17 @@ import java.sql.SQLException;
 public class DataSource {
 	public static JDBCConnectionPool jcp;
 	
+	
+	
 	/*
 	 * Method that creates the maximum number of connections
 	 */
-	public static void createPool(JDBCConnectionPool jcp) throws ClassNotFoundException, SQLException {
+	public static JDBCConnectionPool createPool() throws ClassNotFoundException, SQLException {
+		JDBCConnectionPool jdbc = new JDBCConnectionPool();
 		System.out.println();
 		System.out.println("createPool :");
-		jcp.putConnection();
+		jdbc.putConnection();
+		return jdbc;
 	}
 	
 	/*

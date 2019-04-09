@@ -2,10 +2,8 @@ package fr.pds.floralis.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.BoxLayout;
@@ -13,15 +11,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-
 public class WindowDisconnect extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private JDBCConnectionPool jdb;
-	private Connection connect;
+	// watch WindowConfirm for serialVersionUID
+	private static final long serialVersionUID = -4392167884505063311L;
+	//private JDBCConnectionPool jdb;
+	//private Connection connect;
+	
+	private String host;
+	private int port;
 
 	private Color backgroundColor = Color.WHITE;
 	private int LG = 350;
@@ -35,14 +32,18 @@ public class WindowDisconnect extends JFrame {
 
 	JPanel panelLogo = new LogoPanel();
 	JPanel panelDisconnect = new JPanel();
-
-
-	public WindowDisconnect(JDBCConnectionPool jdbc, Connection connection) throws ClassNotFoundException, SQLException, IOException, InterruptedException {
-		this.jdb = jdbc;
-		this.connect = connection;
-	}
 	
+	
+	public WindowDisconnect(String host, int port) throws HeadlessException {
+		super();
+		this.host = host;
+		this.port = port;
+	}
+
 	public void init() throws InterruptedException {
+		setPort(port);
+		setHost(host);
+		
 		container.setBackground(backgroundColor);
 		panelDisconnect.setBackground(backgroundColor);
 
@@ -60,9 +61,33 @@ public class WindowDisconnect extends JFrame {
 		pack();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
+		
 		this.setVisible(true);
-		jdb.backConnection(connect);
+		
+		//ConnectionClient ccDisconnect = new ConnectionClient(getHost, getPort, "CLOSE", null, null);
+		//ccDisconnect.run();
+		
+		//jdb.backConnection(connect);
+		// On attend un peu avant de la fermer
 		TimeUnit.SECONDS.sleep(3);
 		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+		
+		
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 }

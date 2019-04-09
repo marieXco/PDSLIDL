@@ -8,11 +8,11 @@ public class Alert {
 
 	private int id;
 	private TypeLevel level;
-	private Sensor sensor;
+	private int sensor;
 	private Date start;
 	private Date end;
 
-	public Alert(int id, TypeLevel level, Sensor sensor, Date start, Date end) {
+	public Alert(int id, TypeLevel level, int sensor, Date start, Date end) {
 		super();
 		this.id = id;
 		this.level = level;
@@ -29,11 +29,11 @@ public class Alert {
 		this.id = id;
 	}
 
-	public Sensor getSensor() {
+	public int getSensor() {
 		return sensor;
 	}
 
-	public void setSensor(Sensor sensor) {
+	public void setSensor(int sensor) {
 		this.sensor = sensor;
 	}
 
