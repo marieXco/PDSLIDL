@@ -1,11 +1,9 @@
 package fr.pds.floralis.commons.bean.entity;
 
-import fr.pds.floralis.commons.bean.entity.type.TypeRoom;
-
 public class Room {
 
 	private int id;
-	private TypeRoom name;
+	private String typeRoom;
 
 	public int getId() {
 		return id;
@@ -15,18 +13,27 @@ public class Room {
 		this.id = id;
 	}
 
-	public TypeRoom getName() {
-		return name;
+	public String getTypeRoom() {
+		return typeRoom;
 	}
 
-	public void setName(TypeRoom name) {
-		this.name = name;
+	public void setTypeRoom(String typeRoom) {
+		this.typeRoom = typeRoom;
 	}
 
-	public Room(int id, TypeRoom name) {
+	public Room(int id, String typeRoom) {
 		super();
 		this.id = id;
-		this.name = name;
+		this.typeRoom = typeRoom;
+	}
+	
+	public Room() {
+		
+	}
+	
+	@Override
+	public String toString() {
+		return "{ \"id\" : " + id + ", \"typeRoom\" : \"" + typeRoom + "\"}";
 	}
 
 }

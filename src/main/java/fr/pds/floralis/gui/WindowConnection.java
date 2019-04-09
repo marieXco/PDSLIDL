@@ -8,8 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
@@ -53,11 +51,7 @@ public class WindowConnection extends Thread implements ActionListener{
 	JTextPane forgotPassword = new JTextPane();
 
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
-	
-	public WindowConnection(JDBCConnectionPool jdbc, Connection connection) {
-		jdb = jdbc;
-		connect = connection;	
-	}
+
 
 	public void init() {	
 		StyleConstants.setAlignment(centrer,StyleConstants.ALIGN_CENTER); 
@@ -96,12 +90,9 @@ public class WindowConnection extends Thread implements ActionListener{
 		window.addWindowListener(new WindowAdapter(){
 			public void windowClosed(WindowEvent e){
 				DataSource.backConnection(jdb, connect);
-				synchronized (valueWaitConnection) {
-					window.setVisible(false);
-					valueWaitConnection.notify();	
-				}
+				System.exit(0);
 			}
-		}); 
+		});
 	}
 	
 	public void run() {
@@ -115,21 +106,15 @@ public class WindowConnection extends Thread implements ActionListener{
 				forgotPassword.setText("Un ou plusieurs champs sont manquants");
 			} 
 			else { 
-				ArrayList<?> toto = null;
-
-				try {
-					toto = Selects.SelectPersonnelForConnection(jdb, connect, login.getText(), password.getText());
-				} catch (SQLException e2) {
-					e2.printStackTrace();
-				}
-
+				//ArrayList<?> userFound = null;
 				try {
 					TimeUnit.SECONDS.sleep(3);
 				} catch (InterruptedException e2) {
 					e2.printStackTrace();
 				}
 
-				if (toto.size() == 1) {			
+				//if (userFound.size() == 1) {	
+				if (true) {
 					synchronized (valueWaitConnection) {
 						window.setVisible(false);
 						valueWaitConnection.notify();	
