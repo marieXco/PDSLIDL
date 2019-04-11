@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
-import fr.pds.floralis.gui.tablemodel.SensorsTableModel;
+import fr.pds.floralis.gui.tablemodel.SensorTableModel;
 
 public class MainWindow extends Thread implements ActionListener, Runnable {
 	private String host;
@@ -111,7 +110,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 	private JTable sensorsTable;
 
-	SensorsTableModel sensorModel;
+	SensorTableModel sensorModel;
 
 	public MainWindow(String host, int port) {
 		super();
@@ -167,7 +166,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		// On insère cette liste dans un modèle de tableau créé spécialement
 		// pour les capteurs
 		sensorsFoundList = Arrays.asList(sensorsFoundTab);
-		SensorsTableModel sensorModel = new SensorsTableModel(sensorsFoundList);
+		SensorTableModel sensorModel = new SensorTableModel(sensorsFoundList);
 
 		// On ajoute le modèle à un JTable simple
 		sensorsTable = new JTable(sensorModel) {
@@ -432,7 +431,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 			}
 
 			sensorsFoundList = Arrays.asList(sensorsFoundRefreshTab);
-			SensorsTableModel sensorModelRefresh = new SensorsTableModel(sensorsFoundList);
+			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
 			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
 			sensorsComboBox[0]= "-- Identifiant du capteur --";
@@ -599,7 +598,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
 
 				try {
-					new WindowUpdate().initUpdateSensor(idSensor);
+					new WindowUpdate(getHost(), getPort()).initUpdateSensor(idSensor);
 				} catch (IOException e1) {
 
 					e1.printStackTrace();

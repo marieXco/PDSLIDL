@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
  * our XML parameters to the configuration class 
  *
  */
+
 public class ReadXml {
 	Element login, url, password, driver, nbrConnexions;
 
@@ -43,7 +44,9 @@ public class ReadXml {
 			/*
 			 * Getting the document that will be parsed
 			 */
-			final Document document = builder.parse(new File("src/main/resources/configuration/Configuration.xml"));
+			// FIXME BEFORE EXPORTING THE JARS, uncomment the next line and comment the one after
+			// final Document document = builder.parse(new File("./configuration/configuration.xml"));
+			final Document document = builder.parse(new File("src/main/resources/configuration/configuration.xml"));
 
 
 			/*
@@ -80,8 +83,7 @@ public class ReadXml {
 		} catch (final IOException exx) {
 			exx.printStackTrace();
 		}
-		
-		
+
 	}
 
 	public Element getLogin() {

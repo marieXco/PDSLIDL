@@ -16,8 +16,6 @@ import java.sql.SQLException;
 public class DataSource {
 	public static JDBCConnectionPool jcp;
 	
-	
-	
 	/*
 	 * Method that creates the maximum number of connections
 	 */

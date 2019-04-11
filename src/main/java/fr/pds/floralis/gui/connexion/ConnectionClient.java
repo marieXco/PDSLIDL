@@ -6,21 +6,28 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+/** 
+ * 
+ * ConnectionClient
+ * Link between the client and the server, between the GUIs and the Request Handler
+ * @author alveslaura
+ *
+ */
+
 public class ConnectionClient implements Runnable{
 
 	private Socket connexion = null;
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
 
-	//Notre liste de commandes. Le serveur nous répondra différemment selon la commande utilisée.
 	private static int count = 0;
 	private String name = "Client-";
 	private String table;  
 	private String command;   
 	private String response;
 	private String parameters;
-	private String close;
 
+	// FIX ME : Only one JSONObject send here
 	public ConnectionClient(String host, int port, String table, String command, String parameters){
 		name += ++count;
 		this.table = table;
@@ -38,7 +45,7 @@ public class ConnectionClient implements Runnable{
 
 	public void run(){
 		try {
-
+			
 			writer = new PrintWriter(connexion.getOutputStream(), true);
 			reader = new BufferedInputStream(connexion.getInputStream());
 			//On envoie la commande au serveur
@@ -76,11 +83,6 @@ public class ConnectionClient implements Runnable{
 			e.printStackTrace();
 		}
 	}
-
-	private String getClose() {
-		return close;
-	}
-
 
 	//Méthode qui permet d'envoyer la commande demandée
 	private String getCommand(){

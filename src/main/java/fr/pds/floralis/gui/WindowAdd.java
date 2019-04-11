@@ -119,7 +119,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	public final Object waitAdd = new Object();
 
-	List<?> floorFoundList = new ArrayList();
+	// FIXME : ajouter les paramètres des listes
+	List<Floor> floorFoundList = new ArrayList<Floor>();
 
 	List<?> buildingsFoundList = new ArrayList();
 
