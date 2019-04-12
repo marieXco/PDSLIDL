@@ -13,7 +13,7 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class TimeServer {
 
 	//On initialise des valeurs par défaut
-	private int port = 2345;
+	private int port = 2412;
 	private String host = "127.0.0.1";
 	private ServerSocket server = null;
 	private boolean isRunning = true;

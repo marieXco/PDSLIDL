@@ -7,7 +7,7 @@ public class PostgreSQLJDBC extends Thread {
 
 	public static void main( String args[] )  throws ClassNotFoundException, SQLException, IOException, InterruptedException  {		
 		String host = "127.0.0.1";
-		int port = 2345;
+		int port = 2412;
 		
 		//Fenêtre qui montre le logo
 		WindowOpening frame2 = new WindowOpening();
