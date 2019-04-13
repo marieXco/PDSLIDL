@@ -41,7 +41,8 @@ public class RequestHandler implements Runnable {
 	public void run() {
 		System.err.println("Lancement du traitement de la connexion cliente");
 		
-		boolean closeConnexion = false;
+		// TODO : new JSON to modify closeConnexion
+		//boolean closeConnexion = false;
 		// tant que la connexion est active, on traite les demandes
 
 		while (!sock.isClosed()) {

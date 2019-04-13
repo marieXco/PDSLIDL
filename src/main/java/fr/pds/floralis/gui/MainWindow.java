@@ -46,139 +46,113 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	private int port;
 
 	ObjectMapper objectMapper = new ObjectMapper();
-
-	// Object pour lancer le top de la fin de la JFrame --> voir synchronized
-	// dans le cours
-	public final Object valueWait = new Object();
+	
 	static JFrame window = new JFrame();
-
-	// Container principal
-	JPanel container1 = new JPanel();
-
-	// Deux gros panels : nord + sud, l'un au dessus de l'autre
+	
+	/**
+	 * Object to notify the end of the JFrame
+	 */
+	public final Object valueWait = new Object();
+	
+	/**
+	 * Principal container 
+	 */
+	JPanel mainContainer = new JPanel();
+	
+	/**
+	 * Two main panels, one above the other one
+	 */
 	JPanel southPanel = new JPanel();
 	JPanel northPanel = new JPanel();
 
-	// Panels des capteurs : info contenant les boutons et la comboBox + la
-	// tableau
+	/**
+	 * Panel for the sensors : info for the buttons, the comboBox
+	 * The other one for the sensor table
+	 */
 	JPanel sensorsPanel = new JPanel();
 	JPanel infoSensorsPanel = new JPanel();
 
-	// Panels des localisations :
+	/**
+	 * Location panels
+	 */
 	JPanel locationPanel = new JPanel();
 	JPanel locationList = new JPanel();
 	JScrollPane locationScrollList = new JScrollPane();
 
-	// Boutons pour les capteurs
+	/**
+	 * Buttons for the sesnors
+	 */
 	Button buttonDeleteSensor = new Button("Supprimer le capteur");
 	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
 	Button buttonUpdateSensorState = new Button("Allumer/Eteindre");
 	Button buttonRefreshSensor = new Button("Refresh");
 
-	// Panel des patients : info contenant les boutons et la comboBox + la
-	// tableau
-	JPanel patientPanel = new JPanel();
-	JPanel infoPatientPanel = new JPanel();
-
-	// Boutons pour les patients
-	Button buttonDeletePatient = new Button("Supprimer le patient");
-	Button buttonUpdatePatient = new Button("Modifier les infos du patient");
-
+	/**
+	 * JMenubar and its componants
+	 */
 	JMenuBar menuBar = new JMenuBar();
-
-	JMenu account = new JMenu("Compte");
-	JMenuItem accountModifyCode = new JMenuItem("Modifier mon code");
-	JMenuItem accountModifyPassword = new JMenuItem("Modifier mon mot de passe");
-	JMenuItem accountDisconnect = new JMenuItem("Deconnexion");
-
 	JMenu adding = new JMenu("Ajouts");
-	JMenuItem addingPatient = new JMenuItem("Ajouter un patient");
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
 	JMenuItem addingLocation = new JMenuItem("Ajouter une localisation");
 
-	JMenu deleting = new JMenu("Suppressions");
-
-	JMenu modifying = new JMenu("Modifications");
-
-	// Boutons pour les localisations
+	/**
+	 * Button for the locations
+	 */
 	Button buttonRefreshLocation = new Button("Rafraichir");
 
+	/**
+	 * Elements of the sensor panel
+	 */
 	JComboBox<Object> comboSensors;
-
-	//Liste pour les sensors
 	List<Sensor> sensorsFoundList;
-
 	private JTable sensorsTable;
-
 	SensorTableModel sensorModel;
 
+	/** 
+	 * Constructor, takes the host and port from the main
+	 * @param host
+	 * @param port
+	 */
 	public MainWindow(String host, int port) {
 		super();
 		this.host = host;
 		this.port = port;
 	}
 
+	/**
+	 * Principal method, displays the Jframe
+	 * @throws SQLException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 * @throws InterruptedException 
+	 * @throws JSONException 
+	 */
 	public void init() throws SQLException, JsonParseException,
-	JsonMappingException, IOException {
+	JsonMappingException, IOException, JSONException, InterruptedException {
 		setHost(host);
 		setPort(port);
 
-		// Mise en place de la JMenu Bar
+		
 		window.setJMenuBar(menuBar);
-		menuBar.add(account);
 		menuBar.add(adding);
-		menuBar.add(deleting);
-		menuBar.add(modifying);
-
-		account.add(accountModifyCode);
-		account.add(accountModifyPassword);
-		account.add(accountDisconnect);
-
-		adding.add(addingPatient);
 		adding.add(addingSensor);
 		adding.add(addingLocation);		
 
-		// Les éléments s'ajoutent les uns en dessous des autres
-		infoPatientPanel.setLayout(new BoxLayout(infoPatientPanel,
-				BoxLayout.X_AXIS));
-		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel,
-				BoxLayout.X_AXIS));
-
-		patientPanel.add(infoPatientPanel);
-		sensorsPanel.add(infoSensorsPanel);	
-
-		//On récupère tous les capteurs qui ont été crées
-		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
-		ccSensorFindAll.run();
-
-		// Le retour est en String, à vrai dire c'est un tableau de String, un capteur = un élément du tableau renvoyé
-		String retoursCcSensorFindAll = ccSensorFindAll.getResponse();
-
-		// On le met dans un objet JSON pour qu'il soit bien formé
-		JSONObject sensorsFound = new JSONObject();
-		sensorsFound.put("sensorsFound", retoursCcSensorFindAll);
-
-		// On récupère les varaibles de notre retour et on les "map" avec la classe Sensor
-		// retour { "id" : 1, "idLocation" : 3, "type" : null, "state" :true, "alerts" : null, "brand" : "Thomson", "macAdress" : "1323:23:EZ:1223", "installation" : "2019-01-01", "caracteristics" : "ze", "breakdowns" : null}
-		Sensor[] sensorsFoundTab =  objectMapper.readValue(
-				sensorsFound.get("sensorsFound").toString(), Sensor[].class);
-
-		// On insère cette liste dans un modèle de tableau créé spécialement
-		// pour les capteurs
-		sensorsFoundList = Arrays.asList(sensorsFoundTab);
+		
+		// Beginning of the sensor FindAll
+		findAllSensor fs = new findAllSensor(host, port);
+		sensorsFoundList = fs.findAll(false);
+		// End of the sensor FindAll
+		
 		SensorTableModel sensorModel = new SensorTableModel(sensorsFoundList);
-
-		// On ajoute le modèle à un JTable simple
 		sensorsTable = new JTable(sensorModel) {
 			// See WindowConfirm for serialVersionUID
 			private static final long serialVersionUID = 5025433811409489149L;
 		};
-
-		// On interdit l'edition du tableau
 		sensorsTable.setEnabled(false);
 
 		JScrollPane paneSensors = new JScrollPane(sensorsTable);
-		sensorsPanel.add(new JScrollPane(paneSensors));
 
 		// ComboBox d'identifiants pour les capteurs
 
@@ -192,10 +166,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		// capteur
 		// (index [0] + 1 index pour chaque élément --> tableau de taille 4 donc
 		// getRowCount() + 1)
-
 		String[] sensorsComboBox = new String[sensorModel.getRowCount() + 1];
 		sensorsComboBox[0] = "-- Identifiant du capteur --";
-
 
 		for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
@@ -203,78 +175,60 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		}
 
 		comboSensors = new JComboBox<Object>(sensorsComboBox);
+		
 
-		// Ajout de la combo Box puis des boutons
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
 		infoSensorsPanel.add(buttonRefreshSensor);
 
+		
 		// Mise en place des raccourcis
-		accountModifyCode.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,
-				InputEvent.CTRL_MASK));
-		accountModifyPassword.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_P, InputEvent.CTRL_MASK));
-		accountDisconnect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-				InputEvent.CTRL_MASK));
-		addingPatient.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
-				InputEvent.ALT_DOWN_MASK));
 		addingSensor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
 				InputEvent.ALT_DOWN_MASK));
 		addingLocation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
 				InputEvent.ALT_DOWN_MASK));
 
-		// Mise en place des Listeners pour les boutons
-		buttonDeletePatient.addActionListener(this);
-		buttonUpdatePatient.addActionListener(this);
-
+		
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
 		buttonUpdateSensorState.addActionListener(this);
 		buttonRefreshSensor.addActionListener(this);
-
-		accountDisconnect.addActionListener(this);
-		accountModifyPassword.addActionListener(this);
-		accountModifyCode.addActionListener(this);
-
 		addingSensor.addActionListener(this);
-		addingPatient.addActionListener(this);
 		addingLocation.addActionListener(this);
-
 		buttonRefreshLocation.addActionListener(this);
 
-		// Bordures autour des différents panneaux
+		
 		locationPanel.setBorder(BorderFactory.createTitledBorder("Localisations"));
-		patientPanel.setBorder(BorderFactory
-				.createTitledBorder("Liste des patients"));
 		sensorsPanel.setBorder(BorderFactory
 				.createTitledBorder("Liste des capteurs"));
 
-		// Les panneaux se mettent les une a côté des autres
+		
+		// Elements les uns à côté des autres
+		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel, BoxLayout.X_AXIS));
 		southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
 
-		// Les panneaux se mettent les uns en dessous des autres : plan + listes
+		// Elements un en dessous des autres
 		locationList.setLayout(new BoxLayout(locationList, BoxLayout.Y_AXIS));
 		locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
-		container1.setLayout(new BoxLayout(container1, BoxLayout.Y_AXIS));
+		sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
+		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
-		// Récupère la taille de l'écran
+		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		// Met la fenêtre sur tout l'écran
 		window.setBounds(0, 0, screenSize.width, screenSize.height);
 
-		// Bloque la taille des panneaux
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
 		locationList.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
 		locationPanel.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
 		sensorsPanel.setMaximumSize(new Dimension(900, screenSize.height - 400));
 		northPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
-		patientPanel.setMaximumSize(new Dimension(screenSize.width, 400));	
 		southPanel.setMaximumSize(new Dimension(screenSize.width, 400));
-
-		// Fonctionne comme celui des Capteurs ligne 148.
+		
+		
+		// Début de la récupération des localisations
 		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
 		ccLocationFindAll.run();
 
@@ -282,12 +236,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		JSONObject locationsFound = new JSONObject();	
 		locationsFound.put("locationsFound", retourCcLocationFindAll);
 
-		Location [] locationsFoundTab =  objectMapper.readValue(
-				locationsFound.get("locationsFound").toString(), Location[].class);
-
-		// On passe notre tableau en liste
+		Location [] locationsFoundTab =  objectMapper.readValue(locationsFound.get("locationsFound").toString(), Location[].class);
 		List <Location> locationsFoundList = Arrays.asList(locationsFoundTab);
-		
+		// Fin de la récupération des localisations
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
 			if(!(locationsFoundTab[listIndex].getSensorId().isEmpty())) {
@@ -297,17 +248,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
 			}
 		}
-		// Fin de la récupération des localisations
-
-		// Ajout de tous les panneaux à leur bon endroit
+		
+		
 		locationPanel.add(buttonRefreshLocation);
 		locationPanel.add(locationList);
-
+		sensorsPanel.add(infoSensorsPanel);	
+		sensorsPanel.add(new JScrollPane(paneSensors));
 		northPanel.add(locationPanel);
 		northPanel.add(sensorsPanel);
-		southPanel.add(patientPanel);
-		container1.add(northPanel);
-		container1.add(southPanel);
+		mainContainer.add(northPanel);
+		mainContainer.add(southPanel);
 
 
 		// Bordures vides pour l'espace entre les deux gros panneaux
@@ -316,24 +266,18 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		// Bordures vides pour l'espace dans le panneau des capteurs (du padding)
 		locationList.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 		// Bordures vides pour toute la fenêtre
-		container1.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+		mainContainer.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
-		// Les éléments se mettent les uns en dessous des autres
-		patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
-		sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
-
-		// Main container : container1
-		window.setContentPane(container1);
+		
+		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de déconnection
+		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		window.setContentPane(mainContainer);
 		window.setTitle("Floralis");
 		window.setLocationRelativeTo(null);
-
-		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de
-		// déconnection
-		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setVisible(true);
 
-		// Si la fenêtre est fermée sans déconnection alors
-		// on lance un sychronized pour notifié le main que nous avons fini
+		// Si la fenêtre est fermée alors on notifie le main, 
+		// que la fenêtre vient de se fermer
 		window.addWindowListener(new WindowAdapter() {
 			public void windowClosed(WindowEvent e) {
 				synchronized (valueWait) {
@@ -346,12 +290,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == addingPatient) {
-			System.out.println("Add personnel");
-		}
-
 		if (e.getSource() == addingSensor) {
-			System.out.println("Add sensor");
 			try {
 				new WindowAdd(getHost(), getPort()).initAddSensor();
 			} catch (JSONException | IOException e1) {
@@ -360,7 +299,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		}
 
 		if (e.getSource() == addingLocation) {
-			System.out.println("Add Location");
 			try {
 				new WindowAdd(getHost(), getPort()).initAddLocation();
 			} catch (JsonParseException e1) {
@@ -414,46 +352,33 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		}
 
 		if (e.getSource() == buttonRefreshSensor) {
-			// Voir ligne 148
-			ConnectionClient ccSensorFindAllRefresh = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
-			ccSensorFindAllRefresh.run();
-
-			String retoursCcSensorFindAllRefresh = ccSensorFindAllRefresh.getResponse();
-			JSONObject sensorsFoundRefresh = new JSONObject();
-			sensorsFoundRefresh.put("sensorsFoundRefresh", retoursCcSensorFindAllRefresh);
-
-			Sensor[] sensorsFoundRefreshTab = null;
-			try {
-				sensorsFoundRefreshTab = objectMapper.readValue(
-						sensorsFoundRefresh.get("sensorsFoundRefresh").toString(), Sensor[].class);
-			} catch (JSONException | IOException e1) {
-				e1.printStackTrace();
-			}
-
-			sensorsFoundList = Arrays.asList(sensorsFoundRefreshTab);
-			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-			sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-				int tabIndex = listIndex + 1;
-				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-			}
-			// Fin du connectionClient
 			
+			try {
+				findAllSensor fs = new findAllSensor(host, port);
+				sensorsFoundList = fs.findAll(false);
+				
+				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
-			// On enlève tous les éléments de la comboBox
-			comboSensors.removeAllItems();
+				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+				sensorsComboBox[0]= "-- Identifiant du capteur --";
 
-			//On la rempli des éléments trouvés avec le nouveau connectionClient
-			for (int i = 0; i < sensorsComboBox.length; i++) {
-				comboSensors.addItem(sensorsComboBox[i]);
+				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+					int tabIndex = listIndex + 1;
+					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+				}
+				
+				comboSensors.removeAllItems();
+
+				for (int i = 0; i < sensorsComboBox.length; i++) {
+					comboSensors.addItem(sensorsComboBox[i]);
+				}
+
+				sensorsTable.setModel(sensorModelRefresh);
+				
+			} catch (JSONException | IOException | InterruptedException e2) {
+				e2.printStackTrace();
 			}
-
-			// On déclare le nouveau model comme étant le model de notre sensorTable
-			sensorsTable.setModel(sensorModelRefresh);
-
+			
 		}
 		
 		if (e.getSource() == buttonUpdateSensorState) {
@@ -471,33 +396,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 			ccSensorUpdateState.run();
 			// Fin du sensorUpdate 
 		}
-
-		if (e.getSource() == accountModifyCode) {
-			System.out.println("Modifiy code");
-		}
-
-		if (e.getSource() == accountDisconnect) {
-			// On lance un sychronized pour notifié le main que nous avons fini
-			synchronized (valueWait) {
-				window.setVisible(false);
-				valueWait.notify();
-			}
-		}
-
-		if (e.getSource() == buttonDeletePatient) {
-
-		}
-
-		if (e.getSource() == buttonUpdatePatient) {
-
-		}
-
 		if (e.getSource() == buttonDeleteSensor) {
 			// Récupère l'index de la ComboBox
 			int indexSensor = comboSensors.getSelectedIndex();
 
-			// Si il est à 0, c'est qu'aucun vrai ID n'a été selectionné car
-			// index [0] = --id du capteur--
+			// Si il est à 0, c'est qu'aucun vrai ID n'a été selectionné car index [0] = --id du capteur--
 			if (indexSensor > 0) {
 				// on récupère l'id du capteur contenu à l'index de la checkbox
 				// - 1
@@ -622,6 +525,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

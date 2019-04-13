@@ -30,23 +30,37 @@ public class SensorTableModel extends AbstractTableModel {
 		this.userData = sensorsList;
 	}
 
+	/**
+	 * Mandatory because the class extends AbstractTableModel
+	 * It isn't used in the code
+	 */
 	@Override
-	
 	public String getColumnName(int column) {
 		return columnNames[column];
 	}
 
+	/**
+	 * Mandatory because the class extends AbstractTableModel
+	 * It isn't used in the code
+	 */
 	@Override
 	public int getColumnCount() {
 		return columnNames.length;
 	}
 
+	/**
+	 * Mandatory because the class extends AbstractTableModel
+	 * It isn't used in the code
+	 */
 	@Override
 	public int getRowCount() {
 		return userData.size();
 	}
 
-	@Override
+
+	/**
+	 * Puts the values at their good place
+	 */
 	public Object getValueAt(int row, int column) {
 		Object userAttribute = null;
 		Sensor userObject = userData.get(row);

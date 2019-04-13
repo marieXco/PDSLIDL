@@ -43,7 +43,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	// watch WindowConfirm for serialVersionUID
 	private static final long serialVersionUID = 1700387838741895744L;
 
-
 	private int LG = 700;
 	private int HT = 120;
 
@@ -60,17 +59,19 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	JTextField dateInstallation = new JTextField(10);
 	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
 
-	JComboBox daysComboBox = null;
+	JComboBox<Object> daysComboBox = new JComboBox<Object>();
 
 	String[] daysTab = new String[32];
 
-	JComboBox monthComboBox = null;
+	JComboBox<Object> monthComboBox = new JComboBox<Object>();
 
 	String[] monthsTab = new String[13];
 
-	JComboBox yearComboBox = null;
+	JComboBox<Object> yearComboBox = new JComboBox<Object>();
 
 	String[] yearsTab = new String[12];
+	
+	JComboBox<Object> location = new JComboBox<Object>();
 
 	JTextField caracteristics = new JTextField(30);
 	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
@@ -116,7 +117,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 	Location[] locationsFoundTab = null;
 
-	JComboBox location = null;
+	
 
 	int sensorFoundLocationId;
 	
@@ -209,11 +210,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 			yearsTab[yearIndex] = yearMax;
 		}
 
-		daysComboBox = new JComboBox(daysTab);
+		daysComboBox = new JComboBox<Object>(daysTab);
 
-		monthComboBox = new JComboBox(monthsTab);
+		monthComboBox = new JComboBox<Object>(monthsTab);
 
-		yearComboBox = new JComboBox(yearsTab);
+		yearComboBox = new JComboBox<Object>(yearsTab);
 
 		container.setPreferredSize(new Dimension(LG + 200, HT));
 
