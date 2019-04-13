@@ -3,6 +3,8 @@ package fr.pds.floralis.gui;
 import java.io.IOException;
 import java.sql.SQLException;
 
+// TODO : comments on WindowUpdate, WindowAdd and the server package
+
 /** 
  * PostgreSQLJDBC
  * Main for the client application
@@ -32,7 +34,7 @@ public class PostgreSQLJDBC extends Thread {
 			frame5.valueWait.wait();
 		}
 
-		// Disconnection Window with no thread because it's the last one and that it willl exit the app
+		// Disconnection Window with no thread because it's the last one and that it will exit the app
 		new WindowDisconnect().init();
 	}
 }
