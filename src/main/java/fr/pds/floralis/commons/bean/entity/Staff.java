@@ -1,8 +1,15 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.util.List;
-
 import fr.pds.floralis.commons.bean.entity.type.TypeFonction;
+
+/**
+ * Staff 
+ * The entity made to map the Staff object
+ * 
+ * @author alveslaura
+ *
+ */
 
 public abstract class Staff extends Person {
 

@@ -1,12 +1,8 @@
 package fr.pds.floralis.server.dao;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.json.JSONObject;
-
-import fr.pds.floralis.server.configurationpool.DataSource;
-import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public abstract class DAO<T> {
 
@@ -16,9 +12,9 @@ public abstract class DAO<T> {
 
 	/**
 	 * 
-	 * Méthode de création
+	 * Creation method
 	 * 
-	 * @param obj
+	 * @param JSONObject
 	 * 
 	 * @return JSONObject
 	 */
@@ -29,9 +25,9 @@ public abstract class DAO<T> {
 
 	/**
 	 * 
-	 * Méthode pour effacer
+	 * Erasing method
 	 * 
-	 * @param obj
+	 * @param JSONObject
 	 * 
 	 * @return JSONObject
 	 */
@@ -42,9 +38,9 @@ public abstract class DAO<T> {
 
 	/**
 	 * 
-	 * Méthode de mise à jour
+	 * Update method
 	 * 
-	 * @param obj
+	 * @param JSONObject
 	 * 
 	 * @return JSONObject
 	 */
@@ -53,11 +49,11 @@ public abstract class DAO<T> {
 
 	/**
 	 * 
-	 * Méthode de recherche des informations
+	 * Finding by Id method 
 	 * 
-	 * @param id
+	 * @param JSONObject
 	 * 
-	 * @return T
+	 * @return JSONObject
 	 */
 
 	public abstract JSONObject find(JSONObject jsonObject);
@@ -65,10 +61,10 @@ public abstract class DAO<T> {
 	
 	/**
 	 * 
-	 * Méthode qui renvoie la liste de tous
+	 * Finding all method
 	 * 
 	 * 
-	 * @return List<T>
+	 * @return JSONObject
 	 */
 	public abstract JSONObject findAll();
 }

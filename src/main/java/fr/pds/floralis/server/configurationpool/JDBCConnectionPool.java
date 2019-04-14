@@ -25,7 +25,7 @@ public class JDBCConnectionPool {
 	private int nbrConnexions;
 	Connection connection = null;
 
-	/*
+	/**
 	 * availableConnections : ArrayList that contains opened connections that are not used
 	 * synchroConnections : ArrayList that contains the synchronized connections that are used
 	 */
@@ -47,7 +47,7 @@ public class JDBCConnectionPool {
 	}
 	
 
-	/*
+	/**
 	 * Method to create the maximum number of available connections
 	 */
 	public void putConnection() throws
@@ -62,7 +62,7 @@ public class JDBCConnectionPool {
 		}
 	}
 	
-	/*
+	/**
 	 * Method to get a connection from our available connections 
 	 * and to put it on our synchronized connections
 	 */
@@ -95,7 +95,7 @@ public class JDBCConnectionPool {
 	}
 
 
-	/*
+	/**
 	 * Method to give back one connection from our synchronized connections
 	 * to our available connections
 	 */
@@ -115,7 +115,7 @@ public class JDBCConnectionPool {
 	}
 
 
-	/*
+	/**
 	 * Method to close every connections, from both of our lists
 	 */
 	public void closeAll() throws SQLException {		

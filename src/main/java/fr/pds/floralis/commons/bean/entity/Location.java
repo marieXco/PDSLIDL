@@ -1,9 +1,15 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
+/**
+ * Location 
+ * The entity made to map the Location object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
 
 public class Location {
 	
@@ -71,7 +77,12 @@ public class Location {
 
 	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"sensorId\" : " + sensorId + ", \"room\" :" + room + ", \"floor\" : " + floor
-				+ ", \"building\" : "+ building + "}";
+		return "\n {"
+				+ "\n\t \"id\" : " + id + 
+				",\n\t \"sensorId\" : " + sensorId + 
+				",\n\t \"room\" :" + room + 
+				",\n\t \"floor\" : " + floor + 
+				",\n\t \"building\" : "+ building + 
+				"\n }";
 	}
 }

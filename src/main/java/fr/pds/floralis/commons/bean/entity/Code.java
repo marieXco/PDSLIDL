@@ -1,5 +1,13 @@
 package fr.pds.floralis.commons.bean.entity;
 
+/**
+ * Code 
+ * The entity made to map the Code object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 

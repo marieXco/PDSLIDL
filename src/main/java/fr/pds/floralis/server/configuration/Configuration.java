@@ -4,7 +4,7 @@ package fr.pds.floralis.server.configuration;
  * Configuration
  * 
  * This class is made to get the XML parameters 
- * (by our XML parser ReadXML) and 
+ * (with our XML parser ReadXML) and 
  * to give them to our JDBCConnectionPool
  *
  */

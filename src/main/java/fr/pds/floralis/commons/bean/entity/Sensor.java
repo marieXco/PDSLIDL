@@ -3,9 +3,16 @@ package fr.pds.floralis.commons.bean.entity;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
+
+/**
+ * Sensor 
+ * The entity made to map the Sensor object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
 
 public class Sensor {
 
@@ -122,26 +129,26 @@ public class Sensor {
 
 	@Override
 	public String toString() {
-		return "{ \"id\" : "
+		return "\n { \n\"id\" : "
 				+ id
-				+ ", \"idLocation\" : "
+				+ ", \n\t \"idLocation\" : "
 				+ idLocation
-				+ ", \"type\" : "
+				+ ", \n\t \"type\" : "
 				+ type
-				+ ", \"state\" :"
+				+ ", \n\t \"state\" : "
 				+ state
-				+ ", \"alerts\" : "
+				+ ", \n\t \"alerts\" : "
 				+ alerts
-				+ ", \"brand\" : \""
+				+ ", \n\t \"brand\" : \""
 				+ brand
-				+ "\", \"macAdress\" : \""
+				+ "\", \n\t \"macAdress\" : \""
 				+ macAdress
-				+ "\", \"installation\" : \""
+				+ "\", \n\t \"installation\" : \""
 				+ installation
-				+ "\", \"caracteristics\" : \""
+				+ "\", \n\t \"caracteristics\" : \""
 				+ caracteristics
-				+ "\", \"breakdowns\" : "
+				+ "\", \n\t \"breakdowns\" : "
 				+ breakdowns
-				+ "}";
+				+ "\n }";
 	}
 }
