@@ -4,6 +4,14 @@ import java.sql.Date;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeBreakdown;
 
+/**
+ * Breakdown 
+ * The entity made to map the breakdown object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 public class Breakdown {
 
 	private int id;
@@ -61,5 +69,12 @@ public class Breakdown {
 	public void setEnd(Date end) {
 		this.end = end;
 	}
+
+	@Override
+	public String toString() {
+		return "Breakdown [id=" + id + ", type=" + type + ", sensor=" + sensor + ", start=" + start + ", end=" + end
+				+ "]";
+	}
+	
 
 }

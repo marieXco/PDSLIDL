@@ -11,7 +11,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+/**
+ * WindowOpening
+ * It's the first window that the client will see
+ * It waits for to see if the getconnection worked
+ * @author alveslaura
+ *
+ */
+
 public class WindowOpening extends Thread {
+	// TODO : seeing if getConnection worked
 	public final Object valueWaitEndGetConnection = new Object();
 
 	JFrame window = new JFrame();

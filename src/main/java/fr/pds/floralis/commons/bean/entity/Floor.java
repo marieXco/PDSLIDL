@@ -1,5 +1,13 @@
 package fr.pds.floralis.commons.bean.entity;
 
+/**
+ * Floor 
+ * The entity made to map the Floor object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 public class Floor {
 	
 	private int id;

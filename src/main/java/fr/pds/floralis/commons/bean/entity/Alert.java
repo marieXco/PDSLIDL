@@ -4,6 +4,14 @@ import java.sql.Date;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeLevel;
 
+/**
+ * Alert 
+ * The entity made to map the alert object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 public class Alert {
 
 	private int id;
@@ -61,4 +69,11 @@ public class Alert {
 		this.level = level;
 	}
 
+	
+	public String toJSON() {
+		return "Alert [id=" + id + ", level=" + level + ", sensor=" + sensor + ", start=" + start + ", end=" + end
+				+ "]";
+	}
+	
+	
 }

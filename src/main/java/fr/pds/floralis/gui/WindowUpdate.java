@@ -3,6 +3,7 @@ package fr.pds.floralis.gui;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -42,7 +43,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	// watch WindowConfirm for serialVersionUID
 	private static final long serialVersionUID = 1700387838741895744L;
 
-
 	private int LG = 700;
 	private int HT = 120;
 
@@ -59,17 +59,19 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	JTextField dateInstallation = new JTextField(10);
 	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
 
-	JComboBox daysComboBox = null;
+	JComboBox<Object> daysComboBox = new JComboBox<Object>();
 
 	String[] daysTab = new String[32];
 
-	JComboBox monthComboBox = null;
+	JComboBox<Object> monthComboBox = new JComboBox<Object>();
 
 	String[] monthsTab = new String[13];
 
-	JComboBox yearComboBox = null;
+	JComboBox<Object> yearComboBox = new JComboBox<Object>();
 
 	String[] yearsTab = new String[12];
+	
+	JComboBox<Object> location = new JComboBox<Object>();
 
 	JTextField caracteristics = new JTextField(30);
 	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
@@ -107,17 +109,23 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	JSONObject obj = new JSONObject();
 
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
-	String host = "127.0.0.1";
-	int port = 2345;
-	private int id;
+	private String host;
+	private int port;
+	protected int id;
 
 	List<?> locationsFoundList = new ArrayList<>();
 
 	Location[] locationsFoundTab = null;
 
-	JComboBox location = null;
+	
 
 	int sensorFoundLocationId;
+	
+	public WindowUpdate(String host, int port) throws HeadlessException {
+		super();
+		this.host = host;
+		this.port = port;
+	}
 
 	public void initUpdatePatient(int id) throws SQLException {
 
@@ -202,11 +210,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 			yearsTab[yearIndex] = yearMax;
 		}
 
-		daysComboBox = new JComboBox(daysTab);
+		daysComboBox = new JComboBox<Object>(daysTab);
 
-		monthComboBox = new JComboBox(monthsTab);
+		monthComboBox = new JComboBox<Object>(monthsTab);
 
-		yearComboBox = new JComboBox(yearsTab);
+		yearComboBox = new JComboBox<Object>(yearsTab);
 
 		container.setPreferredSize(new Dimension(LG + 200, HT));
 
@@ -350,11 +358,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 
 				// Début du location Update, voir Window Add lignes 537
-				Location locationUpdate = new Location();
-				locationUpdate.setBuilding(locationsFoundTab[location.getSelectedIndex() - 1].getBuilding());
-				locationUpdate.setRoom(locationsFoundTab[location.getSelectedIndex() - 1].getRoom());
-				locationUpdate.setId(locationsFoundTab[location.getSelectedIndex() - 1].getId());
-				locationUpdate.setFloor(locationsFoundTab[location.getSelectedIndex() - 1].getFloor());
+				Location locationUpdate = locationsFoundTab[location.getSelectedIndex() - 1];
 
 				List <Integer> oldListSensorLocation = new ArrayList<Integer>();
 				// On créer un nouveau tableau

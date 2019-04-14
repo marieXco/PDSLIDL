@@ -28,18 +28,21 @@ public class RequestHandler implements Runnable {
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
 	private BufferedReader readerLine =  null;
+	private Connection connection;
 	private JDBCConnectionPool jdbc;
 	
-	public RequestHandler(Socket pSock, JDBCConnectionPool jdbc) throws ClassNotFoundException, SQLException {
+	public RequestHandler(Socket pSock, JDBCConnectionPool jdbc, Connection connection) throws ClassNotFoundException, SQLException {
 		this.sock = pSock;
 		this.jdbc = jdbc;
+		this.connection = connection;
 	}
 
 	// Le traitement lancé dans un thread séparé
 	public void run() {
 		System.err.println("Lancement du traitement de la connexion cliente");
 		
-		boolean closeConnexion = false;
+		// TODO : new JSON to modify closeConnexion
+		//boolean closeConnexion = false;
 		// tant que la connexion est active, on traite les demandes
 
 		while (!sock.isClosed()) {
@@ -72,9 +75,7 @@ public class RequestHandler implements Runnable {
 				switch (table.toUpperCase()) {
 
 				case "SENSOR":
-					Connection sensorConnection = DataSource.getConnectionFromPool(jdbc);
-					SensorDao sensorDao = new SensorDao(sensorConnection);
-
+					SensorDao sensorDao = new SensorDao(connection);
 					switch (command.toUpperCase()) {
 					case "FINDALL":
 						JSONObject json = sensorDao.findAll();
@@ -117,12 +118,11 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					DataSource.backConnection(getJdbc(), sensorConnection);
+					DataSource.backConnection(jdbc, connection);
 					break;
 
 				case "LOCATION":
-					Connection locationConnection = DataSource.getConnectionFromPool(jdbc);
-					LocationDao locationDao = new LocationDao(locationConnection);
+					LocationDao locationDao = new LocationDao(connection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -167,12 +167,11 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					DataSource.backConnection(getJdbc(), locationConnection);
+					DataSource.backConnection(jdbc, connection);
 					break;
 					
 				case "ROOM":
-					Connection roomConnection = DataSource.getConnectionFromPool(jdbc);	
-					RoomDao roomDao = new RoomDao(roomConnection);
+					RoomDao roomDao = new RoomDao(connection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -218,12 +217,11 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					DataSource.backConnection(getJdbc(), roomConnection);
+					DataSource.backConnection(jdbc, connection);
 					break;
 					
 				case "BUILDING":
-					Connection buildingConnection = DataSource.getConnectionFromPool(jdbc);	
-					BuildingDao buildingDao = new BuildingDao(buildingConnection);
+					BuildingDao buildingDao = new BuildingDao(connection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -268,12 +266,11 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					DataSource.backConnection(getJdbc(), buildingConnection);
+					DataSource.backConnection(jdbc, connection);
 					break;
 					
 				case "FLOOR":
-					Connection floorConnection = DataSource.getConnectionFromPool(jdbc);	
-					FloorDao floorDao = new FloorDao(floorConnection);
+					FloorDao floorDao = new FloorDao(connection);
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
@@ -318,7 +315,7 @@ public class RequestHandler implements Runnable {
 						toSend = "Commande inconnue !";
 						break;
 					}
-					DataSource.backConnection(getJdbc(), floorConnection);
+					DataSource.backConnection(jdbc, connection);
 					break;
 					
 				default:
@@ -379,13 +376,5 @@ public class RequestHandler implements Runnable {
 
 	public void setReader(BufferedInputStream reader) {
 		this.reader = reader;
-	}
-	
-	public JDBCConnectionPool getJdbc() {
-		return jdbc;
-	}
-
-	public void setJdbc(JDBCConnectionPool jdbc) {
-		this.jdbc = jdbc;
 	}
 }

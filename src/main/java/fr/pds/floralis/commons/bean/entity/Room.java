@@ -1,5 +1,13 @@
 package fr.pds.floralis.commons.bean.entity;
 
+/**
+ * Room 
+ * The entity made to map the Room object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 public class Room {
 
 	private int id;

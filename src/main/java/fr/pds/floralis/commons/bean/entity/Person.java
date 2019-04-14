@@ -1,5 +1,13 @@
 package fr.pds.floralis.commons.bean.entity;
 
+/**
+ * Person 
+ * The entity made to map the Person object
+ * 
+ * @author alveslaura
+ *
+ */
+
 public abstract class Person {
 	private int id;
 	private String lastname;

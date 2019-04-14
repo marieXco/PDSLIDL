@@ -13,7 +13,7 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class TimeServer {
 
 	//On initialise des valeurs par défaut
-	private int port = 2345;
+	private int port = 2412;
 	private String host = "127.0.0.1";
 	private ServerSocket server = null;
 	private boolean isRunning = true;
@@ -49,23 +49,22 @@ public class TimeServer {
 		Thread t = new Thread(new Runnable(){
 			public void run(){
 				while(isRunning == true){
-
 					try {
 						//On attend une connexion d'un client
 						Socket client = server.accept();
 
 						//Une fois reçue, on la traite dans un thread séparé
-						TestMain.prompt("Connexion cliente reçue.");                  
-						Thread t = new Thread(new RequestHandler(client, jdbc));
+						System.out.println("Connexion cliente reçue.");                  
+						Thread t = new Thread(new RequestHandler(client, jdbc, DataSource.getConnectionFromPool(jdbc)));
 						t.start();
 
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (SQLException e) {
-						// TODO Auto-generated catch block
+						System.out.println("Aucune connexon est disponible, veuillez patienter");
+						// TODO : ajouter ce message sur une window et reessayer en boucle
 						e.printStackTrace();
 					}
 				}

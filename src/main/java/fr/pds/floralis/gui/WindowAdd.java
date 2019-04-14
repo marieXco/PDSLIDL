@@ -54,13 +54,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JPanel mainInfosPanel = new JPanel();
 	JPanel locationPanel = new JPanel();
 
-	JComboBox room = null;
+	JComboBox<Object> room = new JComboBox<Object>();
 
-	JComboBox location = null;
+	JComboBox<Object> location = new JComboBox<Object>();
 
-	JComboBox building = null;
+	JComboBox<Object> building = new JComboBox<Object>();
 
-	JComboBox floor = null;
+	JComboBox<Object> floor = new JComboBox<Object>();
 
 	JTextField brand = new JTextField(10);
 	JLabel brandLabel = new JLabel("Marque :");
@@ -71,15 +71,15 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JTextField dateInstallation = new JTextField(10);
 	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
 
-	JComboBox day = null;
+	JComboBox<Object> day = new JComboBox<Object>();
 
 	String[] days = new String[32];
 
-	JComboBox month = null;
+	JComboBox<Object> month = new JComboBox<Object>();
 
 	String[] months = new String[13];
 
-	JComboBox year = null;
+	JComboBox<Object> year = new JComboBox<Object>();
 
 	String[] years = new String[12];
 
@@ -119,13 +119,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	public final Object waitAdd = new Object();
 
-	List<?> floorFoundList = new ArrayList();
+	List<Floor> floorFoundList = new ArrayList<Floor>();
 
-	List<?> buildingsFoundList = new ArrayList();
+	List<Building> buildingsFoundList = new ArrayList<Building>();
 
-	List<?> roomsFoundList = new ArrayList();
+	List<Room> roomsFoundList = new ArrayList<Room>();
 
-	List<?> locationsFoundList = new ArrayList();
+	List<Location> locationsFoundList = new ArrayList<Location>();
 
 	Location[] locationsFoundTab = null;
 
@@ -182,11 +182,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 			years[yearIndex] = yearMax;
 		}
 
-		day = new JComboBox(days);
+		day = new JComboBox<Object>(days);
 
-		month = new JComboBox(months);
+		month = new JComboBox<Object>(months);
 
-		year = new JComboBox(years);
+		year = new JComboBox<Object>(years);
 
 		// Voir WindowWorker lignes 269-287
 		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
@@ -534,7 +534,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						ccSensorCreate.run();
 						// Fin du sensor Create
 						
-						// TODO : problème : arraylist ne se metx pas à jours
+						// TODO : problème : arraylist ne se mets pas à jours
 						// début du location Update, fait ici car en ajoutant un capteur
 						// on lui attribue une localisation et il faut donc ajouter notre nouveau 
 						// capteur au tableau d'identifiants de capteurs de la localisation selectionnée

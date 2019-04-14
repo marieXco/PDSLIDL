@@ -16,9 +16,7 @@ import java.sql.SQLException;
 public class DataSource {
 	public static JDBCConnectionPool jcp;
 	
-	
-	
-	/*
+	/**
 	 * Method that creates the maximum number of connections
 	 */
 	public static JDBCConnectionPool createPool() throws ClassNotFoundException, SQLException {
@@ -29,7 +27,7 @@ public class DataSource {
 		return jdbc;
 	}
 	
-	/*
+	/**
 	 * Method that gives one connection to the user
 	 */
 	public static Connection getConnectionFromPool(JDBCConnectionPool jcp) throws ClassNotFoundException, SQLException {
@@ -38,7 +36,7 @@ public class DataSource {
 		return connection;
 	}
 
-	/*
+	/**
 	 * Method that gives back a connection from the user
 	 */
 	public static void backConnection(JDBCConnectionPool jcp, Connection connection) {
@@ -46,7 +44,7 @@ public class DataSource {
 		jcp.backConnection(connection);
 	}
 
-	/*
+	/**
 	 * Method to close all the connections
 	 */
 	public static void close(JDBCConnectionPool jcp) throws SQLException {
