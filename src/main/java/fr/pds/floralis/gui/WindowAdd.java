@@ -48,12 +48,17 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	private int LG = 950;
 	private int HT = 180;
-
+	
+	// Creation of panels
 	JPanel container = new JPanel();
 	JPanel otherInfosPanel = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
 	JPanel locationPanel = new JPanel();
 
+
+	// Creation of all parameters necessary 
+	// For add a personnel, a patient, a sensor and a location
+	
 	JComboBox<Object> room = new JComboBox<Object>();
 
 	JComboBox<Object> location = new JComboBox<Object>();
@@ -62,6 +67,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	JComboBox<Object> floor = new JComboBox<Object>();
 
+	// Parameters for sensors
 	JTextField brand = new JTextField(10);
 	JLabel brandLabel = new JLabel("Marque :");
 
@@ -85,7 +91,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	JTextField caracteristics = new JTextField(30);
 	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
-
+	
+	// Parameters for patients/personnel
 	JTextField firstname = new JTextField(10);
 	JLabel nameLabel = new JLabel("Prenom :");
 
@@ -104,6 +111,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JTextField code = new JTextField(10);
 	JLabel codeLabel = new JLabel("Code :");
 
+	// Button to add a personnel, a sensor, a patient and a location
+	// To see lines 378 - 585 to the Listener of these button
 	Button buttonAddPersonnel = new Button("Ajouter");
 	Button buttonAddSensor = new Button("Ajouter");
 	Button buttonAddPatient = new Button("Ajouter");
@@ -115,6 +124,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 
+	// Parameters for locations
 	JTextField identifiant = new JTextField(10);
 	JLabel identifiantLabel = new JLabel("Identifiant :");
 	public final Object waitAdd = new Object();
@@ -143,11 +153,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 		this.host = host;
 		this.port = port;
 	}
-
+	
+	// TODO method for the Pop-up to add a Personnel
 	public void initAddPersonnel() {
 
 	}
-
+	
+	// method for the Pop-up to add a sensor
+	// You need location to add sensor
 	public void initAddSensor() throws JsonParseException, JsonMappingException, JSONException, IOException {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 		infos.setParagraphAttributes(centrer, true);
@@ -188,7 +201,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 		year = new JComboBox<Object>(years);
 
-		// Voir WindowWorker lignes 269-287
+		// To see WindowWorker lines 269-287
 		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
 		ccLocationFindAll.run();
 
@@ -210,7 +223,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		location = new JComboBox<Object>(locationsComboBox);
-		// Fin ccLocationFindAll
+		// End ccLocationFindAll
 
 		container.setPreferredSize(new Dimension(LG, HT));
 
@@ -247,10 +260,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 		this.setVisible(true);
 	}
 
+	//TODO method for the Pop-up to add a Patient
 	public void initAddPatient() {
 
 	}
-
+	
+	// method for the Pop-up to add a location
+	// You need location to add sensor
 	public void initAddLocation() throws JsonParseException, JsonMappingException, IOException {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 		infos.setParagraphAttributes(centrer, true);
@@ -261,7 +277,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		infos.setFocusable(false);
 		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
-		// Début de Room Find All - voir WindowWorker lignes 269-287
+		// Beginning of the Room Find All - to see WindowWorker lines 269-287
 		ConnectionClient ccRoomFindAll = new ConnectionClient(host, port, "ROOM", "FINDALL", null);
 		ccRoomFindAll.run();
 
@@ -283,9 +299,9 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		room = new JComboBox<Object>(roomsComboBox);
-		// Fin de room find all
+		// End of room find all
 
-		// Début de Building Find All - voir WindowWorker lignes 269-287
+		// Beginning of Building Find All - to see WindowWorker lines 269-287
 		ConnectionClient ccBuildingFindAll = new ConnectionClient(host, port, "BUILDING", "FINDALL", null);
 		ccBuildingFindAll.run();
 
@@ -307,9 +323,9 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		building = new JComboBox<Object>(buildingsComboBox);
-		// Fin building Find All
+		// End building Find All
 
-		// Début de Floor Find All - voir WindowWorker lignes 269-287
+		// Beginning of Floor Find All - to see WindowWorker lines 269-287
 		ConnectionClient ccFloorFindAll = new ConnectionClient(host, port, "FLOOR", "FINDALL", null);
 		ccFloorFindAll.run();
 
@@ -332,7 +348,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		floor = new JComboBox<Object>(floorsComboBox);
-		// Fin Floor Find All
+		// End Floor Find All
 
 		buttonAddLocation.addActionListener(this);
 
@@ -358,6 +374,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		this.setVisible(true);
 	}
 
+	// Listen of action on the button to add a personnel, a patient, a location or a sensor
 	@SuppressWarnings("deprecation")
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonAddPersonnel) {
@@ -374,16 +391,16 @@ public class WindowAdd extends JFrame implements ActionListener {
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
 			}
-
-			// Si l'index est à 0, c'est qu'aucun vraie information n'a été selectionnée
+			
+			// If the index is 0, so there are no selected informations
 			if (building.getSelectedIndex() <= 0 || room.getSelectedIndex() <= 0 || floor.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une localisation valide");
 			}
 			else {
-				// Début de location Find By Id, ici, on vérifie que l'identifiant pour 
-				// la nouvelle localisation n'est pas déja utilisé (voir WindowWorker lignes 269-287)
+				// Beginning of Location Find by Id
+				// Verification that the location id not already used - to see WindowWorker lines 269-287
 				JSONObject locationFindById = new JSONObject();
-				// On récupère l'id rentré en paramètre
+				// Recovery of the id in parameter
 				locationFindById.put("id", Integer.parseInt(identifiant.getText()));
 
 				ConnectionClient ccLocationFindById = new ConnectionClient(host, port,"LOCATION",
@@ -395,25 +412,26 @@ public class WindowAdd extends JFrame implements ActionListener {
 				locationFoundJson.put("locationFoundJson", retourLocationFindById);
 
 				ObjectMapper objectMapper = new ObjectMapper();
-				// On ne trouve plus un tableau mais une localisation unique
+				// It is not a table anymore, it is a unique location
 				Location locationFound;
-				System.out.println("toto");
 				try {
 					locationFound = objectMapper.readValue(
 							locationFoundJson.get("locationFoundJson").toString(), Location.class);
 					
-					// Si la localisation cherchée n'existe pas, une location vide est renvoyée 
-					// C'est à dire { "id" : 0, brand : "null"...}
-					// On vérifie si l'id est différent de zéro, si oui, c'est que l'id de la 
-					// nouvelle localisation est déja pris
+					// If the search location doesn't exist, a empty location is return
+					// The empty location is : { "id" : 0, brand : "null"...}
+					// Verification that the id is not 0 
+					// If the id is 0, so the id of new location is already used 
 					if (locationFound.getId() != 0) {
 						infos.setText("Une localisation a déja cet identifiant, veuillez le modifier");
 					} 
-					// Fin de location Find By Id
+					// End of location Find By Id
 					
 					else {
-						// On créer un building, une room et un floor et on y met les infos des comboBox
-						// - 1 sur les index car l'index 0 est vide, voir window Worker avec la ComboBox des Id des capteurs
+						// Creation of a building, and a floor with comboBox informations
+						// There is a -1 on index 
+						// Because the index 0 is empty (it is the line with the type of the parameter, for example --floor--)  
+						// To see window Worker with the sensor Id ComboBox
 						Building locationBuilding = new Building();
 						locationBuilding.setId(buildingsFoundTab[building.getSelectedIndex() - 1].getId());
 						locationBuilding.setTypeBuilding(buildingsFoundTab[building.getSelectedIndex() - 1].getTypeBuilding());
@@ -426,11 +444,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 						locationFloor.setId(floorsFoundTab[floor.getSelectedIndex() - 1].getId());
 						locationFloor.setName(floorsFoundTab[floor.getSelectedIndex() - 1].getName());
 						
-						// En créant la localisation, elle n'a pas encore de capteur attitrée donc on lui met un tableau 
-						// vide de capteursId 
+						// At the creation of the location, it is not already sensor, so it is a empty table of Id sensors
 						List<Integer> locationSensors = new ArrayList<Integer>();
 
-						// On créer une localisation avec le tout puis on l'insère dans un Json puis dans le ccLocationCreate
+						// Creation of location with all informations then insertion is a JSON
+						// Then insertion in the ccLocationCreate
 						Location locationCreate = new Location();
 						try {
 							
@@ -456,7 +474,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		if (e.getSource() == buttonAddSensor) {
-			// On vérifie que l'identifiant ne contient que des chiffres
+			// Verification that the id contains just number
 			try {
 				Integer.parseInt(identifiant.getText());
 			} catch (java.lang.NumberFormatException ex) {
@@ -468,18 +486,18 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			
-			// Si date = 0 : aucune localisation n'a été selectionnée
+			// If date = 0 : any selected location
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une date valide");
 			}
 			
-			// Si index = 0 : aucune localisation n'a été selectionnée
+			// If index = 0 : Any selected location
 			else if (location.getSelectedIndex() <= 0 ) {
 				infos.setText("Veuillez selectionner une localisation valable");
 			}
 			
 			else {
-				// Début de sensor Find By Id, ici, voir lignes 384-412
+				// Beginning of sensor Find By Id, to see lines 384-412
 				JSONObject sensorIdFindById = new JSONObject();
 				sensorIdFindById.put("id", Integer.parseInt(identifiant.getText()));
 
@@ -499,11 +517,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 					if (sensorFound.getId() != 0) {
 						infos.setText("Un capteur a déja cet identifiant, veuillez le modifier");
 					} 
-					// Fin de Sensor Find By Id
+					// End Sensor Find By Id
 
 					else {
-						// début du sensorCreate
-						// On créer un sensor et récupère toutes les infomations à insérer
+						// Beginning of sensorCreate
+						// Creation of a sensor 
+						// Recovery of all informations to insert
 						Sensor sensorCreate = new Sensor();
 						sensorCreate.setBrand(brand.getText().trim()); 
 						sensorCreate.setMacAdress(macAddress.getText().trim());
@@ -522,9 +541,9 @@ public class WindowAdd extends JFrame implements ActionListener {
 						monthInstallation = month.getSelectedIndex() - 1;
 						yearInstallation = Integer.parseInt(years[year.getSelectedIndex()]);
 						
-						// on créé une Date, - 1900 car le champ 'Year' de date commence en 1900
-						// donc si on selection l'année 2018, il faut insérer l'année 2018 - 1900 pour 
-						// que la date soit bien formée 
+						// Creation of Date - 1900 because the parameter 'Year' of the date beginning in 1900
+						// For example if you choose the year 2018, You have to insert the year 2018-1900
+						// Thus the date is in good shape
 						Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
 
 						sensorCreate.setInstallation(dateInst);
@@ -532,15 +551,17 @@ public class WindowAdd extends JFrame implements ActionListener {
 						JSONObject sensorCreateJson = new JSONObject(sensorCreate);
 						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, "SENSOR", "CREATE", sensorCreateJson.toString());
 						ccSensorCreate.run();
-						// Fin du sensor Create
+						// End sensor Create
 						
 						// TODO : problème : arraylist ne se mets pas à jours
-						// début du location Update, fait ici car en ajoutant un capteur
-						// on lui attribue une localisation et il faut donc ajouter notre nouveau 
-						// capteur au tableau d'identifiants de capteurs de la localisation selectionnée
+						
+						// Beginning of the location update
+						// This function is here because
+						// When you add sensor, you attribute a location to this sensor
+						// So, it have to add the new sensors at the 'sensor id table' of this location
 						Location locationUpdate = locationsFoundTab[location.getSelectedIndex() - 1];
 
-						// On récupère tous les anciens capteurs de la localisation 
+						// Recovery of old sensor of the location 
 						List <Integer> locationSensorsId  = locationUpdate.getSensorId();
 						locationSensorsId.add(sensorCreate.getId());
 						
@@ -550,7 +571,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						try {
 							ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", locationUpdateJson.toString());
 							ccLocationUpdate.run();
-							// fin du locationUpdate
+							// End locationUpdate
 							this.setVisible(false);
 						} catch (JSONException e1) {
 							e1.printStackTrace();
