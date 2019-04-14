@@ -4,6 +4,14 @@ import java.sql.Date;
 
 import fr.pds.floralis.commons.bean.entity.type.TypePassage;
 
+/**
+ * Passage 
+ * The entity made to map the Passage object and map it to JSON with the toJSON
+ * 
+ * @author alveslaura
+ *
+ */
+
 public class Passage {
 
 	public Passage(int id, int building, TypePassage type, Date date) {
