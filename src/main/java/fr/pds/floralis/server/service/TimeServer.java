@@ -12,7 +12,6 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 
 public class TimeServer {
 
-	//On initialise des valeurs par défaut
 	private int port = 2412;
 	private String host = "127.0.0.1";
 	private ServerSocket server = null;
@@ -41,20 +40,29 @@ public class TimeServer {
 		}
 	}
 
-
-	//On lance notre serveur
+	/**
+	 * open
+	 * Class made to open our server
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	public void open() throws ClassNotFoundException, SQLException{
 		JDBCConnectionPool jdbc = DataSource.createPool();
-		//Toujours dans un thread à part vu qu'il est dans une boucle infinie
+		
 		Thread t = new Thread(new Runnable(){
 			public void run(){
 				while(isRunning == true){
 					try {
-						//On attend une connexion d'un client
+						
+						/**
+						 * Listening for a connection and accepting it
+						 */
 						Socket client = server.accept();
-
-						//Une fois reçue, on la traite dans un thread séparé
-						System.out.println("Connexion cliente reçue.");                  
+						System.out.println("Connexion cliente reçue.");   
+						
+						/**
+						 * Creating a new Thread where we launch a RequestHandler and launching it
+						 */
 						Thread t = new Thread(new RequestHandler(client, jdbc, DataSource.getConnectionFromPool(jdbc)));
 						t.start();
 
@@ -69,6 +77,9 @@ public class TimeServer {
 					}
 				}
 
+				/**
+				 * We close the socket once all the thread are closed
+				 */
 				try {
 					server.close();
 				} catch (IOException e) {
@@ -77,10 +88,16 @@ public class TimeServer {
 				}
 			}
 		});
-
+		
+		/**
+		 * We run the run method that is contained in our thread
+		 */
 		t.start();
 	}
-
+	
+	/**
+	 * FIXME : Here but never used ? 
+	 */
 	public void close(){
 		isRunning = false;
 	}   

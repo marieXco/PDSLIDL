@@ -1,17 +1,15 @@
 package fr.pds.floralis.server.service;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.pds.floralis.server.configurationpool.DataSource;
@@ -22,58 +20,73 @@ import fr.pds.floralis.server.dao.LocationDao;
 import fr.pds.floralis.server.dao.RoomDao;
 import fr.pds.floralis.server.dao.SensorDao;
 
+/**
+ * RequestHandler 
+ * This class is made to read the client request and to answer it
+ * @author alveslaura
+ *
+ */
+
 public class RequestHandler implements Runnable {
 
 	private Socket sock;
 	private PrintWriter writer = null;
 	private BufferedInputStream reader = null;
-	private BufferedReader readerLine =  null;
 	private Connection connection;
 	private JDBCConnectionPool jdbc;
-	
+
+	/**
+	 * Constructor
+	 * @param pSock
+	 * @param jdbc
+	 * @param connection
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	public RequestHandler(Socket pSock, JDBCConnectionPool jdbc, Connection connection) throws ClassNotFoundException, SQLException {
 		this.sock = pSock;
 		this.jdbc = jdbc;
 		this.connection = connection;
 	}
 
-	// Le traitement lancé dans un thread séparé
+	/**
+	 * run()
+	 * Class that does the request traitment, called on a thread
+	 */
 	public void run() {
 		System.err.println("Lancement du traitement de la connexion cliente");
-		
-		// TODO : new JSON to modify closeConnexion
-		//boolean closeConnexion = false;
-		// tant que la connexion est active, on traite les demandes
 
 		while (!sock.isClosed()) {
-
 			try {
-				// Ici, nous n'utilisons pas les mêmes objets que précédemment
-				// Je vous expliquerai pourquoi ensuite
 				writer = new PrintWriter(sock.getOutputStream());
 				reader = new BufferedInputStream(sock.getInputStream());
-				readerLine = new BufferedReader(new InputStreamReader(reader, StandardCharsets.UTF_8));
 
-				String table = readerLine.readLine();
-				String command = readerLine.readLine();
-				String parameters = readerLine.readLine();
-				String close = readerLine.readLine();
+				String request = read();
+				JSONObject requestJson = new JSONObject(request);
+				
+				/**
+				 * See the Request class on the entity
+				 */
+				String table = requestJson.getString("requested-view-entity");
+				String command = requestJson.getString("type");
+				JSONArray parameters = requestJson.getJSONArray("requested-values");
 
 				InetSocketAddress remote = (InetSocketAddress) sock.getRemoteSocketAddress();
 
-				// On affiche quelques infos, pour le débuggage
+				/**
+				 * Debug infos
+				 * remote contains the port and the ip address that made the request
+				 */
 				String debug = "";
-				debug = "Thread : " + Thread.currentThread().getName() + ". ";
-				debug += "Demande de l'adresse : " + remote.getAddress().getHostAddress() + ".";
-				debug += " Sur le port : " + remote.getPort() + ".\n";
-				debug += "\t -> Commande reçue : " + command + " sur la table : " + table + "\n";
+				debug = "Address asking : " + remote.getAddress().getHostAddress() + ".";
+				debug += " On port : " + remote.getPort() + ".\n";
+				debug += "\t -> Command : " + command + " on table : " + table + "\n";
+				debug += "\t with parameters : " + parameters + "\n";
 				System.err.println("\n" + debug);
 
-				// On traite la demande du client en fonction de la commande envoyée
 				String toSend = "";
-				
-				switch (table.toUpperCase()) {
 
+				switch (table.toUpperCase()) {
 				case "SENSOR":
 					SensorDao sensorDao = new SensorDao(connection);
 					switch (command.toUpperCase()) {
@@ -115,7 +128,7 @@ public class RequestHandler implements Runnable {
 						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
 						break;
 					default:
-						toSend = "Commande inconnue !";
+						toSend = "Unkwown command for the Sensors table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);
@@ -164,12 +177,12 @@ public class RequestHandler implements Runnable {
 						break;
 
 					default:
-						toSend = "Commande inconnue !";
+						toSend = "Unkwown command for the Locations table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
-					
+
 				case "ROOM":
 					RoomDao roomDao = new RoomDao(connection);
 
@@ -212,14 +225,14 @@ public class RequestHandler implements Runnable {
 
 						toSend = jsonRoomDaoUpdate.get("successUpdate").toString();
 						break;
-						
+
 					default:
-						toSend = "Commande inconnue !";
+						toSend = "Unkwown command for the Rooms table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
-					
+
 				case "BUILDING":
 					BuildingDao buildingDao = new BuildingDao(connection);
 
@@ -261,14 +274,14 @@ public class RequestHandler implements Runnable {
 
 						toSend = jsonBuildingDaoUpdate.get("successUpdate").toString();
 						break;
-						
+
 					default:
-						toSend = "Commande inconnue !";
+						toSend = "Unkwown command for the Buildings table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
-					
+
 				case "FLOOR":
 					FloorDao floorDao = new FloorDao(connection);
 
@@ -310,42 +323,32 @@ public class RequestHandler implements Runnable {
 
 						toSend = floorUpdate.get("successUpdate").toString();
 						break;
-						
+
 					default:
-						toSend = "Commande inconnue !";
+						toSend = "Unkwown command for the Floors table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
-					
+
 				default:
-					toSend = "Commande inconnue !";
+					toSend = "Unkwown table !";
 					break;
 				}
 
-
-				// On envoie la réponse au client
+				/**
+				 * We write the result and send it to the ConnectionClient with .flush
+				 */
 				writer.write(toSend);
-				// Il FAUT IMPERATIVEMENT UTILISER flush()
-				// Sinon les données ne seront pas transmises au client
-				// et il attendra indéfiniment
 				writer.flush();
 
-				switch (close.toUpperCase()) {
-				case "CLOSE" :
-					System.err.println("COMMANDE CLOSE DETECTEE ! ");
-					writer = null;
-					reader = null;
-					sock.close();
-					break;
-				}
+				System.err.println("Closing the RequestHandler !");
+				sock.close();
 
 			} catch (SocketException e) {
-				System.err.println("LA CONNEXION A ETE INTERROMPUE ! ");
-				break;
+				System.err.println("Interrupted connection");
 			} catch (IOException e) {
 				e.printStackTrace();
-
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (SQLException e) {
@@ -377,4 +380,13 @@ public class RequestHandler implements Runnable {
 	public void setReader(BufferedInputStream reader) {
 		this.reader = reader;
 	}
+
+	private String read() throws IOException{      
+		String response = "";
+		int stream;
+		byte[] b = new byte[4096];
+		stream = reader.read(b);
+		response = new String(b, 0, stream + 1);      
+		return response;
+	}   
 }

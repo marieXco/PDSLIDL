@@ -24,48 +24,50 @@ public class BuildingDao extends DAO<Building> {
 
 	@Override
 	public JSONObject create(JSONObject jsonObject) {
-		// retourner un int pour évaluer le succès 
 		int success = 0;
 		
-		// création d'un objet de type PostGresSQL
+		// création d'un object du type JSON
+		// FIXME : trying without using PGObject
 		PGobject object = new PGobject();
 		try {
 			object.setValue(jsonObject.toString());
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		
 		object.setType("json");
 		
-		// Faire notre insertion 
 		try {
 			connect.setAutoCommit(false);
 
-			//requete 
 			String sql = "INSERT INTO buildings (data) VALUES (?);";
 
 			// On utilise un PreparedStatement pour pouvoir précompilé 
 			// avant d'ajouter la colonne 
 			PreparedStatement statement = connect.prepareStatement(sql);
-
 			statement.setObject(1, object);
-			 // calcule le nombre de ligne exécuter
+			
+			 // calcule le nombre de ligne exécutées / modifiées
 			success = statement.executeUpdate(); 
 			connect.commit();
 			statement.close();
+			
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
 		
-		//vérifier le fonctionnement 
+		// Modifié, on insert dans buildingCreated 
+		// true si il y a plus d'une ligne exécutée
+		// false sinon 
+		JSONObject buildingCreated = new JSONObject();
+		
 		if(success > 0) { //si on a plus d'une ligne exécuté 
-			System.out.println("create success");
+			buildingCreated.put("successCreate", "true");
+		} else {
+			buildingCreated.put("successCreate", "false");
 		}
 		
-		//JSON 
-		JSONObject buildingCreated = new JSONObject();
-		buildingCreated.put("successCreate", success);
-		System.out.println(buildingCreated.toString());
 		return buildingCreated;
 	}
 
@@ -90,14 +92,15 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		// on regarde si la requète fonctionne 
-		if(success > 0) {
-			System.out.println("delete success");
-		}
-		// la partie JSON 
+		
 		JSONObject buildingDeleted = new JSONObject();
-		buildingDeleted.put("successDelete", success);
-		System.out.println(buildingDeleted.toString());
+		
+		if(success > 0) {
+			buildingDeleted.put("successDelete", "true");
+		} else {
+			buildingDeleted.put("successDelete", "false");
+		}
+
 		return buildingDeleted;
 	}
 

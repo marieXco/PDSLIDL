@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 /** 
  * TestMain
- * 
  * Mehtod to start the server
  * 
  * @author alveslaura
@@ -12,7 +11,6 @@ import java.sql.SQLException;
  */
 
 public class TestMain {
-	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		TimeServer ts = new TimeServer();
 		ts.open();	

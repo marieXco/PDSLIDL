@@ -11,14 +11,15 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class findAllSensor  {
 	
-	private ObjectMapper objectMapper;
-	private String host;
-	private int port;
+	private static ObjectMapper objectMapper;
+	private static String host;
+	private static int port;
 
 	public findAllSensor(String host, int port) {
 		super();
@@ -26,12 +27,19 @@ public class findAllSensor  {
 		this.port = port;
 	}
 
-	public List<Sensor> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsList;
 		
-		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, "SENSOR", "FINDALL", null);
+		String[] emptyTab = new String[0];
+		Request request = new Request();
+		request.setType("FINDALL");
+		request.setEntity("SENSOR");
+		request.setFields(emptyTab);
+		request.setValues(emptyTab);
+		
+		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toString());
 		ccSensorFindAll.run();
 		
 		String retoursCcSensorFindAll = ccSensorFindAll.getResponse();
@@ -48,6 +56,14 @@ public class findAllSensor  {
 		}
 		
 		return sensorsList;
+	}
+	
+	public static void main( String args[] ) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {		
+		String host = "127.0.0.1";
+		int port = 2412;
+		findAllSensor fs = new findAllSensor(host, port);
+		fs.findAll(false);
+
 	}
 
 }

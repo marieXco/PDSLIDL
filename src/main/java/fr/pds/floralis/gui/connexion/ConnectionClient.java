@@ -22,17 +22,13 @@ public class ConnectionClient implements Runnable{
 
 	private static int count = 0;
 	private String name = "Client-";
-	private String table;  
-	private String command;   
+	private String request;  
 	private String response;
-	private String parameters;
 
 	// FIX ME : Only one JSONObject send here
-	public ConnectionClient(String host, int port, String table, String command, String parameters){
+	public ConnectionClient(String host, int port, String request){
 		name += ++count;
-		this.table = table;
-		this.command = command;
-		this.parameters = parameters;
+		this.request = request;
 		try {
 			connexion = new Socket(host, port);
 		} catch (UnknownHostException e) {
@@ -50,21 +46,12 @@ public class ConnectionClient implements Runnable{
 			reader = new BufferedInputStream(connexion.getInputStream());
 			//On envoie la commande au serveur
 
-			String table = getTable();
-			writer.println(table);
-
-			String commande = getCommand();
-			writer.println(commande);
-			
-			String parameters = getParameters();
-			writer.println(parameters);
-
-			writer.println("CLOSE");
+			writer.print(getRequest());
 			
 			//TOUJOURS UTILISER flush() POUR ENVOYER RÉELLEMENT DES INFOS AU SERVEUR
 			writer.flush();  
 
-			System.out.println("Commande " + commande + " sur la table " + table + " envoyée au serveur");
+			System.out.println("requête" + getRequest());
 
 			//On attend la réponse
 			response = read();
@@ -85,16 +72,8 @@ public class ConnectionClient implements Runnable{
 	}
 
 	//Méthode qui permet d'envoyer la commande demandée
-	private String getCommand(){
-		return command;
-	}
-
-	private String getTable(){
-		return table;
-	}
-	
-	public String getParameters() {
-		return parameters;
+	private String getRequest(){
+		return request;
 	}
 
 	public String getResponse() {
