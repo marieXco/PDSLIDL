@@ -522,15 +522,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

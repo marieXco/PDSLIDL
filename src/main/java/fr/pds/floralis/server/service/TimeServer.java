@@ -64,7 +64,7 @@ public class TimeServer {
 						e.printStackTrace();
 					} catch (SQLException e) {
 						System.out.println("Aucune connexon est disponible, veuillez patienter");
-						// TODO : ajouter ce message sur une window et reessayer en boucle
+						// TODO : adding this messsage on a window
 						e.printStackTrace();
 					}
 				}
