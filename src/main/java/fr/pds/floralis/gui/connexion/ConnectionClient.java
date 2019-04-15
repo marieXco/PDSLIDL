@@ -51,7 +51,7 @@ public class ConnectionClient implements Runnable{
 			//TOUJOURS UTILISER flush() POUR ENVOYER RÉELLEMENT DES INFOS AU SERVEUR
 			writer.flush();  
 
-			System.out.println("requête" + getRequest());
+			System.out.println("\t * Request :" + getRequest());
 
 			//On attend la réponse
 			response = read();

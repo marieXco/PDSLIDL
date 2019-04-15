@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
@@ -166,9 +167,13 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		// Recovery of the sensor associate at the id in parameter
 		JSONObject sensorIdFindById = new JSONObject();
 		sensorIdFindById.put("id", getId());
-
-		ConnectionClient ccSensorFindById = new ConnectionClient(host, port,"SENSOR",
-				"FINDBYID", sensorIdFindById.toString());
+		
+		Request request = new Request();
+		request.setType("FINDBYID");
+		request.setEntity("SENSOR");
+		request.setFields(sensorIdFindById);
+		
+		ConnectionClient ccSensorFindById = new ConnectionClient(host, port, request.toString());
 		ccSensorFindById.run();
 
 		String retourSensorFindById = ccSensorFindById.getResponse();
@@ -182,7 +187,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		// Beginning of location Find All
 		// To see WindowWorker lines 269
-		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
+		Request secondRequest = new Request();
+		secondRequest.setType("FINDALL");
+		secondRequest.setEntity("LOCATION");
+		secondRequest.setFields(new JSONObject());
+		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, secondRequest.toString());
 		ccLocationFindAll.run();
 
 		String retourCcLocationFindAll = ccLocationFindAll.getResponse();
@@ -314,7 +323,13 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				sensorUpdate.setInstallation(dateInstallation);
 
 				JSONObject sensorUpdateJson = new JSONObject(sensorUpdate);
-				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, "SENSOR", "UPDATE", sensorUpdateJson.toString());
+				
+				Request thirdRequest = new Request();
+				thirdRequest.setType("UPDATE");
+				thirdRequest.setEntity("SENSOR");
+				thirdRequest.setFields(sensorUpdateJson);
+				
+				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toString());
 				ccSensorUpdate.run();
 				// End sensorUpdate 
 
@@ -326,7 +341,12 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 				// Recovery of the location associate at the sensor 
 				// And delete in this location the selected sensor
-				ConnectionClient ccLocation = new ConnectionClient(host, port, "LOCATION", "FINDBYID", objOldLocation.toString());
+				Request forthRequest = new Request();
+				forthRequest.setType("FINDBYID");
+				forthRequest.setEntity("LOCATION");
+				forthRequest.setFields(objOldLocation);
+				
+				ConnectionClient ccLocation = new ConnectionClient(host, port, forthRequest.toString());
 				ccLocation.run();
 
 				String retoursOldLocation = ccLocation.getResponse();
@@ -359,8 +379,13 @@ public class WindowUpdate extends JFrame implements ActionListener {
 					// Then, it do the update on the locations table
 					oldLocation.setSensorId(newListSensorLocation);
 					JSONObject parametersOldLocation = new JSONObject(oldLocation);	
+					
+					Request fifthRequest = new Request();
+					fifthRequest.setType("UPDATE");
+					fifthRequest.setEntity("LOCATION");
+					fifthRequest.setFields(parametersOldLocation);
 
-					ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", parametersOldLocation.toString());
+					ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, fifthRequest.toString());
 					ccLocationUpdate.run();
 					// End old location Update
 
@@ -390,7 +415,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				locationUpdate.setSensorId(newListSensorLocation);
 				JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
 
-				ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", locationUpdateJson.toString());
+				Request sixthRequest = new Request();
+				sixthRequest.setType("UPDATE");
+				sixthRequest.setEntity("LOCATION");
+				sixthRequest.setFields(locationUpdateJson);
+				ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, sixthRequest.toString());
 				ccLocationUpdate.run();
 				// End location Update
 

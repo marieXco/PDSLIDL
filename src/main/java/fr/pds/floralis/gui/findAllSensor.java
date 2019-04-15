@@ -32,12 +32,10 @@ public class findAllSensor  {
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsList;
 		
-		String[] emptyTab = new String[0];
 		Request request = new Request();
 		request.setType("FINDALL");
 		request.setEntity("SENSOR");
-		request.setFields(emptyTab);
-		request.setValues(emptyTab);
+		request.setFields(new JSONObject());
 		
 		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toString());
 		ccSensorFindAll.run();
