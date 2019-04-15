@@ -17,7 +17,7 @@ import fr.pds.floralis.commons.bean.entity.Building;
 
 public class BuildingDao extends DAO<Building> {
 	Connection connect = null;
-	
+
 	public BuildingDao(Connection connect) throws ClassNotFoundException, SQLException {
 		this.connect = connect;
 	}
@@ -25,8 +25,7 @@ public class BuildingDao extends DAO<Building> {
 	@Override
 	public JSONObject create(JSONObject jsonObject) {
 		int success = 0;
-		
-		// création d'un object du type JSON
+
 		// FIXME : trying without using PGObject
 		PGobject object = new PGobject();
 		try {
@@ -34,40 +33,34 @@ public class BuildingDao extends DAO<Building> {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		object.setType("json");
-		
+
 		try {
 			connect.setAutoCommit(false);
 
 			String sql = "INSERT INTO buildings (data) VALUES (?);";
 
-			// On utilise un PreparedStatement pour pouvoir précompilé 
-			// avant d'ajouter la colonne 
 			PreparedStatement statement = connect.prepareStatement(sql);
 			statement.setObject(1, object);
-			
-			 // calcule le nombre de ligne exécutées / modifiées
+
 			success = statement.executeUpdate(); 
 			connect.commit();
 			statement.close();
-			
+
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		// Modifié, on insert dans buildingCreated 
-		// true si il y a plus d'une ligne exécutée
-		// false sinon 
+
 		JSONObject buildingCreated = new JSONObject();
-		
-		if(success > 0) { //si on a plus d'une ligne exécuté 
+
+		if(success > 0) {
 			buildingCreated.put("successCreate", "true");
 		} else {
 			buildingCreated.put("successCreate", "false");
 		}
-		
+
 		return buildingCreated;
 	}
 
@@ -76,7 +69,7 @@ public class BuildingDao extends DAO<Building> {
 		int success = 0;
 		int buildingId = jsonObject.getInt("id"); //traduction de mon id en int 
 
-		//la suppression de ma ligne, fonctionne de la meme manière que pour le create
+		// Works like create
 		try {
 			connect.setAutoCommit(false);
 
@@ -92,9 +85,9 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
+
 		JSONObject buildingDeleted = new JSONObject();
-		
+
 		if(success > 0) {
 			buildingDeleted.put("successDelete", "true");
 		} else {
@@ -107,7 +100,7 @@ public class BuildingDao extends DAO<Building> {
 	@Override
 	public JSONObject update(JSONObject jsonObject) {
 		int success = 0;
-		
+
 		int buildingId = jsonObject.getInt("id");
 
 		try {
@@ -127,13 +120,14 @@ public class BuildingDao extends DAO<Building> {
 			System.exit(0);
 		}
 
-		if(success > 0) {
-			System.out.println("update success");
-		}
-
 		JSONObject buildingUpdated = new JSONObject();
-		buildingUpdated.put("successUpdate", success);
-		System.out.println(buildingUpdated.toString());
+
+		if(success > 0) {
+			buildingUpdated.put("successUpdate", "true");
+		} else {
+			buildingUpdated.put("successUpdate", "false");
+		}
+		
 		return buildingUpdated;
 	}
 
@@ -162,13 +156,14 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (building.getTypeBuilding() != null) { // a vérifier je suis pas sur 
+
+		if (building.getTypeBuilding() != null) {
 			System.out.println("find success");
 		}
-		
+
 		JSONObject buildingFound = new JSONObject();
 		buildingFound.put("buildingFound", building.toString());
+		
 		return buildingFound;
 	}
 
@@ -204,9 +199,9 @@ public class BuildingDao extends DAO<Building> {
 
 		JSONObject buildingList = new JSONObject();
 		buildingList.put("buildingList", buidings.toString());
-		
+
 		return buildingList;
 	}
-	
+
 
 }

@@ -24,7 +24,8 @@ public class Sensor {
 	private String brand;
 	private String macAdress;
 	private Date installation;
-	private String caracteristics;
+	private String min;
+	private String max;
 	private List<Integer> breakdowns = new ArrayList<Integer>();
 
 	public int getId() {
@@ -83,12 +84,20 @@ public class Sensor {
 		this.installation = installation;
 	}
 
-	public String getCaracteristics() {
-		return caracteristics;
+	public String getMin() {
+		return min;
 	}
 
-	public void setCaracteristics(String caracteristics) {
-		this.caracteristics = caracteristics;
+	public void setMin(String min) {
+		this.min = min;
+	}
+
+	public String getMax() {
+		return max;
+	}
+
+	public void setMax(String max) {
+		this.max = max;
 	}
 
 	public List<Integer> getAlerts() {
@@ -119,7 +128,8 @@ public class Sensor {
 		this.brand = brand;
 		this.macAdress = macAdress;
 		this.installation = installation;
-		this.caracteristics = caracteristics;
+		this.min = min;
+		this.max = max;
 		this.breakdowns = breakdowns;
 	}
 
@@ -145,8 +155,10 @@ public class Sensor {
 				+ macAdress
 				+ "\", \n\t \"installation\" : \""
 				+ installation
-				+ "\", \n\t \"caracteristics\" : \""
-				+ caracteristics
+				+ "\", \n\t \"min\" : \""
+				+ min
+				+ "\", \n\t \"max\" : \""
+				+ max
 				+ "\", \n\t \"breakdowns\" : "
 				+ breakdowns
 				+ "\n }";
