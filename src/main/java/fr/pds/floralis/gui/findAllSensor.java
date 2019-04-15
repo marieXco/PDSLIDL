@@ -55,13 +55,5 @@ public class findAllSensor  {
 		
 		return sensorsList;
 	}
-	
-	public static void main( String args[] ) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {		
-		String host = "127.0.0.1";
-		int port = 2412;
-		findAllSensor fs = new findAllSensor(host, port);
-		fs.findAll(false);
-
-	}
 
 }
