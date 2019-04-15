@@ -79,8 +79,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	
 	JComboBox<Object> location = new JComboBox<Object>();
 
-	JTextField caracteristics = new JTextField(30);
-	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
+	JTextField min = new JTextField(5);
+	JLabel minLabel = new JLabel("Seuil Min :");
+	
+	JTextField max = new JTextField(5);
+	JLabel maxLabel = new JLabel("Seuil Max :");
 
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	
@@ -249,8 +252,11 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		otherInfosPanel.add(monthComboBox);
 		otherInfosPanel.add(yearComboBox);
 
-		otherInfosPanel.add(caracteristicsLabel);
-		otherInfosPanel.add(caracteristics);
+		otherInfosPanel.add(minLabel);
+		otherInfosPanel.add(min);
+		
+		otherInfosPanel.add(maxLabel);
+		otherInfosPanel.add(max);
 
 		// Adding of window parameters informations of found sensor
 		brand.setText(sensorFound.getBrand());
@@ -258,7 +264,8 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		daysComboBox.setSelectedIndex(sensorFound.getInstallation().getDate());
 		monthComboBox.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
 		yearComboBox.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
-		caracteristics.setText(sensorFound.getCaracteristics());
+		min.setText(sensorFound.getMin());
+		max.setText(sensorFound.getMax());
 
 		sensorFoundLocationId = sensorFound.getIdLocation();
 
@@ -288,21 +295,46 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonUpdateSensor) {
 			// To see WindowAdd line 459
-			try {
+/*			try {
 				Integer.parseInt(identifiant.getText());
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
+			}*/
+			try {
+				Integer.parseInt(min.getText());
+				Integer.parseInt(max.getText());
+			} catch (java.lang.NumberFormatException ex) {
+				infos.setText("Les seuils ne peuvent contenir que des chiffres");
 			}
+			
+			// Verification that the sill contains just number
+			try {
+				Integer.parseInt(min.getText());
+				Integer.parseInt(max.getText());
+			} catch (java.lang.NumberFormatException ex) {
+				infos.setText("Les seuils ne peuvent contenir que des chiffres");
+			}
+			
 			if (brand.getText().isEmpty() || macAddress.getText().isEmpty()
-					|| caracteristics.getText().isEmpty()) {
+					|| min.getText().isEmpty() || max.getText().isEmpty() ) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			} 
+			
+			else if (location.getSelectedIndex() <= 0 ) {
+				infos.setText("Veuillez selectionner une localisation valable");
+			}
+			
+			// If min > max
+			else if (Integer.parseInt(min.getText()) > Integer.parseInt(max.getText())) {
+				infos.setText("La valeur minimum doit être inferieure à la valeur maximum");
+			}
 			else {
 				// Beginning of sensor Update
 				Sensor sensorUpdate = new Sensor();
 				sensorUpdate.setBrand(brand.getText().trim());
 				sensorUpdate.setMacAdress(macAddress.getText().trim());
-				sensorUpdate.setCaracteristics(caracteristics.getText().trim());
+				sensorUpdate.setMin(min.getText().trim());
+				sensorUpdate.setMax(max.getText().trim());
 				sensorUpdate.setIdLocation(locationsFoundTab[location.getSelectedIndex()-1].getId());
 
 				sensorUpdate.setId(getId());

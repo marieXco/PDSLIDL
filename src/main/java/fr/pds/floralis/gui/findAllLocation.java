@@ -43,10 +43,10 @@ public class findAllLocation  {
 		String retoursCcLocationFindAll = ccLocationfindAll.getResponse();
 		JSONObject locationsFound = new JSONObject();
 		locationsFound.put("locationsFound", retoursCcLocationFindAll);
-		System.out.println(locationsFound.get("sensorsFound"));
+		System.out.println(locationsFound.get("locationsFound"));
 		
-		Location[] sensorsFoundTab =  objectMapper.readValue(locationsFound.get("sensorsFound").toString(), Location[].class);
-		locationsList = Arrays.asList(sensorsFoundTab);
+		Location[] locationsFoundTab =  objectMapper.readValue(locationsFound.get("locationsFound").toString(), Location[].class);
+		locationsList = Arrays.asList(locationsFoundTab);
 		
 		if(refresh) {
 			Thread.sleep(6000);

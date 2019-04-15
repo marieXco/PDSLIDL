@@ -90,8 +90,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	String[] years = new String[12];
 
-	JTextField caracteristics = new JTextField(30);
-	JLabel caracteristicsLabel = new JLabel("Caractéristiques :");
+	JTextField min = new JTextField(5);
+	JLabel minLabel = new JLabel("Seuil Min :");
+	
+	JTextField max = new JTextField(5);
+	JLabel maxLabel = new JLabel("Seuil Max :");
 	
 	// Parameters for patients/personnel
 	JTextField firstname = new JTextField(10);
@@ -211,7 +214,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
-			locationsComboBox[tabIndex] = locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName();
+			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName();
 		}
 
 		location = new JComboBox<Object>(locationsComboBox);
@@ -231,8 +234,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 		otherInfosPanel.add(month);
 		otherInfosPanel.add(year);
 
-		otherInfosPanel.add(caracteristicsLabel);
-		otherInfosPanel.add(caracteristics);
+		otherInfosPanel.add(minLabel);
+		otherInfosPanel.add(min);
+		
+		otherInfosPanel.add(maxLabel);
+		otherInfosPanel.add(max);
 
 		locationPanel.add(location);
 
@@ -497,8 +503,18 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
 			}
 			
+			
+			// Verification that the sill contains just number
+			try {
+				Integer.parseInt(min.getText());
+				Integer.parseInt(max.getText());
+			} catch (java.lang.NumberFormatException ex) {
+				infos.setText("Les seuils ne peuvent contenir que des chiffres");
+			}
+			
+			
 			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty()
-					|| caracteristics.getText().isEmpty()) {
+					|| min.getText().isEmpty() || max.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			
@@ -510,6 +526,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 			// If index = 0 : Any selected location
 			else if (location.getSelectedIndex() <= 0 ) {
 				infos.setText("Veuillez selectionner une localisation valable");
+			}
+			
+			// If min > max
+			else if (Integer.parseInt(min.getText()) > Integer.parseInt(max.getText())) {
+				infos.setText("La valeur minimum doit être inferieure à la valeur maximum");
 			}
 			
 			else {
@@ -546,9 +567,10 @@ public class WindowAdd extends JFrame implements ActionListener {
 						Sensor sensorCreate = new Sensor();
 						sensorCreate.setBrand(brand.getText().trim()); 
 						sensorCreate.setMacAdress(macAddress.getText().trim());
-						sensorCreate.setCaracteristics(caracteristics.getText().trim());
+						sensorCreate.setMin(min.getText().trim());
+						sensorCreate.setMax(max.getText().trim());
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
-						sensorCreate.setIdLocation(locationsFoundTab[location.getSelectedIndex() - 1].getId());
+						sensorCreate.setIdLocation(locationsFoundList.get(location.getSelectedIndex() - 1).getId());
 						sensorCreate.setAlerts(null);
 						sensorCreate.setBreakdowns(null);
 						sensorCreate.setState(true);
@@ -585,7 +607,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						// This function is here because
 						// When you add sensor, you attribute a location to this sensor
 						// So, it have to add the new sensors at the 'sensor id table' of this location
-						Location locationUpdate = locationsFoundTab[location.getSelectedIndex() - 1];
+						Location locationUpdate = locationsFoundList.get(location.getSelectedIndex() - 1);
 
 						// Recovery of old sensor of the location 
 						List <Integer> locationSensorsId  = locationUpdate.getSensorId();
