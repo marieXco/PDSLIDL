@@ -16,8 +16,10 @@
 	import javax.swing.text.SimpleAttributeSet;
 	import javax.swing.text.StyleConstants;
 
-
-
+	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
+	//TODO: faire les scripts
+	
+	// this is the window where 
 	public class WindowStats {
 		
 		
@@ -31,6 +33,7 @@
 		// Creation of all parameters necessary 
 		public void initIndicators() {
 
+		// TODO: creation of button "compare" which showing a comparaison with last value
 
 		// TODO: Combobox for indicators
 		
