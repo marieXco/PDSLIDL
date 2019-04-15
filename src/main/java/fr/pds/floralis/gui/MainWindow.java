@@ -2,6 +2,7 @@ package fr.pds.floralis.gui;
 
 import java.awt.Button;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorTableModel;
@@ -229,7 +231,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		
 		
 		// Début de la récupération des localisations
-		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
+		Request request = new Request();
+		request.setType("FINDALL");
+		request.setEntity("LOCATION");
+		request.setFields(new JSONObject());
+		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, request.toString());
 		ccLocationFindAll.run();
 
 		String retourCcLocationFindAll = ccLocationFindAll.getResponse();
@@ -295,6 +301,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				new WindowAdd(getHost(), getPort()).initAddSensor();
 			} catch (JSONException | IOException e1) {
 				e1.printStackTrace();
+			} catch (HeadlessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		}
 
@@ -314,7 +326,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
-			ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
+			Request request = new Request();
+			request.setType("FINDALL");
+			request.setEntity("LOCATION");
+			request.setFields(new JSONObject());
+			ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, request.toString());
 			ccLocationFindAll.run();
 
 			String retourCcLocationFindAll = ccLocationFindAll.getResponse();
@@ -392,7 +408,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 			}
 
 			JSONObject sensorUpdateStateJson = new JSONObject(sensorUpdateState);
-			ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, "SENSOR", "UPDATE", sensorUpdateStateJson.toString());
+			
+			Request request = new Request();		
+			request.setType("UPDATE");
+			request.setEntity("SENSOR");
+			request.setFields(sensorUpdateStateJson);
+			
+			ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toString());
 			ccSensorUpdateState.run();
 			// Fin du sensorUpdate 
 		}
@@ -434,12 +456,22 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				// Si sure est à true alors on lance la supression en insérant
 				// l'object JSON contenant l'id
 				if (sure) {
-					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, "SENSOR", "DELETE", objSensorDelete.toString());
+					Request request = new Request();		
+					request.setType("DELETE");
+					request.setEntity("SENSOR");
+					request.setFields(sensorFoundDelete);
+					
+					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toString());
 					ccSensorDelete.run();
 
 					// Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
-					ConnectionClient ccLocationFindById = new ConnectionClient(host, port, "LOCATION", "FINDBYID", sensorFoundDelete.toString());
+					Request secondRequest = new Request();		
+					secondRequest.setType("FINDBYID");
+					secondRequest.setEntity("LOCATION");
+					secondRequest.setFields(sensorFoundDelete);
+					
+					ConnectionClient ccLocationFindById = new ConnectionClient(host, port, secondRequest.toString());
 					ccLocationFindById.run();
 
 					String retoursLocationFindById = ccLocationFindById.getResponse();
@@ -472,7 +504,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 						locationFound.setSensorId(newListSensorLocation);
 						JSONObject parametersLocation = new JSONObject(locationFound);	
 
-						ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", parametersLocation.toString());
+						Request third = new Request();		
+						third.setType("UPDATE");
+						third.setEntity("LOCATION");
+						third.setFields(parametersLocation);
+						
+						ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, third.toString());
 						ccLocationUpdate.run();
 
 					} catch (JSONException | IOException e1) {

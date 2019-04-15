@@ -9,7 +9,6 @@ import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import fr.pds.floralis.server.configurationpool.DataSource;
@@ -62,14 +61,14 @@ public class RequestHandler implements Runnable {
 				reader = new BufferedInputStream(sock.getInputStream());
 
 				String request = read();
-				JSONObject requestJson = new JSONObject(request);
+				JSONObject requestJson = new JSONObject(request);	
 				
 				/**
 				 * See the Request class on the entity
 				 */
 				String table = requestJson.getString("requested-view-entity");
 				String command = requestJson.getString("type");
-				JSONArray parameters = requestJson.getJSONArray("requested-values");
+				JSONObject parameters = requestJson.getJSONObject("requested-parameters");
 
 				InetSocketAddress remote = (InetSocketAddress) sock.getRemoteSocketAddress();
 
@@ -97,33 +96,25 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject(parameters);
-
-						JSONObject sensorFound = sensorDao.find(jsonId);
+						JSONObject sensorFound = sensorDao.find(parameters);
 
 						toSend = sensorFound.getString("sensorFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject(parameters);
-
-						JSONObject jsonSensorDaoCreate = sensorDao.create(jsonCreate);
+						JSONObject jsonSensorDaoCreate = sensorDao.create(parameters);
 
 						toSend = jsonSensorDaoCreate.get("successCreate").toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonDeleteId = new JSONObject(parameters);
-
-						JSONObject jsonSensorDaoDelete = sensorDao.delete(jsonDeleteId);
+						JSONObject jsonSensorDaoDelete = sensorDao.delete(parameters);
 
 						toSend = jsonSensorDaoDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject(parameters);
-
-						JSONObject jsonSensorDaoUpdate = sensorDao.update(jsonUpdate);
+						JSONObject jsonSensorDaoUpdate = sensorDao.update(parameters);
 
 						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
 						break;
@@ -145,33 +136,25 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject(parameters);
-
-						JSONObject locationFound = locationDao.find(jsonId);
+						JSONObject locationFound = locationDao.find(parameters);
 
 						toSend = locationFound.getString("locationFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject(parameters);
-
-						JSONObject jsonLocationDaoCreate = locationDao.create(jsonCreate);
+						JSONObject jsonLocationDaoCreate = locationDao.create(parameters);
 
 						toSend = jsonLocationDaoCreate.get("successCreate").toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonDeleteId = new JSONObject(parameters);
-
-						JSONObject jsonLocationDaoDelete = locationDao.delete(jsonDeleteId);
+						JSONObject jsonLocationDaoDelete = locationDao.delete(parameters);
 
 						toSend = jsonLocationDaoDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject(parameters);
-
-						JSONObject jsonLocationDaoUpdate = locationDao.update(jsonUpdate);
+						JSONObject jsonLocationDaoUpdate = locationDao.update(parameters);
 
 						toSend = jsonLocationDaoUpdate.get("successUpdate").toString();
 						break;
@@ -195,33 +178,25 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject(parameters);
-
-						JSONObject roomFound = roomDao.find(jsonId);
+						JSONObject roomFound = roomDao.find(parameters);
 
 						toSend = roomFound.getString("roomFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject(parameters);
-
-						JSONObject jsonRoomDaoCreate = roomDao.create(jsonCreate);
+						JSONObject jsonRoomDaoCreate = roomDao.create(parameters);
 
 						toSend = jsonRoomDaoCreate.get("successCreate").toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonDeleteId = new JSONObject(parameters);
-
-						JSONObject jsonRoomDaoDelete = roomDao.delete(jsonDeleteId);
+						JSONObject jsonRoomDaoDelete = roomDao.delete(parameters);
 
 						toSend = jsonRoomDaoDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject(parameters);
-
-						JSONObject jsonRoomDaoUpdate = roomDao.update(jsonUpdate);
+						JSONObject jsonRoomDaoUpdate = roomDao.update(parameters);
 
 						toSend = jsonRoomDaoUpdate.get("successUpdate").toString();
 						break;
@@ -244,33 +219,25 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject(parameters);
-
-						JSONObject buildingFound = buildingDao.find(jsonId);
+						JSONObject buildingFound = buildingDao.find(parameters);
 
 						toSend = buildingFound.getString("buildingFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject(parameters);
-
-						JSONObject jsonBuildingDaoCreate = buildingDao.create(jsonCreate);
+						JSONObject jsonBuildingDaoCreate = buildingDao.create(parameters);
 
 						toSend = jsonBuildingDaoCreate.get("successCreate").toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonDeleteId = new JSONObject(parameters);
-
-						JSONObject jsonBuildingDaoDelete = buildingDao.delete(jsonDeleteId);
+						JSONObject jsonBuildingDaoDelete = buildingDao.delete(parameters);
 
 						toSend = jsonBuildingDaoDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject(parameters);
-
-						JSONObject jsonBuildingDaoUpdate = buildingDao.update(jsonUpdate);
+						JSONObject jsonBuildingDaoUpdate = buildingDao.update(parameters);
 
 						toSend = jsonBuildingDaoUpdate.get("successUpdate").toString();
 						break;
@@ -293,33 +260,25 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYID":
-						JSONObject jsonId = new JSONObject(parameters);
-
-						JSONObject floorFound = floorDao.find(jsonId);
+						JSONObject floorFound = floorDao.find(parameters);
 
 						toSend = floorFound.getString("floorFound");
 						break;
 
 					case "CREATE":
-						JSONObject jsonCreate = new JSONObject(parameters);
-
-						JSONObject floorCreate = floorDao.create(jsonCreate);
+						JSONObject floorCreate = floorDao.create(parameters);
 
 						toSend = floorCreate.get("successCreate").toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonDeleteId = new JSONObject(parameters);
-
-						JSONObject floorDelete = floorDao.delete(jsonDeleteId);
+						JSONObject floorDelete = floorDao.delete(parameters);
 
 						toSend = floorDelete.get("successDelete").toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonUpdate = new JSONObject(parameters);
-
-						JSONObject floorUpdate = floorDao.update(jsonUpdate);
+						JSONObject floorUpdate = floorDao.update(parameters);
 
 						toSend = floorUpdate.get("successUpdate").toString();
 						break;

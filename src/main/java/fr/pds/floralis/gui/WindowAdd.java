@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.pds.floralis.commons.bean.entity.Building;
 import fr.pds.floralis.commons.bean.entity.Floor;
 import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Room;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
@@ -161,7 +162,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 	
 	// method for the Pop-up to add a sensor
 	// You need location to add sensor
-	public void initAddSensor() throws JsonParseException, JsonMappingException, JSONException, IOException {
+	public void initAddSensor() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 		infos.setParagraphAttributes(centrer, true);
 		infos.setText("Ajout d'un capteur");
@@ -202,17 +203,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 		year = new JComboBox<Object>(years);
 
 		// To see WindowWorker lines 269-287
-		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, "LOCATION", "FINDALL", null);
-		ccLocationFindAll.run();
-
-		String retourCcLocationFindAll = ccLocationFindAll.getResponse();
-		JSONObject locationsFound = new JSONObject();	
-		locationsFound.put("locationsFound", retourCcLocationFindAll);
-
-		locationsFoundTab =  objectMapper.readValue(
-				locationsFound.get("locationsFound").toString(), Location[].class);
-
-		locationsFoundList = Arrays.asList(locationsFoundTab);
+		findAllLocation fl = new findAllLocation(host, port);
+		locationsFoundList = fl.findAll(false);
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
 		locationsComboBox[0] = "--Localisation--";
@@ -278,7 +270,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
 		// Beginning of the Room Find All - to see WindowWorker lines 269-287
-		ConnectionClient ccRoomFindAll = new ConnectionClient(host, port, "ROOM", "FINDALL", null);
+		Request request = new Request();
+		request.setType("FINDALL");
+		request.setEntity("ROOM");
+		request.setFields(new JSONObject());
+		
+		ConnectionClient ccRoomFindAll = new ConnectionClient(host, port, request.toString());
 		ccRoomFindAll.run();
 
 		String retourCcRoomFindAll = ccRoomFindAll.getResponse();
@@ -302,7 +299,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 		// End of room find all
 
 		// Beginning of Building Find All - to see WindowWorker lines 269-287
-		ConnectionClient ccBuildingFindAll = new ConnectionClient(host, port, "BUILDING", "FINDALL", null);
+		Request secondRequest = new Request();
+		secondRequest.setType("FINDALL");
+		secondRequest.setEntity("BUILDING");
+		secondRequest.setFields(new JSONObject());
+		
+		ConnectionClient ccBuildingFindAll = new ConnectionClient(host, port, secondRequest.toString());
 		ccBuildingFindAll.run();
 
 		String retourCcBuildingFindAll = ccBuildingFindAll.getResponse();
@@ -326,7 +328,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 		// End building Find All
 
 		// Beginning of Floor Find All - to see WindowWorker lines 269-287
-		ConnectionClient ccFloorFindAll = new ConnectionClient(host, port, "FLOOR", "FINDALL", null);
+		Request thirdRequest = new Request();
+		thirdRequest.setType("FINDALL");
+		thirdRequest.setEntity("FLOOR");
+		thirdRequest.setFields(new JSONObject());
+		
+		ConnectionClient ccFloorFindAll = new ConnectionClient(host, port, thirdRequest.toString());
 		ccFloorFindAll.run();
 
 		String retoursCcFloorFindAll = ccFloorFindAll.getResponse();
@@ -403,8 +410,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 				// Recovery of the id in parameter
 				locationFindById.put("id", Integer.parseInt(identifiant.getText()));
 
-				ConnectionClient ccLocationFindById = new ConnectionClient(host, port,"LOCATION",
-						"FINDBYID", locationFindById.toString());
+				Request request = new Request();
+				request.setType("FINDBYID");
+				request.setEntity("LOCATION");
+				request.setFields(locationFindById);
+				
+				ConnectionClient ccLocationFindById = new ConnectionClient(host, port, request.toString());
 				ccLocationFindById.run();
 
 				String retourLocationFindById = ccLocationFindById.getResponse();
@@ -459,8 +470,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 							locationCreate.setBuilding(locationBuilding);
 
 							JSONObject locationCreateJson = new JSONObject(locationCreate);
-
-							ConnectionClient ccLocationCreate = new ConnectionClient(host, port, "LOCATION", "CREATE", locationCreateJson.toString());
+							
+							Request secondRequest = new Request();
+							secondRequest.setType("CREATE");
+							secondRequest.setEntity("LOCATION");
+							secondRequest.setFields(locationCreateJson);
+							
+							ConnectionClient ccLocationCreate = new ConnectionClient(host, port, secondRequest.toString());
 							ccLocationCreate.run();
 							this.setVisible(false);
 						} catch (JSONException e1) {
@@ -501,8 +517,12 @@ public class WindowAdd extends JFrame implements ActionListener {
 				JSONObject sensorIdFindById = new JSONObject();
 				sensorIdFindById.put("id", Integer.parseInt(identifiant.getText()));
 
-				ConnectionClient ccSensorFindById = new ConnectionClient(host, port,"SENSOR",
-						"FINDBYID", sensorIdFindById.toString());
+				Request thirdRequest = new Request();
+				thirdRequest.setType("FINDBYID");
+				thirdRequest.setEntity("SENSOR");
+				thirdRequest.setFields(sensorIdFindById);
+				
+				ConnectionClient ccSensorFindById = new ConnectionClient(host, port, thirdRequest.toString());
 				ccSensorFindById.run();
 
 				String retourSensorFindById = ccSensorFindById.getResponse();
@@ -549,7 +569,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 						sensorCreate.setInstallation(dateInst);
 
 						JSONObject sensorCreateJson = new JSONObject(sensorCreate);
-						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, "SENSOR", "CREATE", sensorCreateJson.toString());
+						
+						Request forthRequest = new Request();
+						forthRequest.setType("CREATE");
+						forthRequest.setEntity("SENSOR");
+						forthRequest.setFields(sensorCreateJson);
+						
+						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toString());
 						ccSensorCreate.run();
 						// End sensor Create
 						
@@ -568,8 +594,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 						locationUpdate.setSensorId(locationSensorsId);
 						
 						JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
+						Request fifthRequest = new Request();
+						fifthRequest.setType("UPDATE");
+						fifthRequest.setEntity("LOCATION");
+						fifthRequest.setFields(locationUpdateJson);
+						
 						try {
-							ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, "LOCATION", "UPDATE", locationUpdateJson.toString());
+							ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, fifthRequest.toString());
 							ccLocationUpdate.run();
 							// End locationUpdate
 							this.setVisible(false);

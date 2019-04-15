@@ -32,12 +32,10 @@ public class findAllSensor  {
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsList;
 		
-		String[] emptyTab = new String[0];
 		Request request = new Request();
 		request.setType("FINDALL");
 		request.setEntity("SENSOR");
-		request.setFields(emptyTab);
-		request.setValues(emptyTab);
+		request.setFields(new JSONObject());
 		
 		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toString());
 		ccSensorFindAll.run();
@@ -56,14 +54,6 @@ public class findAllSensor  {
 		}
 		
 		return sensorsList;
-	}
-	
-	public static void main( String args[] ) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {		
-		String host = "127.0.0.1";
-		int port = 2412;
-		findAllSensor fs = new findAllSensor(host, port);
-		fs.findAll(false);
-
 	}
 
 }
