@@ -48,6 +48,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	private int port;
 
 	ObjectMapper objectMapper = new ObjectMapper();
+	//J'adore le pds
 	
 	static JFrame window = new JFrame();
 	
