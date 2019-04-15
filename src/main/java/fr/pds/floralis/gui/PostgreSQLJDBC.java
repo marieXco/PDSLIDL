@@ -14,7 +14,7 @@ import java.sql.SQLException;
  *
  */
 
-// COUCOU MODIF SUR MASTER MDR
+// COUCOU MODIF SUR LAURA MDR
 public class PostgreSQLJDBC extends Thread {
 	public static void main( String args[] )  throws ClassNotFoundException, SQLException, IOException, InterruptedException  {		
 		String host = "127.0.0.1";
