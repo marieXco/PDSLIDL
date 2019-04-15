@@ -24,10 +24,8 @@ public class FloorDao extends DAO<Floor> {
 
 	@Override
 	public JSONObject create(JSONObject jsonObject) {
-		// retourner un int pour évaluer le succès 
 		int success = 0;
 		
-		// création d'un objet de type PostGresSQL
 		PGobject object = new PGobject();
 		try {
 			object.setValue(jsonObject.toString());
@@ -36,20 +34,16 @@ public class FloorDao extends DAO<Floor> {
 		}
 		object.setType("json");
 		
-		// Faire notre insertion 
 		try {
 			connect.setAutoCommit(false);
 
-			//requete 
 			String sql = "INSERT INTO floors (data) VALUES (?);";
 
-			// On utilise un PreparedStatement pour pouvoir précompilé 
-			// avant d'ajouter la colonne 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.setObject(1, object);
-			 // calcule le nombre de ligne exécuter
 			success = statement.executeUpdate(); 
+			
 			connect.commit();
 			statement.close();
 		} catch (Exception e) {
@@ -57,24 +51,23 @@ public class FloorDao extends DAO<Floor> {
 			System.exit(0);
 		}
 		
-		//vérifier le fonctionnement 
-		if(success > 0) { //si on a plus d'une ligne exécuté 
-			System.out.println("create success");
+		JSONObject floorCreated = new JSONObject();
+		
+		if(success > 0) {  
+			floorCreated.put("successCreate", "true");
+		} else {
+			floorCreated.put("successCreate", "false");
 		}
 		
-		//JSON 
-		JSONObject floorCreated = new JSONObject();
-		floorCreated.put("successCreate", success);
-		System.out.println(floorCreated.toString());
 		return floorCreated;
 	}
 
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
+		
 		int success = 0;
-		int floorId = jsonObject.getInt("id"); //traduction de mon id en int 
+		int floorId = jsonObject.getInt("id"); 
 
-		//la suppression de ma ligne, fonctionne de la meme manière que pour le create
 		try {
 			connect.setAutoCommit(false);
 
@@ -90,14 +83,15 @@ public class FloorDao extends DAO<Floor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		// on regarde si la requète fonctionne 
-		if(success > 0) {
-			System.out.println("delete success");
-		}
-		// la partie JSON 
+		
 		JSONObject floorDeleted = new JSONObject();
-		floorDeleted.put("successDelete", success);
-		System.out.println(floorDeleted.toString());
+		
+		if(success > 0) {
+			floorDeleted.put("successDelete", "true");
+		} else {
+			floorDeleted.put("successDelete", "false");
+		}
+
 		return floorDeleted;
 	}
 
@@ -123,14 +117,15 @@ public class FloorDao extends DAO<Floor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
+		
+		JSONObject floorUpdated = new JSONObject();
 
 		if(success > 0) {
-			System.out.println("update success");
+			floorUpdated.put("successUpdate", "true");
+		} else {
+			floorUpdated.put("successUpdate", "false");
 		}
 
-		JSONObject floorUpdated = new JSONObject();
-		floorUpdated.put("successUpdate", success);
-		System.out.println(floorUpdated.toString());
 		return floorUpdated;
 	}
 
@@ -146,9 +141,7 @@ public class FloorDao extends DAO<Floor> {
 			Statement stmt = connect.createStatement();
 			ResultSet rs = stmt.executeQuery( "SELECT data FROM floors where (data -> 'id')::json::text = '" + floorId + "'::json::text;" );
 
-			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
-				//Poser questions sur ça 
 				floor = mapper.readValue(rs.getObject(1).toString(), Floor.class);
 			}			
 
@@ -158,10 +151,6 @@ public class FloorDao extends DAO<Floor> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (floor.getName() != null) { // a vérifier je suis pas sur 
-			System.out.println("find success");
 		}
 		
 		JSONObject floorFound = new JSONObject();
@@ -194,10 +183,7 @@ public class FloorDao extends DAO<Floor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné 
-		if (floors != null) {
-			System.out.println("findAll success");
-		}
+
 
 		JSONObject floorList = new JSONObject();
 		floorList.put("floorList", floors.toString());

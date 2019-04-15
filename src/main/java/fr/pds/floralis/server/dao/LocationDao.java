@@ -24,10 +24,8 @@ public class LocationDao extends DAO<Location> {
 
 	@Override
 	public JSONObject create(JSONObject jsonObject) {
-		// retourner un int pour évaluer le succès
 		int success = 0;
 
-		// création d'un objet de type PostGresSQL
 		PGobject object = new PGobject();
 		try {
 			object.setValue(jsonObject.toString());
@@ -36,19 +34,14 @@ public class LocationDao extends DAO<Location> {
 		}
 		object.setType("json");
 
-		// Faire notre insertion
 		try {
 			connect.setAutoCommit(false);
 
-			// requete
 			String sql = "INSERT INTO location (data) VALUES (?);";
 
-			// On utilise un PreparedStatement pour pouvoir précompilé
-			// avant d'ajouter la colonne
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.setObject(1, object);
-			// calcule le nombre de ligne exécuter
 			success = statement.executeUpdate();
 			connect.commit();
 			statement.close();
@@ -57,25 +50,24 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 
-		// vérifier le fonctionnement
-		if (success > 0) { // si on a plus d'une ligne exécuté
-			System.out.println("create success");
-		}
-
-		// JSON
 		JSONObject locationCreated = new JSONObject();
-		locationCreated.put("successCreate", success);
-		System.out.println(locationCreated.toString());
+		
+		if (success > 0) {
+			locationCreated.put("successCreate", "true");
+		} else {
+			locationCreated.put("successCreate", "false");
+		}
+		
+		
 		return locationCreated;
 	}
 
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
 		int success = 0;
-		int locationId = jsonObject.getInt("id"); // traduction de mon id en int
+		int locationId = jsonObject.getInt("id"); 
 
-		// la suppression de ma ligne, fonctionne de la meme manière que pour le
-		// create
+		
 		try {
 			connect.setAutoCommit(false);
 
@@ -92,14 +84,15 @@ public class LocationDao extends DAO<Location> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		// on regarde si la requète fonctionne
-		if (success > 0) {
-			System.out.println("delete success");
-		}
-		// la partie JSON
+		
 		JSONObject locationDeleted = new JSONObject();
-		locationDeleted.put("successDelete", success);
-		System.out.println(locationDeleted.toString());
+		
+		if (success > 0) {
+			locationDeleted.put("successDelete", "true");
+		} else {
+			locationDeleted.put("successDelete", "false");
+		}
+	
 		return locationDeleted;
 	}
 
@@ -132,8 +125,13 @@ public class LocationDao extends DAO<Location> {
 		}
 
 		JSONObject locationUpdated = new JSONObject();
-		locationUpdated.put("successUpdate", success);
-		System.out.println(locationUpdated.toString());
+		
+		if (success > 0) {
+			locationUpdated.put("successUpdate", "true");
+		} else {
+			locationUpdated.put("successUpdate", "false");
+		}
+		
 		return locationUpdated;
 	}
 
@@ -155,9 +153,7 @@ public class LocationDao extends DAO<Location> {
 					.executeQuery("SELECT data FROM location where (data -> 'id')::json::text = '"
 							+ locationId + "'::json::text;");
 
-			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
-				// Poser questions sur ça
 				location = mapper.readValue(rs.getObject(1).toString(),
 						Location.class);
 			}
@@ -168,10 +164,6 @@ public class LocationDao extends DAO<Location> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (location.getId()!= 0) { // a vérifier je suis pas sur 
-			System.out.println("find success");
 		}
 
 		JSONObject locationFound = new JSONObject();
@@ -203,10 +195,6 @@ public class LocationDao extends DAO<Location> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné
-		if (allLocation != null) {
-			System.out.println("findAll success");
 		}
 
 		JSONObject locationList = new JSONObject();

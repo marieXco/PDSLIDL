@@ -92,7 +92,7 @@ public class RequestHandler implements Runnable {
 					case "FINDALL":
 						JSONObject json = sensorDao.findAll();
 
-						toSend = json.get("sensorsList").toString();
+						toSend = json.get("sensorList").toString();
 						break;
 
 					case "FINDBYID":
@@ -138,7 +138,7 @@ public class RequestHandler implements Runnable {
 					case "FINDBYID":
 						JSONObject locationFound = locationDao.find(parameters);
 
-						toSend = locationFound.getString("locationFound");
+						toSend = locationFound.get("locationFound").toString();
 						break;
 
 					case "CREATE":
@@ -174,7 +174,7 @@ public class RequestHandler implements Runnable {
 						JSONObject json = roomDao.findAll();
 						System.out.println(json.toString());
 
-						toSend = json.get("roomsList").toString();
+						toSend = json.get("roomList").toString();
 						break;
 
 					case "FINDBYID":
