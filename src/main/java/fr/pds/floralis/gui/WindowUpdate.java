@@ -339,13 +339,10 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 				sensorUpdate.setId(getId());
 				// For the moment, not alert, no breakdown
-				sensorUpdate.setAlert(false);
-				sensorUpdate.setBreakdown(false);
+				sensorUpdate.setAlert(null);
+				sensorUpdate.setBreakdown(null);
 				// This button switch the state of the sensor selected in the comboBox
 				sensorUpdate.setState(false);
-				sensorUpdate.setConfigure(false);
-				sensorUpdate.setIpAddress(null);
-				sensorUpdate.setPort(null);
 
 				int dayInstallation = daysComboBox.getSelectedIndex();
 				int monthInstallation = monthComboBox.getSelectedIndex() - 1;

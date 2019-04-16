@@ -27,6 +27,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 
@@ -94,6 +95,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	 */
 	JMenuBar menuBar = new JMenuBar();
 	JMenu adding = new JMenu("Ajouts");
+	JMenu showing = new JMenu("Map");
+	JMenuItem showingMap = new JMenuItem("Voir la map des capteurs");
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
 	JMenuItem addingLocation = new JMenuItem("Ajouter une localisation");
 
@@ -135,9 +138,17 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		setHost(host);
 		setPort(port);
 
+		JPanel p1=new JPanel(); 
+		JTabbedPane tp=new JTabbedPane();  
+		tp.setBounds(50,50,200,200);  
+	    tp.add("Map", p1);  
+	    window.add(tp);
+	    
 		
 		window.setJMenuBar(menuBar);
 		menuBar.add(adding);
+		menuBar.add(showing);
+		showing.add(showingMap);
 		adding.add(addingSensor);
 		adding.add(addingLocation);		
 
@@ -199,6 +210,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		buttonRefreshSensor.addActionListener(this);
 		addingSensor.addActionListener(this);
 		addingLocation.addActionListener(this);
+		showingMap.addActionListener(this);
 		buttonRefreshLocation.addActionListener(this);
 
 		
@@ -322,6 +334,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 				e1.printStackTrace();
 			}
+		}
+		
+		if (e.getSource() == showingMap) {
+			System.out.println("clique bouton showingMap");
+			new WindowMapSensor(getHost(), getPort()).initMap();
+			
 		}
 
 		if (e.getSource() == buttonRefreshLocation) {
