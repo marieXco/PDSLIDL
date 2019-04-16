@@ -571,7 +571,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						sensorCreate.setMax(max.getText().trim());
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
 						sensorCreate.setIdLocation(locationsFoundList.get(location.getSelectedIndex() - 1).getId());
-						sensorCreate.setAlert(true);
+						sensorCreate.setAlert(false);
 						sensorCreate.setBreakdown(false);
 						sensorCreate.setConfigure(false);
 						sensorCreate.setIpAddress(null);
