@@ -260,7 +260,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		// Adding of window parameters informations of found sensor
 		brand.setText(sensorFound.getBrand());
-		macAddress.setText(sensorFound.getMacAdress().trim());
+		macAddress.setText(sensorFound.getMacAddress().trim());
 		daysComboBox.setSelectedIndex(sensorFound.getInstallation().getDate());
 		monthComboBox.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
 		yearComboBox.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
@@ -332,17 +332,20 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				// Beginning of sensor Update
 				Sensor sensorUpdate = new Sensor();
 				sensorUpdate.setBrand(brand.getText().trim());
-				sensorUpdate.setMacAdress(macAddress.getText().trim());
+				sensorUpdate.setMacAddress(macAddress.getText().trim());
 				sensorUpdate.setMin(min.getText().trim());
 				sensorUpdate.setMax(max.getText().trim());
 				sensorUpdate.setIdLocation(locationsFoundTab[location.getSelectedIndex()-1].getId());
 
 				sensorUpdate.setId(getId());
 				// For the moment, not alert, no breakdown
-				sensorUpdate.setAlerts(null);
-				sensorUpdate.setBreakdowns(null);
+				sensorUpdate.setAlert(false);
+				sensorUpdate.setBreakdown(false);
 				// This button switch the state of the sensor selected in the comboBox
 				sensorUpdate.setState(false);
+				sensorUpdate.setConfigure(false);
+				sensorUpdate.setIpAddress(null);
+				sensorUpdate.setPort(null);
 
 				int dayInstallation = daysComboBox.getSelectedIndex();
 				int monthInstallation = monthComboBox.getSelectedIndex() - 1;
