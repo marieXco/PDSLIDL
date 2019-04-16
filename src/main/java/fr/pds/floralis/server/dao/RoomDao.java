@@ -36,19 +36,14 @@ public class RoomDao extends DAO<Room> {
 		}
 		object.setType("json");
 		
-		// Faire notre insertion 
 		try {
 			connect.setAutoCommit(false);
 
-			//requete 
 			String sql = "INSERT INTO rooms (data) VALUES (?);";
 
-			// On utilise un PreparedStatement pour pouvoir précompilé 
-			// avant d'ajouter la colonne 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
 			statement.setObject(1, object);
-			 // calcule le nombre de ligne exécuter
 			success = statement.executeUpdate(); 
 			connect.commit();
 			statement.close();
@@ -56,25 +51,24 @@ public class RoomDao extends DAO<Room> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
+
+		JSONObject roomCreated = new JSONObject();
 		
-		//vérifier le fonctionnement 
-		if(success > 0) { //si on a plus d'une ligne exécuté 
-			System.out.println("create success");
+		if (success > 0) {
+			roomCreated.put("successCreate", "true");
+		} else {
+			roomCreated.put("successCreate", "false");
 		}
 		
-		//JSON 
-		JSONObject roomCreated = new JSONObject();
-		roomCreated.put("successCreate", success);
-		System.out.println(roomCreated.toString());
 		return roomCreated;
 	}
 
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
+		
 		int success = 0;
-		int roomId = jsonObject.getInt("id"); //traduction de mon id en int 
+		int roomId = jsonObject.getInt("id"); 
 
-		//la suppression de ma ligne, fonctionne de la meme manière que pour le create
 		try {
 			connect.setAutoCommit(false);
 
@@ -90,14 +84,15 @@ public class RoomDao extends DAO<Room> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		// on regarde si la requète fonctionne 
-		if(success > 0) {
-			System.out.println("delete success");
-		}
-		// la partie JSON 
+		
 		JSONObject roomDeleted = new JSONObject();
-		roomDeleted.put("successDelete", success);
-		System.out.println(roomDeleted.toString());
+		
+		if (success > 0) {
+			roomDeleted.put("successDelete", "true");
+		} else {
+			roomDeleted.put("successDelete", "false");
+		}
+		
 		return roomDeleted;
 	}
 
@@ -129,8 +124,13 @@ public class RoomDao extends DAO<Room> {
 		}
 
 		JSONObject roomUpdated = new JSONObject();
-		roomUpdated.put("successUpdate", success);
-		System.out.println(roomUpdated.toString());
+		
+		if (success > 0) {
+			roomUpdated.put("successUpdate", "true");
+		} else {
+			roomUpdated.put("successUpdate", "false");
+		}
+		
 		return roomUpdated;
 	}
 
@@ -146,9 +146,7 @@ public class RoomDao extends DAO<Room> {
 			Statement stmt = connect.createStatement();
 			ResultSet rs = stmt.executeQuery( "SELECT data FROM rooms where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
 
-			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
-				//Poser questions sur ça 
 				room = mapper.readValue(rs.getObject(1).toString(), Room.class);
 			}			
 
@@ -158,10 +156,6 @@ public class RoomDao extends DAO<Room> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-		//on vérifie qu'on ai bien trouver ce que l'on recherche
-		 if (room.getTypeRoom() != null) { // a vérifier je suis pas sur 
-			System.out.println("find success");
 		}
 		
 		JSONObject roomFound = new JSONObject();
@@ -181,7 +175,6 @@ public class RoomDao extends DAO<Room> {
 
 			ResultSet rs = stmt.executeQuery("SELECT data FROM rooms;");
 
-
 			while (rs.next()) {
 				room = mapper.readValue(rs.getObject(1).toString(), Room.class);
 				rooms.add(room);
@@ -194,13 +187,9 @@ public class RoomDao extends DAO<Room> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné 
-		if (rooms != null) {
-			System.out.println("findAll success");
-		}
 
 		JSONObject roomList = new JSONObject();
-		roomList.put("roomsList", rooms.toString());
+		roomList.put("roomList", rooms.toString());
 		
 		return roomList;
 	}

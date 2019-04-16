@@ -384,6 +384,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				ConnectionClient ccLocation = new ConnectionClient(host, port, forthRequest.toString());
 				ccLocation.run();
 
+				// FIXME : trop fatiguée pour trouver le problème, à voir demain matin
 				String retoursOldLocation = ccLocation.getResponse();
 				JSONObject retourOldLocationJson = new JSONObject();	
 				retourOldLocationJson.put("retourLocation", retoursOldLocation);
