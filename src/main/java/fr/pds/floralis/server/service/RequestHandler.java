@@ -61,6 +61,7 @@ public class RequestHandler implements Runnable {
 				reader = new BufferedInputStream(sock.getInputStream());
 
 				String request = read();
+			
 				JSONObject requestJson = new JSONObject(request);	
 				
 				/**

@@ -1,8 +1,6 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 

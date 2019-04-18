@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
@@ -17,22 +18,29 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 
 public class SensorDao extends DAO<Sensor> {
 	Connection connect = null;
+	Logger logger = Logger.getLogger(this.getClass().getName());
 	
 	public SensorDao(Connection connect) throws ClassNotFoundException, SQLException {
 		this.connect = connect;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#create(org.json.JSONObject)
+	 */
+	@Override
 	public JSONObject create(JSONObject jsonObject) {
 		int success = 0;
 
 		PGobject object1 = new PGobject();
 		try {
-			object1.setValue(jsonObject.toString());
+			object1.setValue(jsonObject.toString()); // TODO Move in other try block
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
 		object1.setType("json");
 
+		
+		
 		try {
 			connect.setAutoCommit(false);
 
@@ -46,22 +54,29 @@ public class SensorDao extends DAO<Sensor> {
 			connect.commit();
 
 			statement.close();
-		} catch (Exception e) {
+		} catch (SQLException e) {
+			logger.severe(e.getMessage());
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
+			//System.exit(0);
+			success = 0;
+		} finally {
+			// TODO Release resources
 		}
 		
 		JSONObject sensorCreated = new JSONObject();
-
 		if (success > 0) {
 			sensorCreated.put("successCreate", "true");
-		} else {
-			sensorCreated.put("successCreate", "false");
+			return sensorCreated;
+//		} else {
+//			sensorCreated.put("successCreate", "false");
 		}
 
-		return sensorCreated;
+		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#delete(org.json.JSONObject)
+	 */
 	@Override
 	public JSONObject delete(JSONObject jsonObject) {
 		int success = 0;
@@ -97,6 +112,9 @@ public class SensorDao extends DAO<Sensor> {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#update(org.json.JSONObject)
+	 */
 	@Override
 	public JSONObject update(JSONObject jsonObject) {
 		int success = 0;
@@ -131,6 +149,9 @@ public class SensorDao extends DAO<Sensor> {
 		return sensorUpdated;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#find(org.json.JSONObject)
+	 */
 	@Override
 	public JSONObject find(JSONObject jsonObject) {
 		ObjectMapper mapper = new ObjectMapper();
@@ -162,6 +183,9 @@ public class SensorDao extends DAO<Sensor> {
 		return sensorFound;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#findAll()
+	 */
 	@Override
 	public JSONObject findAll() {
 		ObjectMapper mapper = new ObjectMapper();
@@ -178,14 +202,15 @@ public class SensorDao extends DAO<Sensor> {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
 				sensors.add(sensor);
 			}
-
 			rs.close();
 			stmt.close();
+
 
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}	
+
+		}
 
 		JSONObject sensorsList = new JSONObject();
 		sensorsList.put("sensorList", sensors.toString());
