@@ -3,6 +3,8 @@ package fr.pds.floralis.commons.bean.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 /**
  * Location 
  * The entity made to map the Location object and map it to JSON with the toJSON
@@ -75,14 +77,18 @@ public class Location {
 		this.building = building;
 	}
 
-	@Override
 	public String toString() {
-		return "\n {"
-				+ "\n\t \"id\" : " + id + 
-				",\n\t \"sensorId\" : " + sensorId + 
-				",\n\t \"room\" :" + room + 
-				",\n\t \"floor\" : " + floor + 
-				",\n\t \"building\" : "+ building + 
-				"\n }";
+		return "Location [id=" + id + ", sensorId=" + sensorId + ", room=" + room + ", floor=" + floor + ", building="
+				+ building + "]";
+	}
+
+	public JSONObject toJSON() {
+		JSONObject locationToJson = new JSONObject();
+		locationToJson.put("id", id);
+		locationToJson.put("sensorId", sensorId);
+		locationToJson.put("room", room);
+		locationToJson.put("floor", floor);
+		locationToJson.put("building", building);
+		return locationToJson;
 	}
 }

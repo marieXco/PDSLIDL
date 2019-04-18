@@ -1,5 +1,6 @@
 package fr.pds.floralis.server.service;
 
+import java.util.List;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,8 +10,14 @@ import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import fr.pds.floralis.commons.bean.entity.Building;
+import fr.pds.floralis.commons.bean.entity.Floor;
+import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Room;
+import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 import fr.pds.floralis.server.dao.BuildingDao;
@@ -90,33 +97,38 @@ public class RequestHandler implements Runnable {
 					SensorDao sensorDao = new SensorDao(connection);
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						JSONObject json = sensorDao.findAll();
+						List<Sensor> sensorList = sensorDao.findAll();
+						
+						JSONArray sensorListToJson = new JSONArray();
+						sensorListToJson.put(sensorList);
 
-						toSend = json.get("sensorList").toString();
+						toSend = sensorListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject sensorFound = sensorDao.find(parameters);
+						Sensor sensorFound = sensorDao.find(parameters.getInt("id"));
 
-						toSend = sensorFound.getString("sensorFound");
+						toSend = sensorFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						JSONObject jsonSensorDaoCreate = sensorDao.create(parameters);
+						// FIXME PLEASE, ToString but to Sensor, using objectMapper
+						Boolean sensorCreation = sensorDao.create(new Sensor());
 
-						toSend = jsonSensorDaoCreate.get("successCreate").toString();
+						toSend = sensorCreation.toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonSensorDaoDelete = sensorDao.delete(parameters);
+						Boolean sensorErasing = sensorDao.delete(parameters.getInt("id"));
 
-						toSend = jsonSensorDaoDelete.get("successDelete").toString();
+						toSend = sensorErasing.toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonSensorDaoUpdate = sensorDao.update(parameters);
+						// FIXME PLEASE, ToString but to Sensor, using objectMapper
+						Boolean sensorUpdating = sensorDao.update(parameters.getInt("id"), new Sensor());
 
-						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
+						toSend = sensorUpdating.toString();
 						break;
 					default:
 						toSend = "Unkwown command for the Sensors table !";
@@ -130,33 +142,36 @@ public class RequestHandler implements Runnable {
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						JSONObject json = locationDao.findAll();
+						List<Location> locationList = locationDao.findAll();
 
-						toSend = json.get("locationList").toString();
+						JSONArray locationListToJson = new JSONArray();
+						locationListToJson.put(locationList);
+
+						toSend = locationListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject locationFound = locationDao.find(parameters);
+						Location locationFound = locationDao.find(parameters.getInt("id"));
 
-						toSend = locationFound.get("locationFound").toString();
+						toSend = locationFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						JSONObject jsonLocationDaoCreate = locationDao.create(parameters);
+						Boolean locationCreation = locationDao.create(new Location());
 
-						toSend = jsonLocationDaoCreate.get("successCreate").toString();
+						toSend = locationCreation.toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonLocationDaoDelete = locationDao.delete(parameters);
+						Boolean locationDeleting = locationDao.delete(parameters.getInt("id"));
 
-						toSend = jsonLocationDaoDelete.get("successDelete").toString();
+						toSend = locationDeleting.toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonLocationDaoUpdate = locationDao.update(parameters);
+						Boolean locationUpdating = locationDao.update(parameters.getInt("id"), new Location());
 
-						toSend = jsonLocationDaoUpdate.get("successUpdate").toString();
+						toSend = locationUpdating.toString();
 						break;
 
 					default:
@@ -171,34 +186,36 @@ public class RequestHandler implements Runnable {
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						JSONObject json = roomDao.findAll();
-						System.out.println(json.toString());
+						List<Room> roomList = roomDao.findAll();
 
-						toSend = json.get("roomList").toString();
+						JSONArray roomListToJson = new JSONArray();
+						roomListToJson.put(roomList);
+
+						toSend = roomListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject roomFound = roomDao.find(parameters);
+						Room roomFound = roomDao.find(parameters.getInt("id"));
 
-						toSend = roomFound.getString("roomFound");
+						toSend = roomFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						JSONObject jsonRoomDaoCreate = roomDao.create(parameters);
+						Boolean roomCreation = roomDao.create(new Room());
 
-						toSend = jsonRoomDaoCreate.get("successCreate").toString();
+						toSend = roomCreation.toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonRoomDaoDelete = roomDao.delete(parameters);
+						Boolean roomErasing = roomDao.delete(parameters.getInt("id"));
 
-						toSend = jsonRoomDaoDelete.get("successDelete").toString();
+						toSend = roomErasing.toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonRoomDaoUpdate = roomDao.update(parameters);
+						Boolean roomUpdating = roomDao.update(parameters.getInt("id"), new Room());
 
-						toSend = jsonRoomDaoUpdate.get("successUpdate").toString();
+						toSend = roomUpdating.toString();
 						break;
 
 					default:
@@ -213,33 +230,37 @@ public class RequestHandler implements Runnable {
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						JSONObject json = buildingDao.findAll();
+						List<Building> buildingList = buildingDao.findAll();
+						
+						JSONArray buildingListToJson = new JSONArray();
+						buildingListToJson.put(buildingList);
 
-						toSend = json.get("buildingList").toString();
+						toSend = buildingListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject buildingFound = buildingDao.find(parameters);
+						//TODO : a modifier
+						Building buildingFound = buildingDao.find(parameters.getInt("id"));
 
-						toSend = buildingFound.getString("buildingFound");
+						toSend = buildingFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						JSONObject jsonBuildingDaoCreate = buildingDao.create(parameters);
+						Boolean buildingCreation = buildingDao.create(new Building());
 
-						toSend = jsonBuildingDaoCreate.get("successCreate").toString();
+						toSend = buildingCreation.toString();
 						break;
 
 					case "DELETE":
-						JSONObject jsonBuildingDaoDelete = buildingDao.delete(parameters);
+						Boolean buildingErasing = buildingDao.delete(parameters.getInt("id"));
 
-						toSend = jsonBuildingDaoDelete.get("successDelete").toString();
+						toSend = buildingErasing.toString();
 						break;
 
 					case "UPDATE":
-						JSONObject jsonBuildingDaoUpdate = buildingDao.update(parameters);
+						Boolean buildingUpdating = buildingDao.update(parameters.getInt("id"), new Building());
 
-						toSend = jsonBuildingDaoUpdate.get("successUpdate").toString();
+						toSend = buildingUpdating.toString();
 						break;
 
 					default:
@@ -254,33 +275,35 @@ public class RequestHandler implements Runnable {
 
 					switch (command.toUpperCase()) {
 					case "FINDALL":
-						JSONObject json = floorDao.findAll();
+						List<Floor> floorList = floorDao.findAll();		
+						JSONArray floorListToJson = new JSONArray();
+						floorListToJson.put(floorList);
 
-						toSend = json.get("floorList").toString();
+						toSend = floorListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						JSONObject floorFound = floorDao.find(parameters);
+						Floor floorFound = floorDao.find(parameters.getInt("id"));
 
-						toSend = floorFound.getString("floorFound");
+						toSend = floorFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						JSONObject floorCreate = floorDao.create(parameters);
+						Boolean floorCreate = floorDao.create(new Floor());
 
-						toSend = floorCreate.get("successCreate").toString();
+						toSend = floorCreate.toString();
 						break;
 
 					case "DELETE":
-						JSONObject floorDelete = floorDao.delete(parameters);
+						Boolean floorDelete = floorDao.delete(parameters.getInt("id"));
 
-						toSend = floorDelete.get("successDelete").toString();
+						toSend = floorDelete.toString();
 						break;
 
 					case "UPDATE":
-						JSONObject floorUpdate = floorDao.update(parameters);
+						Boolean floorUpdate = floorDao.update(parameters.getInt("id"), new Floor());
 
-						toSend = floorUpdate.get("successUpdate").toString();
+						toSend = floorUpdate.toString();
 						break;
 
 					default:

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Room;
 
-public class RoomDao extends DAO<Room> {
+public class RoomDao implements DAO<Room> {
 	Connection connect = null;
 	
 	public RoomDao(Connection connect) throws ClassNotFoundException, SQLException {
@@ -23,11 +23,12 @@ public class RoomDao extends DAO<Room> {
 	}
 
 	@Override
-	public JSONObject create(JSONObject jsonObject) {
+	public boolean create(Room roomToCreate) {
+		JSONObject jsonObject = roomToCreate.toJSON();
 		// retourner un int pour évaluer le succès 
 		int success = 0;
 		
-		// création d'un objet de type PostGresSQL
+		// création d'un objet pour PostGresSQL de type JSON
 		PGobject object = new PGobject();
 		try {
 			object.setValue(jsonObject.toString());
@@ -42,8 +43,10 @@ public class RoomDao extends DAO<Room> {
 			String sql = "INSERT INTO rooms (data) VALUES (?);";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
-
 			statement.setObject(1, object);
+			
+			//executeupdate compte le nombre le lignes affectées
+			// si 0 alors a n'a pas marché
 			success = statement.executeUpdate(); 
 			connect.commit();
 			statement.close();
@@ -52,27 +55,23 @@ public class RoomDao extends DAO<Room> {
 			System.exit(0);
 		}
 
-		JSONObject roomCreated = new JSONObject();
-		
-		if (success > 0) {
-			roomCreated.put("successCreate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			roomCreated.put("successCreate", "false");
+			return false;
 		}
 		
-		return roomCreated;
 	}
 
 	@Override
-	public JSONObject delete(JSONObject jsonObject) {
+	public boolean delete(int id) {
 		
 		int success = 0;
-		int roomId = jsonObject.getInt("id"); 
 
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM rooms where (data -> 'id')::json::text = '" + roomId + "'::json::text;";
+			String sql = "DELETE FROM rooms where (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -85,20 +84,19 @@ public class RoomDao extends DAO<Room> {
 			System.exit(0);
 		}
 		
-		JSONObject roomDeleted = new JSONObject();
-		
-		if (success > 0) {
-			roomDeleted.put("successDelete", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			roomDeleted.put("successDelete", "false");
+			return false;
 		}
 		
-		return roomDeleted;
 	}
 
 	@Override
-	public JSONObject update(JSONObject jsonObject) {
+	public boolean update(int id, Room roomToUpdate) {
 		int success = 0;
+		
+		JSONObject jsonObject = roomToUpdate.toJSON();
 		
 		int roomId = jsonObject.getInt("id");
 
@@ -111,7 +109,6 @@ public class RoomDao extends DAO<Room> {
 			success = statement.executeUpdate();
 			connect.commit();
 
-
 			statement.close();
 
 		} catch (Exception e) {
@@ -120,31 +117,22 @@ public class RoomDao extends DAO<Room> {
 		}
 
 		if(success > 0) {
-			System.out.println("update success");
-		}
-
-		JSONObject roomUpdated = new JSONObject();
-		
-		if (success > 0) {
-			roomUpdated.put("successUpdate", "true");
+			return true;
 		} else {
-			roomUpdated.put("successUpdate", "false");
+			return false;
 		}
 		
-		return roomUpdated;
 	}
 
 	@Override
-	public JSONObject find(JSONObject jsonObject) {
+	public Room find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
 		Room room = new Room(0, null);
-
-		int locationId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM rooms where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM rooms where (data -> 'id')::json::text = '" + id + "'::json::text;" );
 
 			while (rs.next()) {
 				room = mapper.readValue(rs.getObject(1).toString(), Room.class);
@@ -157,14 +145,12 @@ public class RoomDao extends DAO<Room> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		JSONObject roomFound = new JSONObject();
-		roomFound.put("roomFound", room.toString());
-		return roomFound;
+
+		return room;
 	}
 
 	@Override
-	public JSONObject findAll() { 
+	public List<Room> findAll() { 
 		ObjectMapper mapper = new ObjectMapper();
 		List<Room> rooms = new ArrayList<Room>();
 		Room room = new Room(0, null);
@@ -187,11 +173,8 @@ public class RoomDao extends DAO<Room> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-
-		JSONObject roomList = new JSONObject();
-		roomList.put("roomList", rooms.toString());
 		
-		return roomList;
+		return rooms;
 	}
 	
 

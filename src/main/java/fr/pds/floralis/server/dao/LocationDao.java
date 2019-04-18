@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Location;
 
-public class LocationDao extends DAO<Location> {
+public class LocationDao implements DAO<Location> {
 	Connection connect = null;
 	
 	public LocationDao(Connection connect) throws ClassNotFoundException, SQLException {
@@ -23,7 +23,8 @@ public class LocationDao extends DAO<Location> {
 	}
 
 	@Override
-	public JSONObject create(JSONObject jsonObject) {
+	public boolean create(Location locationToCreate) {
+		JSONObject jsonObject = locationToCreate.toJSON();
 		int success = 0;
 
 		PGobject object = new PGobject();
@@ -50,29 +51,23 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 
-		JSONObject locationCreated = new JSONObject();
-		
-		if (success > 0) {
-			locationCreated.put("successCreate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			locationCreated.put("successCreate", "false");
+			return false;
 		}
 		
-		
-		return locationCreated;
 	}
 
 	@Override
-	public JSONObject delete(JSONObject jsonObject) {
+	public boolean delete(int id) {
 		int success = 0;
-		int locationId = jsonObject.getInt("id"); 
-
 		
 		try {
 			connect.setAutoCommit(false);
 
 			String sql = "DELETE FROM location where (data -> 'id')::json::text = '"
-					+ locationId + "'::json::text;";
+					+ id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -85,27 +80,24 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 		
-		JSONObject locationDeleted = new JSONObject();
-		
-		if (success > 0) {
-			locationDeleted.put("successDelete", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			locationDeleted.put("successDelete", "false");
+			return false;
 		}
 	
-		return locationDeleted;
 	}
 
 	@Override
-	public JSONObject update(JSONObject jsonObject) {
+	public boolean update(int id, Location locationToUpdate) {
 		int success = 0;
 
-		int locationId = jsonObject.getInt("id");
+		JSONObject jsonObject = locationToUpdate.toJSON();
 
 		try {
 			connect.setAutoCommit(false);
 			String sql = "UPDATE location SET data = '" + jsonObject
-					+ "' WHERE (data -> 'id')::json::text = '" + locationId
+					+ "' WHERE (data -> 'id')::json::text = '" + id
 					+ "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
@@ -120,38 +112,28 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 
-		if (success > 0) {
-			System.out.println("update success");
-		}
-
-		JSONObject locationUpdated = new JSONObject();
-		
-		if (success > 0) {
-			locationUpdated.put("successUpdate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			locationUpdated.put("successUpdate", "false");
+			return false;
 		}
-		
-		return locationUpdated;
+	
 	}
 
 	@Override
-	public JSONObject find(JSONObject jsonObject) {
+	public Location find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Integer> emptyList = new ArrayList<Integer>();
 		emptyList.add(0);
 		emptyList.add(0);
 		Location location = new Location(0, emptyList, null, null, null);
 
-
-		int locationId = jsonObject.getInt("id");
-
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 			ResultSet rs = stmt
 					.executeQuery("SELECT data FROM location where (data -> 'id')::json::text = '"
-							+ locationId + "'::json::text;");
+							+ id + "'::json::text;");
 
 			while (rs.next()) {
 				location = mapper.readValue(rs.getObject(1).toString(),
@@ -166,15 +148,13 @@ public class LocationDao extends DAO<Location> {
 			System.exit(0);
 		}
 
-		JSONObject locationFound = new JSONObject();
-		locationFound.put("locationFound", location.toString());
-		return locationFound;
+		return location;
 	}
 
 	@Override
-	public JSONObject findAll() {
+	public List<Location> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
-		List<Location> allLocation = new ArrayList<Location>();
+		List<Location> locationList = new ArrayList<Location>();
 		Location location = new Location();
 
 		try {
@@ -186,7 +166,7 @@ public class LocationDao extends DAO<Location> {
 			while (rs.next()) {
 				location = mapper.readValue(rs.getObject(1).toString(),
 						Location.class);
-				allLocation.add(location);
+				locationList.add(location);
 			}
 
 			rs.close();
@@ -196,9 +176,6 @@ public class LocationDao extends DAO<Location> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		JSONObject locationList = new JSONObject();
-		locationList.put("locationList", allLocation.toString());
 
 		return locationList;
 	}

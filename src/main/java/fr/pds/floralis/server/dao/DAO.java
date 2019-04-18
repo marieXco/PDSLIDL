@@ -1,70 +1,55 @@
 package fr.pds.floralis.server.dao;
 
-import java.sql.SQLException;
+import java.util.List;
 
-import org.json.JSONObject;
+public interface DAO<T> {
 
-public abstract class DAO<T> {
-
-	public DAO() throws ClassNotFoundException, SQLException {
-		
-	}
 
 	/**
-	 * 
 	 * Creation method
 	 * 
-	 * @param JSONObject
+	 * @param objToUpdate
 	 * 
-	 * @return JSONObject
 	 */
 
-
-	public abstract JSONObject create(JSONObject jsonObject);
-
-
-	/**
-	 * 
-	 * Erasing method
-	 * 
-	 * @param JSONObject
-	 * 
-	 * @return JSONObject
-	 */
-
-
-	public abstract JSONObject delete(JSONObject jsonObject);
-
-
-	/**
-	 * 
-	 * Update method
-	 * 
-	 * @param JSONObject
-	 * 
-	 * @return JSONObject
-	 */
-
-	public abstract JSONObject update(JSONObject jsonObject);
-
-	/**
-	 * 
-	 * Finding by Id method 
-	 * 
-	 * @param JSONObject
-	 * 
-	 * @return JSONObject
-	 */
-
-	public abstract JSONObject find(JSONObject jsonObject);
-
+	public abstract boolean create(T objToCreate);
 	
 	/**
+	 * Deleting method
 	 * 
-	 * Finding all method
+	 * @param id
 	 * 
-	 * 
-	 * @return JSONObject
 	 */
-	public abstract JSONObject findAll();
+	
+	public abstract boolean delete(int id);
+	
+	/**
+	 * Updating method
+	 * 
+	 * @param id
+	 * 
+	 */
+
+	public abstract boolean update(int id, T objToUpdate);
+
+	/**
+	 * Finding by id method
+	 * 
+	 * @param id
+	 * 
+	 * @return
+	 * 
+	 */
+
+	public abstract Object find(int id);
+
+	
+	
+	/**
+	 * FindingAll method
+	 * 
+	 * @return
+	 */
+	
+	public abstract List<T> findAll();
 }
