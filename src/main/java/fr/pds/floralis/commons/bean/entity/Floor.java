@@ -47,6 +47,10 @@ public class Floor {
 		
 		return floorToJson;
 	}
+	
+	public String jsonToString(Floor floorToJson) {
+		return floorToJson.toJSON().toString();
+	}
 
 	@Override
 	public String toString() {

@@ -13,7 +13,6 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -124,7 +123,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	private int port;
 	protected int id;
 
-	List<?> locationsFoundList = new ArrayList<>();
+	List<Location> locationsFoundList = new ArrayList<>();
 
 	Location[] locationsFoundTab = null;
 
@@ -146,7 +145,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	// method to update a sensor
 	@SuppressWarnings("deprecation")
 	public void initUpdateSensor(int id) throws JsonParseException,
-	JsonMappingException, IOException {
+	JsonMappingException, IOException, JSONException, InterruptedException {
 		setId(id);
 
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
@@ -176,7 +175,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		request.setEntity("SENSOR");
 		request.setFields(sensorIdFindById);
 		
-		ConnectionClient ccSensorFindById = new ConnectionClient(host, port, request.toString());
+		ConnectionClient ccSensorFindById = new ConnectionClient(host, port, request.toJSON().toString());
 		ccSensorFindById.run();
 
 		String retourSensorFindById = ccSensorFindById.getResponse();
@@ -190,33 +189,20 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		// Beginning of location Find All
 		// To see WindowWorker lines 269
-		Request secondRequest = new Request();
-		secondRequest.setType("FINDALL");
-		secondRequest.setEntity("LOCATION");
-		secondRequest.setFields(new JSONObject());
-		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, secondRequest.toString());
-		ccLocationFindAll.run();
-
-		String retourCcLocationFindAll = ccLocationFindAll.getResponse();
-		JSONObject locationsFound = new JSONObject();	
-		locationsFound.put("locationsFound", retourCcLocationFindAll);
-
-		locationsFoundTab =  objectMapper.readValue(
-				locationsFound.get("locationsFound").toString(), Location[].class);
-
-		// The table become a list
-		locationsFoundList = Arrays.asList(locationsFoundTab);
-
-		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
-		locationsComboBox[0] = "--Localisation--";
-
-		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-			int tabIndex = listIndex + 1;
-			locationsComboBox[tabIndex] = locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName();
-		}
+//		findAllLocation fl = new findAllLocation(host, port);
+//		locationsFoundList = fl.findAll(false);
+//
+//		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
+//		locationsComboBox[0] = "--Localisation--";
+//
+//		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+//			int tabIndex = listIndex + 1;
+//			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName();
+//		}
 		// End location Find all
 		
-		location = new JComboBox<Object>(locationsComboBox);
+		// Ajouter des choses dans la comboBox
+		location = new JComboBox<Object>();
 
 		for (int dayIndex = 1; dayIndex < daysTab.length; dayIndex++) {
 			String daysMax = (dayIndex) + "";
@@ -335,7 +321,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				sensorUpdate.setMacAddress(macAddress.getText().trim());
 				sensorUpdate.setMin(min.getText().trim());
 				sensorUpdate.setMax(max.getText().trim());
-				sensorUpdate.setIdLocation(locationsFoundTab[location.getSelectedIndex()-1].getId());
+				sensorUpdate.setIdLocation(locationsFoundList.get(location.getSelectedIndex()-1).getId());
 
 				sensorUpdate.setId(getId());
 				// For the moment, not alert, no breakdown
@@ -357,107 +343,24 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 				sensorUpdate.setInstallation(dateInstallation);
 
-				JSONObject sensorUpdateJson = new JSONObject(sensorUpdate);
+				JSONObject sensorUpdateJson = new JSONObject();
+				sensorUpdateJson.put("id", sensorUpdate.getId());
+				sensorUpdateJson.put("sensorToUpdate", sensorUpdate.toJSON());
 				
 				Request thirdRequest = new Request();
 				thirdRequest.setType("UPDATE");
 				thirdRequest.setEntity("SENSOR");
 				thirdRequest.setFields(sensorUpdateJson);
 				
-				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toString());
+				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 				ccSensorUpdate.run();
 				// End sensorUpdate 
 
 				// Beginning of old Location Update
-				JSONObject objOldLocation = new JSONObject();
+				// TODO : locationUpdate --> taking of the sensorId on the old location
+				// Adding the sensorId on the new Location
+				// End old location Update
 
-				objOldLocation.put("id", getSensorFoundLocationId()); 
-				System.out.println("id :" + objOldLocation.toString());
-
-				// Recovery of the location associate at the sensor 
-				// And delete in this location the selected sensor
-				Request forthRequest = new Request();
-				forthRequest.setType("FINDBYID");
-				forthRequest.setEntity("LOCATION");
-				forthRequest.setFields(objOldLocation);
-				
-				ConnectionClient ccLocation = new ConnectionClient(host, port, forthRequest.toString());
-				ccLocation.run();
-
-				// FIXME : trop fatiguée pour trouver le problème, à voir demain matin
-				String retoursOldLocation = ccLocation.getResponse();
-				JSONObject retourOldLocationJson = new JSONObject();	
-				retourOldLocationJson.put("retourLocation", retoursOldLocation);
-
-				ObjectMapper objectMapper = new ObjectMapper();
-				Location oldLocation;
-
-				try {
-					oldLocation = objectMapper.readValue(
-							retourOldLocationJson.get("retourLocation").toString(), Location.class);
-
-					// Recovery of all sensor id od the location
-					List <Integer> oldListSensorLocation = new ArrayList<Integer>();
-					// Creation of a new table
-					List <Integer> newListSensorLocation = new ArrayList<Integer>();
-
-
-					// In the new table, adding of sensor expect the sensor that you just delete
-					if(!oldListSensorLocation.contains(getId())) {
-						newListSensorLocation.addAll(oldListSensorLocation);
-					}
-					else {
-						newListSensorLocation.addAll(oldListSensorLocation);
-						newListSensorLocation.add(getId());
-					}
-
-					// Modification with the new table
-					// Then, it do the update on the locations table
-					oldLocation.setSensorId(newListSensorLocation);
-					JSONObject parametersOldLocation = new JSONObject(oldLocation);	
-					
-					Request fifthRequest = new Request();
-					fifthRequest.setType("UPDATE");
-					fifthRequest.setEntity("LOCATION");
-					fifthRequest.setFields(parametersOldLocation);
-
-					ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, fifthRequest.toString());
-					ccLocationUpdate.run();
-					// End old location Update
-
-				} catch (JSONException | IOException e1) {
-					e1.printStackTrace();
-				}
-
-
-				// Beginning of location Update 
-				// To see Window Add line 537
-				Location locationUpdate = locationsFoundTab[location.getSelectedIndex() - 1];
-
-				List <Integer> oldListSensorLocation = new ArrayList<Integer>();
-				// Creation of a new table
-				List <Integer> newListSensorLocation = new ArrayList<Integer>();
-
-				// In the new table, adding of sensor expect the sensor that you just delete
-				if(!oldListSensorLocation.contains(getId())) {
-					newListSensorLocation.addAll(oldListSensorLocation);
-				}
-				else {
-					newListSensorLocation.addAll(oldListSensorLocation);
-					newListSensorLocation.add(getId());
-				}		
-
-
-				locationUpdate.setSensorId(newListSensorLocation);
-				JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
-
-				Request sixthRequest = new Request();
-				sixthRequest.setType("UPDATE");
-				sixthRequest.setEntity("LOCATION");
-				sixthRequest.setFields(locationUpdateJson);
-				ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, sixthRequest.toString());
-				ccLocationUpdate.run();
-				// End location Update
 
 				this.setVisible(false);
 			}

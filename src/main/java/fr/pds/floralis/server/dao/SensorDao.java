@@ -171,7 +171,9 @@ public class SensorDao implements DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
+		System.out.println();
 		
 		return sensors;
 	}
+
 }

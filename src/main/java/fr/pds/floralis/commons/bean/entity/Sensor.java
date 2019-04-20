@@ -1,6 +1,7 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -169,7 +170,7 @@ public class Sensor {
 	}
 	
 	public JSONObject toJSON() {
-		JSONObject sensorToJson = new JSONObject();
+		JSONObject sensorToJson = new JSONObject(); 
 		sensorToJson.put("id", id);
 		sensorToJson.put("idLocation", idLocation);
 		sensorToJson.put("type", type);
@@ -187,7 +188,7 @@ public class Sensor {
 		
 		return sensorToJson;
 	}
-
+	
 	
 	@Override
 	public String toString() {
@@ -196,6 +197,10 @@ public class Sensor {
 				+ port + ", configure=" + configure + ", installation=" + installation + ", min=" + min + ", max=" + max
 				+ ", breakdown=" + breakdown + "]";
 	}
-	
+
+	public JSONObject toJSON(List<Sensor> sensors) {
+		JSONObject listToJson = new JSONObject(sensors);
+		return listToJson;
+	}	
 	
 }

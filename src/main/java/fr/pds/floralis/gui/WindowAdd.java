@@ -206,18 +206,19 @@ public class WindowAdd extends JFrame implements ActionListener {
 		year = new JComboBox<Object>(years);
 
 		// To see WindowWorker lines 269-287
-		findAllLocation fl = new findAllLocation(host, port);
-		locationsFoundList = fl.findAll(false);
+//		findAllLocation fl = new findAllLocation(host, port);
+//		locationsFoundList = fl.findAll(false);
+//
+//		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
+//		locationsComboBox[0] = "--Localisation--";
+//
+//		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+//			int tabIndex = listIndex + 1;
+//			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName();
+//		}
 
-		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
-		locationsComboBox[0] = "--Localisation--";
-
-		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-			int tabIndex = listIndex + 1;
-			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName();
-		}
-
-		location = new JComboBox<Object>(locationsComboBox);
+		// TODO : ajouter des trucs dans la combo box
+		location = new JComboBox<Object>();
 		// End ccLocationFindAll
 
 		container.setPreferredSize(new Dimension(LG, HT));
@@ -281,7 +282,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		request.setEntity("ROOM");
 		request.setFields(new JSONObject());
 		
-		ConnectionClient ccRoomFindAll = new ConnectionClient(host, port, request.toString());
+		ConnectionClient ccRoomFindAll = new ConnectionClient(host, port, request.toJSON().toString());
 		ccRoomFindAll.run();
 
 		String retourCcRoomFindAll = ccRoomFindAll.getResponse();
@@ -310,7 +311,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		secondRequest.setEntity("BUILDING");
 		secondRequest.setFields(new JSONObject());
 		
-		ConnectionClient ccBuildingFindAll = new ConnectionClient(host, port, secondRequest.toString());
+		ConnectionClient ccBuildingFindAll = new ConnectionClient(host, port, secondRequest.toJSON().toString());
 		ccBuildingFindAll.run();
 
 		String retourCcBuildingFindAll = ccBuildingFindAll.getResponse();
@@ -339,7 +340,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		thirdRequest.setEntity("FLOOR");
 		thirdRequest.setFields(new JSONObject());
 		
-		ConnectionClient ccFloorFindAll = new ConnectionClient(host, port, thirdRequest.toString());
+		ConnectionClient ccFloorFindAll = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 		ccFloorFindAll.run();
 
 		String retoursCcFloorFindAll = ccFloorFindAll.getResponse();
@@ -399,100 +400,102 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 
 		if (e.getSource() == buttonAddLocation) {	
-			try {
-				Integer.parseInt(identifiant.getText());
-			} catch (java.lang.NumberFormatException ex) {
-				infos.setText("L'identifiant ne peut contenir que des chiffres");
-			}
-			
-			// If the index is 0, so there are no selected informations
-			if (building.getSelectedIndex() <= 0 || room.getSelectedIndex() <= 0 || floor.getSelectedIndex() <= 0) {
-				infos.setText("Veuillez selectionner une localisation valide");
-			}
-			else {
-				// Beginning of Location Find by Id
-				// Verification that the location id not already used - to see WindowWorker lines 269-287
-				JSONObject locationFindById = new JSONObject();
-				// Recovery of the id in parameter
-				locationFindById.put("id", Integer.parseInt(identifiant.getText()));
-
-				Request request = new Request();
-				request.setType("FINDBYID");
-				request.setEntity("LOCATION");
-				request.setFields(locationFindById);
-				
-				ConnectionClient ccLocationFindById = new ConnectionClient(host, port, request.toString());
-				ccLocationFindById.run();
-
-				String retourLocationFindById = ccLocationFindById.getResponse();
-				JSONObject locationFoundJson = new JSONObject();
-				locationFoundJson.put("locationFoundJson", retourLocationFindById);
-
-				ObjectMapper objectMapper = new ObjectMapper();
-				// It is not a table anymore, it is a unique location
-				Location locationFound;
-				try {
-					locationFound = objectMapper.readValue(
-							locationFoundJson.get("locationFoundJson").toString(), Location.class);
-					
-					// If the search location doesn't exist, a empty location is return
-					// The empty location is : { "id" : 0, brand : "null"...}
-					// Verification that the id is not 0 
-					// If the id is 0, so the id of new location is already used 
-					if (locationFound.getId() != 0) {
-						infos.setText("Une localisation a déja cet identifiant, veuillez le modifier");
-					} 
-					// End of location Find By Id
-					
-					else {
-						// Creation of a building, and a floor with comboBox informations
-						// There is a -1 on index 
-						// Because the index 0 is empty (it is the line with the type of the parameter, for example --floor--)  
-						// To see window Worker with the sensor Id ComboBox
-						Building locationBuilding = new Building();
-						locationBuilding.setId(buildingsFoundTab[building.getSelectedIndex() - 1].getId());
-						locationBuilding.setTypeBuilding(buildingsFoundTab[building.getSelectedIndex() - 1].getTypeBuilding());
-
-						Room locationRoom = new Room();
-						locationRoom.setId(roomsFoundTab[room.getSelectedIndex() - 1].getId());
-						locationRoom.setTypeRoom(roomsFoundTab[room.getSelectedIndex() - 1].getTypeRoom());
-
-						Floor locationFloor = new Floor();
-						locationFloor.setId(floorsFoundTab[floor.getSelectedIndex() - 1].getId());
-						locationFloor.setName(floorsFoundTab[floor.getSelectedIndex() - 1].getName());
-						
-						// At the creation of the location, it is not already sensor, so it is a empty table of Id sensors
-						List<Integer> locationSensors = new ArrayList<Integer>();
-
-						// Creation of location with all informations then insertion is a JSON
-						// Then insertion in the ccLocationCreate
-						Location locationCreate = new Location();
-						try {
-							
-							locationCreate.setSensorId(locationSensors);
-							locationCreate.setId(Integer.parseInt(identifiant.getText()));
-							locationCreate.setRoom(locationRoom);
-							locationCreate.setFloor(locationFloor);
-							locationCreate.setBuilding(locationBuilding);
-
-							JSONObject locationCreateJson = new JSONObject(locationCreate);
-							
-							Request secondRequest = new Request();
-							secondRequest.setType("CREATE");
-							secondRequest.setEntity("LOCATION");
-							secondRequest.setFields(locationCreateJson);
-							
-							ConnectionClient ccLocationCreate = new ConnectionClient(host, port, secondRequest.toString());
-							ccLocationCreate.run();
-							this.setVisible(false);
-						} catch (JSONException e1) {
-							e1.printStackTrace();
-						}
-					}
-				} catch (JSONException | IOException e2) {
-					e2.printStackTrace();
-				}
-			}
+//			try {
+//				Integer.parseInt(identifiant.getText());
+//			} catch (java.lang.NumberFormatException ex) {
+//				infos.setText("L'identifiant ne peut contenir que des chiffres");
+//			}
+//			
+//			// If the index is 0, so there are no selected informations
+//			if (building.getSelectedIndex() <= 0 || room.getSelectedIndex() <= 0 || floor.getSelectedIndex() <= 0) {
+//				infos.setText("Veuillez selectionner une localisation valide");
+//			}
+//			else {
+//				// Beginning of Location Find by Id
+//				// Verification that the location id not already used - to see WindowWorker lines 269-287
+//				JSONObject locationFindById = new JSONObject();
+//				// Recovery of the id in parameter
+//				locationFindById.put("id", Integer.parseInt(identifiant.getText()));
+//
+//				Request request = new Request();
+//				request.setType("FINDBYID");
+//				request.setEntity("LOCATION");
+//				request.setFields(locationFindById);
+//				
+//				ConnectionClient ccLocationFindById = new ConnectionClient(host, port, request.toJSON().toString());
+//				ccLocationFindById.run();
+//
+//				String retourLocationFindById = ccLocationFindById.getResponse();
+//				JSONObject locationFoundJson = new JSONObject();
+//				locationFoundJson.put("locationFoundJson", retourLocationFindById);
+//
+//				ObjectMapper objectMapper = new ObjectMapper();
+//				// It is not a table anymore, it is a unique location
+//				Location locationFound;
+//				try {
+//					locationFound = objectMapper.readValue(
+//							locationFoundJson.get("locationFoundJson").toString(), Location.class);
+//					
+//					// If the search location doesn't exist, a empty location is return
+//					// The empty location is : { "id" : 0, brand : "null"...}
+//					// Verification that the id is not 0 
+//					// If the id is 0, so the id of new location is already used 
+//					if (locationFound.getId() != 0) {
+//						infos.setText("Une localisation a déja cet identifiant, veuillez le modifier");
+//					} 
+//					// End of location Find By Id
+//					
+//					else {
+//						// Creation of a building, and a floor with comboBox informations
+//						// There is a -1 on index 
+//						// Because the index 0 is empty (it is the line with the type of the parameter, for example --floor--)  
+//						// To see window Worker with the sensor Id ComboBox
+//						Building locationBuilding = new Building();
+//						locationBuilding.setId(buildingsFoundTab[building.getSelectedIndex() - 1].getId());
+//						locationBuilding.setTypeBuilding(buildingsFoundTab[building.getSelectedIndex() - 1].getTypeBuilding());
+//
+//						Room locationRoom = new Room();
+//						locationRoom.setId(roomsFoundTab[room.getSelectedIndex() - 1].getId());
+//						locationRoom.setTypeRoom(roomsFoundTab[room.getSelectedIndex() - 1].getTypeRoom());
+//
+//						Floor locationFloor = new Floor();
+//						locationFloor.setId(floorsFoundTab[floor.getSelectedIndex() - 1].getId());
+//						locationFloor.setName(floorsFoundTab[floor.getSelectedIndex() - 1].getName());
+//						
+//						// At the creation of the location, it is not already sensor, so it is a empty table of Id sensors
+//						List<Integer> locationSensors = new ArrayList<Integer>();
+//
+//						// Creation of location with all informations then insertion is a JSON
+//						// Then insertion in the ccLocationCreate
+//						Location locationCreate = new Location();
+//						try {
+//							
+//							locationCreate.setSensorId(locationSensors);
+//							locationCreate.setId(Integer.parseInt(identifiant.getText()));
+//							locationCreate.setRoom(jsonToString(locationRoom));
+//							
+//							locationCreate.setFloor(locationFloor);
+//							locationCreate.setBuilding(locationBuilding);
+//
+//							JSONObject locationCreateJson = new JSONObject();
+//							locationCreateJson.put("locationToCreate", locationCreate);
+//							
+//							Request secondRequest = new Request();
+//							secondRequest.setType("CREATE");
+//							secondRequest.setEntity("LOCATION");
+//							secondRequest.setFields(locationCreateJson);
+//							
+//							ConnectionClient ccLocationCreate = new ConnectionClient(host, port, secondRequest.toJSON().toString());
+//							ccLocationCreate.run();
+//							this.setVisible(false);
+//						} catch (JSONException e1) {
+//							e1.printStackTrace();
+//						}
+//					}
+//				} catch (JSONException | IOException e2) {
+//					e2.printStackTrace();
+//				}
+//			}
 		}
 
 		if (e.getSource() == buttonAddSensor) {
@@ -543,7 +546,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 				thirdRequest.setEntity("SENSOR");
 				thirdRequest.setFields(sensorIdFindById);
 				
-				ConnectionClient ccSensorFindById = new ConnectionClient(host, port, thirdRequest.toString());
+				ConnectionClient ccSensorFindById = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 				ccSensorFindById.run();
 
 				String retourSensorFindById = ccSensorFindById.getResponse();
@@ -600,7 +603,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						forthRequest.setEntity("SENSOR");
 						forthRequest.setFields(sensorCreateJson);
 						
-						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toString());
+						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toJSON().toString());
 						ccSensorCreate.run();
 						// End sensor Create
 						
@@ -610,28 +613,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 						// This function is here because
 						// When you add sensor, you attribute a location to this sensor
 						// So, it have to add the new sensors at the 'sensor id table' of this location
-						Location locationUpdate = locationsFoundList.get(location.getSelectedIndex() - 1);
-
-						// Recovery of old sensor of the location 
-						List <Integer> locationSensorsId  = locationUpdate.getSensorId();
-						locationSensorsId.add(sensorCreate.getId());
-						
-						locationUpdate.setSensorId(locationSensorsId);
-						
-						JSONObject locationUpdateJson = new JSONObject(locationUpdate);	
-						Request fifthRequest = new Request();
-						fifthRequest.setType("UPDATE");
-						fifthRequest.setEntity("LOCATION");
-						fifthRequest.setFields(locationUpdateJson);
-						
-						try {
-							ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, fifthRequest.toString());
-							ccLocationUpdate.run();
-							// End locationUpdate
-							this.setVisible(false);
-						} catch (JSONException e1) {
-							e1.printStackTrace();
-						}
+						// TODO : modifier l'ancienne localisation 
+						this.setVisible(false);
 					}
 
 				} catch (JSONException | IOException e1) {

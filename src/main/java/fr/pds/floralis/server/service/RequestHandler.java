@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.pds.floralis.commons.bean.entity.Building;
 import fr.pds.floralis.commons.bean.entity.Floor;
 import fr.pds.floralis.commons.bean.entity.Location;
@@ -40,6 +42,7 @@ public class RequestHandler implements Runnable {
 	private BufferedInputStream reader = null;
 	private Connection connection;
 	private JDBCConnectionPool jdbc;
+	public ObjectMapper objectMapper;
 
 	/**
 	 * Constructor
@@ -69,6 +72,7 @@ public class RequestHandler implements Runnable {
 
 				String request = read();
 				JSONObject requestJson = new JSONObject(request);	
+				ObjectMapper objectMapper = new ObjectMapper();
 				
 				/**
 				 * See the Request class on the entity
@@ -99,8 +103,7 @@ public class RequestHandler implements Runnable {
 					case "FINDALL":
 						List<Sensor> sensorList = sensorDao.findAll();
 						
-						JSONArray sensorListToJson = new JSONArray();
-						sensorListToJson.put(sensorList);
+						JSONArray sensorListToJson = new JSONArray(sensorList);
 
 						toSend = sensorListToJson.toString();
 						break;
@@ -112,8 +115,8 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						// FIXME PLEASE, ToString but to Sensor, using objectMapper
-						Boolean sensorCreation = sensorDao.create(new Sensor());
+						Sensor sensorToCreate = objectMapper.readValue(parameters.get("sensorToCreate").toString(), Sensor.class);
+						Boolean sensorCreation = sensorDao.create(sensorToCreate);
 
 						toSend = sensorCreation.toString();
 						break;
@@ -125,8 +128,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "UPDATE":
-						// FIXME PLEASE, ToString but to Sensor, using objectMapper
-						Boolean sensorUpdating = sensorDao.update(parameters.getInt("id"), new Sensor());
+						Sensor sensorToUpdate = objectMapper.readValue(parameters.get("sensorToUpdate").toString(), Sensor.class);
+						
+						Boolean sensorUpdating = sensorDao.update(parameters.getInt("id"), sensorToUpdate);
 
 						toSend = sensorUpdating.toString();
 						break;
@@ -144,8 +148,7 @@ public class RequestHandler implements Runnable {
 					case "FINDALL":
 						List<Location> locationList = locationDao.findAll();
 
-						JSONArray locationListToJson = new JSONArray();
-						locationListToJson.put(locationList);
+						JSONArray locationListToJson = new JSONArray(locationList);
 
 						toSend = locationListToJson.toString();
 						break;
@@ -157,7 +160,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Boolean locationCreation = locationDao.create(new Location());
+						Location locationToCreate = objectMapper.readValue(parameters.get("locationToCreate").toString(), Location.class);
+						
+						Boolean locationCreation = locationDao.create(locationToCreate);
 
 						toSend = locationCreation.toString();
 						break;
@@ -169,7 +174,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "UPDATE":
-						Boolean locationUpdating = locationDao.update(parameters.getInt("id"), new Location());
+						Location locationToUpdate= objectMapper.readValue(parameters.get("locationToUpdate").toString(), Location.class);
+						
+						Boolean locationUpdating = locationDao.update(parameters.getInt("id"), locationToUpdate);
 
 						toSend = locationUpdating.toString();
 						break;
@@ -188,8 +195,7 @@ public class RequestHandler implements Runnable {
 					case "FINDALL":
 						List<Room> roomList = roomDao.findAll();
 
-						JSONArray roomListToJson = new JSONArray();
-						roomListToJson.put(roomList);
+						JSONArray roomListToJson = new JSONArray(roomList);
 
 						toSend = roomListToJson.toString();
 						break;
@@ -201,7 +207,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Boolean roomCreation = roomDao.create(new Room());
+						Room roomToCreate = objectMapper.readValue(parameters.get("roomToCreate").toString(), Room.class);
+						
+						Boolean roomCreation = roomDao.create(roomToCreate);
 
 						toSend = roomCreation.toString();
 						break;
@@ -213,7 +221,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "UPDATE":
-						Boolean roomUpdating = roomDao.update(parameters.getInt("id"), new Room());
+						Room roomToUpdate = objectMapper.readValue(parameters.get("roomToUpdate").toString(), Room.class);
+						
+						Boolean roomUpdating = roomDao.update(parameters.getInt("id"), roomToUpdate);
 
 						toSend = roomUpdating.toString();
 						break;
@@ -232,21 +242,21 @@ public class RequestHandler implements Runnable {
 					case "FINDALL":
 						List<Building> buildingList = buildingDao.findAll();
 						
-						JSONArray buildingListToJson = new JSONArray();
-						buildingListToJson.put(buildingList);
+						JSONArray buildingListToJson = new JSONArray(buildingList);
 
 						toSend = buildingListToJson.toString();
 						break;
 
 					case "FINDBYID":
-						//TODO : a modifier
 						Building buildingFound = buildingDao.find(parameters.getInt("id"));
 
 						toSend = buildingFound.toJSON().toString();
 						break;
 
 					case "CREATE":
-						Boolean buildingCreation = buildingDao.create(new Building());
+						Building buildingToCreate = objectMapper.readValue(parameters.get("buildingToCreate").toString(), Building.class);
+						
+						Boolean buildingCreation = buildingDao.create(buildingToCreate);
 
 						toSend = buildingCreation.toString();
 						break;
@@ -258,7 +268,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "UPDATE":
-						Boolean buildingUpdating = buildingDao.update(parameters.getInt("id"), new Building());
+						Building buildingToUpdate = objectMapper.readValue(parameters.get("buildingToUpdate").toString(), Building.class);
+						
+						Boolean buildingUpdating = buildingDao.update(parameters.getInt("id"), buildingToUpdate);
 
 						toSend = buildingUpdating.toString();
 						break;
@@ -276,8 +288,8 @@ public class RequestHandler implements Runnable {
 					switch (command.toUpperCase()) {
 					case "FINDALL":
 						List<Floor> floorList = floorDao.findAll();		
-						JSONArray floorListToJson = new JSONArray();
-						floorListToJson.put(floorList);
+						
+						JSONArray floorListToJson = new JSONArray(floorList);
 
 						toSend = floorListToJson.toString();
 						break;
@@ -289,7 +301,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Boolean floorCreate = floorDao.create(new Floor());
+						Floor floorToCreate = objectMapper.readValue(parameters.get("floorToCreate").toString(), Floor.class);
+						
+						Boolean floorCreate = floorDao.create(floorToCreate);
 
 						toSend = floorCreate.toString();
 						break;
@@ -301,7 +315,9 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "UPDATE":
-						Boolean floorUpdate = floorDao.update(parameters.getInt("id"), new Floor());
+						Floor floorToUpdate = objectMapper.readValue(parameters.get("floorToUpdate").toString(), Floor.class);
+						
+						Boolean floorUpdate = floorDao.update(parameters.getInt("id"), floorToUpdate);
 
 						toSend = floorUpdate.toString();
 						break;

@@ -126,7 +126,7 @@ public class LocationDao implements DAO<Location> {
 		List<Integer> emptyList = new ArrayList<Integer>();
 		emptyList.add(0);
 		emptyList.add(0);
-		Location location = new Location(0, emptyList, null, null, null);
+		Location location = new Location();
 
 		try {
 			connect.setAutoCommit(false);
