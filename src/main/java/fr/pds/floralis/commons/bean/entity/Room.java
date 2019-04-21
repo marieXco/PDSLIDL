@@ -1,5 +1,7 @@
 package fr.pds.floralis.commons.bean.entity;
 
+import org.json.JSONObject;
+
 /**
  * Room 
  * The entity made to map the Room object and map it to JSON with the toJSON
@@ -41,7 +43,14 @@ public class Room {
 	
 	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"typeRoom\" : \"" + typeRoom + "\"}";
+		return "Room [id=" + id + ", typeRoom=" + typeRoom + "]";
+	}
+
+	public JSONObject toJSON() {
+		JSONObject roomToJson = new JSONObject();
+		roomToJson.put("id", id);
+		roomToJson.put("typeRoom", typeRoom);
+		return roomToJson;
 	}
 
 }

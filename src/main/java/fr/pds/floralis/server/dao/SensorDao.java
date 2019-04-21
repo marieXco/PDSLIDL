@@ -15,14 +15,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
 
-public class SensorDao extends DAO<Sensor> {
+public class SensorDao implements DAO<Sensor> {
 	Connection connect = null;
 	
 	public SensorDao(Connection connect) throws ClassNotFoundException, SQLException {
 		this.connect = connect;
 	}
 
-	public JSONObject create(JSONObject jsonObject) {
+	public boolean create(Sensor sensorToCreate) {
+		JSONObject jsonObject = sensorToCreate.toJSON();
 		int success = 0;
 
 		PGobject object1 = new PGobject();
@@ -51,27 +52,22 @@ public class SensorDao extends DAO<Sensor> {
 			System.exit(0);
 		}
 		
-		JSONObject sensorCreated = new JSONObject();
-
-		if (success > 0) {
-			sensorCreated.put("successCreate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			sensorCreated.put("successCreate", "false");
+			return false;
 		}
-
-		return sensorCreated;
+		
 	}
 
 	@Override
-	public JSONObject delete(JSONObject jsonObject) {
+	public boolean delete(int id) {
 		int success = 0;
-		int sensorId = jsonObject.getInt("id");
-
 
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;";
+			String sql = "DELETE FROM sensors where (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -86,26 +82,23 @@ public class SensorDao extends DAO<Sensor> {
 			System.exit(0);
 		}
 
-		JSONObject sensorDeleted = new JSONObject();	
-		if (success > 0) {
-			sensorDeleted.put("successDelete", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			sensorDeleted.put("successDelete", "false");
+			return false;
 		}
-
-		return sensorDeleted;
+		
 	}
 
 
 	@Override
-	public JSONObject update(JSONObject jsonObject) {
+	public boolean update(int id, Sensor sensorToUpdate) {
 		int success = 0;
-		
-		int idSensor = jsonObject.getInt("id");
+		JSONObject jsonObject = sensorToUpdate.toJSON();
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE sensors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + idSensor + "'::json::text;";
+			String sql = "UPDATE sensors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -119,30 +112,25 @@ public class SensorDao extends DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		JSONObject sensorUpdated = new JSONObject();
 		
-		if (success > 0) {
-			sensorUpdated.put("successUpdate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			sensorUpdated.put("successUpdate", "false");
+			return false;
 		}
 		
-		return sensorUpdated;
 	}
 
 	@Override
-	public JSONObject find(JSONObject jsonObject) {
+	public Sensor find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
 		Sensor sensor = new Sensor();
-
-		int sensorId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'id')::json::text = '" + sensorId + "'::json::text;" );
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'id')::json::text = '" + id + "'::json::text;" );
 
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
@@ -156,14 +144,11 @@ public class SensorDao extends DAO<Sensor> {
 			System.exit(0);
 		}
 		
-		JSONObject sensorFound = new JSONObject();
-		sensorFound.put("sensorFound", sensor.toString());
-		
-		return sensorFound;
+		return sensor;
 	}
 
 	@Override
-	public JSONObject findAll() {
+	public List<Sensor> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Sensor> sensors = new ArrayList<Sensor>();
 		Sensor sensor = new Sensor();
@@ -186,10 +171,9 @@ public class SensorDao extends DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-
-		JSONObject sensorsList = new JSONObject();
-		sensorsList.put("sensorList", sensors.toString());
+		System.out.println();
 		
-		return sensorsList;
+		return sensors;
 	}
+
 }
