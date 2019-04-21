@@ -3,6 +3,8 @@ package fr.pds.floralis.commons.bean.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 /**
  * Location 
  * The entity made to map the Location object and map it to JSON with the toJSON
@@ -15,74 +17,109 @@ public class Location {
 	
 	private int id;
 	private List<Integer> sensorId = new ArrayList<Integer>();
-	private Room room;
-	private Floor floor;
-	private Building building;
+	private int roomId;
+	private int floorId;
+	private int buildingId;
 
+	
+	
+	/**
+	 * @return the id
+	 */
 	public int getId() {
 		return id;
 	}
 
+	/**
+	 * @param id the id to set
+	 */
 	public void setId(int id) {
 		this.id = id;
 	}
 
+	/**
+	 * @return the sensorId
+	 */
 	public List<Integer> getSensorId() {
 		return sensorId;
 	}
 
-	public void setSensorId(List<Integer> sensor) {
-		this.sensorId = sensor;
+	/**
+	 * @param sensorId the sensorId to set
+	 */
+	public void setSensorId(List<Integer> sensorId) {
+		this.sensorId = sensorId;
 	}
 
-	public Room getRoom() {
-		return room;
+	/**
+	 * @return the roomId
+	 */
+	public int getRoomId() {
+		return roomId;
 	}
 
-	public void setRoom(Room room) {
-		this.room = room;
+	/**
+	 * @param roomId the roomId to set
+	 */
+	public void setRoomId(int roomId) {
+		this.roomId = roomId;
 	}
 
-	public Floor getFloor() {
-		return floor;
+	/**
+	 * @return the floorId
+	 */
+	public int getFloorId() {
+		return floorId;
 	}
 
-	public void setFloor(Floor floor) {
-		this.floor = floor;
+	/**
+	 * @param floorId the floorId to set
+	 */
+	public void setFloorId(int floorId) {
+		this.floorId = floorId;
 	}
 
-	public Building getBuilding() {
-		return building;
+	/**
+	 * @return the buildingId
+	 */
+	public int getBuildingId() {
+		return buildingId;
 	}
 
-	public void setBuilding(Building building) {
-		this.building = building;
+	/**
+	 * @param buildingId the buildingId to set
+	 */
+	public void setBuildingId(int buildingId) {
+		this.buildingId = buildingId;
 	}
+
 	
-	
-	// TODO : TEST : ne fonctionne que si il y a un constructeur vide ? 
 	public Location() {
 	}
 
 
-	public Location(int id, List <Integer> sensor, Room room, Floor floor,
-			Building building) {
+	public Location(int id, List <Integer> sensor, int roomId, int floorId,
+			int buildingId) {
 		super();
 		this.id = id;
 		this.sensorId = sensor;
-		this.room = room;
-		this.floor = floor;
-		this.building = building;
+		this.roomId = roomId;
+		this.floorId = floorId;
+		this.buildingId = buildingId;
 	}
 
-	@Override
 	public String toString() {
-		return "\n {"
-				+ "\n\t \"id\" : " + id + 
-				",\n\t \"sensorId\" : " + sensorId + 
-				",\n\t \"room\" :" + room + 
-				",\n\t \"floor\" : " + floor + 
-				",\n\t \"building\" : "+ building + 
-				"\n }";
+		return "Location [id=" + id + ", sensorId=" + sensorId + ", room=" + roomId + ", floor=" + floorId + ", building="
+				+ buildingId + "]";
+	}
+
+	public JSONObject toJSON() {
+		JSONObject locationToJson = new JSONObject();
+		locationToJson.put("id", id);
+		locationToJson.put("sensorId", sensorId);
+		locationToJson.put("roomId", roomId);
+		locationToJson.put("floorId", floorId);
+		locationToJson.put("buildingId", buildingId);
+		return locationToJson;
 	}
 }
