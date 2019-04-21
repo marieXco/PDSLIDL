@@ -1,9 +1,12 @@
-package fr.pds.floralis.server.service.capture;
+package fr.pds.floralis.server.simulation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +43,13 @@ public class Simulation {
 		Sensor[] sensorsFoundTab =  objectMapper.readValue(sensorsFound.get("sensorsFound").toString(), Sensor[].class);
 		List<Sensor> sensorsList = Arrays.asList(sensorsFoundTab);
 		
+		List<Entry<String, String>> entryList = new ArrayList<Map.Entry<String, String>>();
+		
+		PropertiesReader properties = new PropertiesReader();
+		entryList = properties.getPropValues();
+		int id = Integer.parseInt(entryList.get(0).getValue());
+		
+		
 		HashMap<String, Integer> sensorsCache = new HashMap<String, Integer>();
 		
 		for (Sensor sensor : sensorsList) { 
@@ -74,5 +84,7 @@ public class Simulation {
 
 	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException {
 		Simulation.simulationTest();
+		
+		
 	}
 }
