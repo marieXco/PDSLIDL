@@ -13,10 +13,9 @@ import org.postgresql.util.PGobject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 import fr.pds.floralis.commons.bean.entity.Patient;
 
-public class PatientDao extends DAO<Patient> {
+public class PatientDao implements DAO<Patient> {
 	
 	//create a connection 
 	Connection connect = null;
@@ -27,183 +26,152 @@ public class PatientDao extends DAO<Patient> {
 	}
 
 	@Override
-	// for insert 
-	public JSONObject create(JSONObject jsonObject) {
-		int success = 0; 
-		
-		PGobject object = new PGobject();
-		try {
-			object.setValue(jsonObject.toString());
-		}catch(SQLException e1){
-			e1.printStackTrace();
-		}
-		object.setType("json");
-		
-		try {
-			connect.setAutoCommit(false);
-			
-			String sql = "INSERT INTO patients (data) VALUES (?) ; ";
-			
-			PreparedStatement statement = connect.prepareStatement(sql);
+	public boolean create(Patient patientToCreate) {
+		JSONObject jsonObject = patientToCreate.toJSON();
+		int success = 0;
 
+		PGobject object = new PGobject(); 
+		try { 
+			object.setValue(jsonObject.toString()); 
+		} catch (SQLException e1) { 
+			e1.printStackTrace(); 
+		}
+		object.setType("json"); 
+
+		try { 
+			connect.setAutoCommit(false); 
+			String sql = "INSERT INTO patients (data) VALUES (?);";
+
+			PreparedStatement statement = connect.prepareStatement(sql); 
 			statement.setObject(1, object);
 			success = statement.executeUpdate();
 			connect.commit();
 			statement.close();
-			
-		} catch(Exception e) {
+		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		JSONObject patientCreated = new JSONObject();
-		
-		if (success > 0) {
-			patientCreated.put("successCreate", "true");
+
+		if(success > 0) {
+			return true;
 		} else {
-			patientCreated.put("successCreate", "false");
+			return false;
 		}
-			
-		return patientCreated; 
+		
 	}
 
+
 	@Override
-	//to delete
-	public JSONObject delete(JSONObject jsonObject) {
-		int success = 0;
-		int patientId = jsonObject.getInt("id"); 
-		
-		
-		try{ 
-			connect.setAutoCommit(false);
-		
+	public boolean delete(int id) {
+		int success = 0; 
+		 
+		try { 
+			connect.setAutoCommit(false); 
+ 
 			String sql = "DELETE FROM patients where (data -> 'id')::json::text = '"
-						+ patientId + "'::json::text;";
-	
-			PreparedStatement statement = connect.prepareStatement(sql);
-	
-			success = statement.executeUpdate();
-			connect.commit();
-			statement.close();
-	
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-		
-		JSONObject patientDeleted = new JSONObject();
-		
-		if (success > 0) {
-			patientDeleted.put("successDelete", "true");
-		} else {
-			patientDeleted.put("successDelete", "false");
-		}
-	
-		return patientDeleted;
+					+ id + "'::json::text;";
+ 
+			PreparedStatement statement = connect.prepareStatement(sql); 
+ 
+			success = statement.executeUpdate(); 
+			connect.commit(); 
+			statement.close(); 
+ 
+		} catch (Exception e) { 
+			System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+			System.exit(0); 
+		} 
+		 
+		if(success > 0) { 
+			return true; 
+		} else { 
+			return false; 
+		} 
 	}
 
 	@Override
-	// to update
-	public JSONObject update(JSONObject jsonObject) {
-		int success = 0;
-		int patientId = jsonObject.getInt("id");
+	public boolean update(int id, Patient patientToUpdate) {
+		int success = 0; 
 
-		try {
-			connect.setAutoCommit(false);
+		JSONObject jsonObject = patientToUpdate.toJSON();
+ 
+		try {  
+			connect.setAutoCommit(false); 
 			String sql = "UPDATE patients SET data = '" + jsonObject
-					+ "' WHERE (data -> 'id')::json::text = '" + patientId
-					+ "'::json::text;";
-
-			PreparedStatement statement = connect.prepareStatement(sql);
+					+ "' WHERE (data -> 'id')::json::text = '" + id
+					+ "'::json::text;"; 
 			
-			success = statement.executeUpdate();
+			PreparedStatement statement = connect.prepareStatement(sql); 
+			success = statement.executeUpdate(); 
 			connect.commit();
 			statement.close();
-
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-
-		if (success > 0) {
-			System.out.println("update success");
-		}
-
-		JSONObject patientUpdated = new JSONObject();
-		
-		if (success > 0) {
-			patientUpdated.put("successUpdate", "true");
-		} else {
-			patientUpdated.put("successUpdate", "false");
-		}
-		
-		return patientUpdated;
-	}
-
-
-	@Override
-	//to select few lines
-	public JSONObject find(JSONObject jsonObject) {
-		ObjectMapper mapper = new ObjectMapper();
-		Patient patient = new Patient(0, null, null, 0);
-
-		int patientId = jsonObject.getInt("id");
-
-		try {
-			connect.setAutoCommit(false);
-			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt
-					.executeQuery("SELECT data FROM patients where (data -> 'id')::json::text = '"
-							+ patientId + "'::json::text;");
-
-			while (rs.next()) {
-				patient = mapper.readValue(rs.getObject(1).toString(),Patient.class);
-			}
-
-			rs.close();
-			stmt.close();
-
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-
-		JSONObject patientFound = new JSONObject();
-		patientFound.put("patientFound", patient.toString());
-		return patientFound;
+ 
+		} catch (Exception e) { 
+			System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+			System.exit(0); 
+		} 
+ 
+		if(success > 0) {
+			return true; 
+		} else { 
+			return false; 
+		}  
 	}
 
 	@Override
-	//to select all lines
-	public JSONObject findAll() {
-		ObjectMapper mapper = new ObjectMapper();
-		List<Patient> allPatient = new ArrayList<Patient>();
+	public Object find(int id) {
+		ObjectMapper mapper = new ObjectMapper(); 
+		List<Integer> emptyList = new ArrayList<Integer>(); 
+		emptyList.add(0); 
+		emptyList.add(0); 
 		Patient patient = new Patient(0, null, null, 0);
 
-		try {
-			connect.setAutoCommit(false);
-			Statement stmt = connect.createStatement();
-
-			ResultSet rs = stmt.executeQuery("SELECT data FROM location;");
+		try {  
+			connect.setAutoCommit(false); 
+			Statement stmt = connect.createStatement(); 
+			ResultSet rs = stmt.executeQuery("SELECT data FROM patients where (data -> 'id')::json::text = '"+ id + "'::json::text;");
 
 			while (rs.next()) {
-				patient = mapper.readValue(rs.getObject(1).toString(),Patient.class);
-				allPatient.add(patient);
-			}
+				patient = mapper.readValue(rs.getObject(1).toString(), Patient.class);
+			} 
 
-			rs.close();
-			stmt.close();
-
-		} catch (Exception e) {
-			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
-		}
-
-		JSONObject patientList = new JSONObject();
-		patientList.put("locationList", allPatient.toString());
-
+			rs.close(); 
+			stmt.close(); 
+ 
+		} catch (Exception e) { 
+			System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+			System.exit(0); 
+		} 
+  
+		return patient;
+	}  
+ 
+	@Override
+	public List<Patient> findAll() {
+		ObjectMapper mapper = new ObjectMapper(); 
+		List<Patient> patientList = new ArrayList<Patient>(); 
+		Patient patient = new Patient(0, null, null, 0);
+ 
+		try { 
+			connect.setAutoCommit(false); 
+			Statement stmt = connect.createStatement(); 
+ 
+			ResultSet rs = stmt.executeQuery("SELECT data FROM patients;"); 
+ 
+			while (rs.next()) { 
+				patient = mapper.readValue(rs.getObject(1).toString(),Patient.class); 
+				patientList.add(patient);
+			} 
+ 
+			rs.close(); 
+			stmt.close(); 
+ 
+		} catch (Exception e) { 
+			System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+			System.exit(0); 
+		} 
+ 
 		return patientList;
-	}
-	
+	} 
 	
 }
