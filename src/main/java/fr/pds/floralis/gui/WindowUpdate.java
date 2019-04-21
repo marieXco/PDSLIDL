@@ -189,20 +189,20 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		// Beginning of location Find All
 		// To see WindowWorker lines 269
-//		findAllLocation fl = new findAllLocation(host, port);
-//		locationsFoundList = fl.findAll(false);
-//
-//		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
-//		locationsComboBox[0] = "--Localisation--";
-//
-//		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-//			int tabIndex = listIndex + 1;
-//			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName();
-//		}
+		findAllLocation fl = new findAllLocation(host, port);
+		locationsFoundList = fl.findAll(false);
+
+		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
+		locationsComboBox[0] = "--Localisation--";
+
+		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+			int tabIndex = listIndex + 1;
+			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId();
+		}
 		// End location Find all
 		
 		// Ajouter des choses dans la comboBox
-		location = new JComboBox<Object>();
+		location = new JComboBox<Object>(locationsComboBox);
 
 		for (int dayIndex = 1; dayIndex < daysTab.length; dayIndex++) {
 			String daysMax = (dayIndex) + "";

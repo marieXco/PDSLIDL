@@ -115,7 +115,7 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Sensor sensorToCreate = objectMapper.readValue(parameters.get("sensorToCreate").toString(), Sensor.class);
+						Sensor sensorToCreate = objectMapper.readValue(parameters.toString(), Sensor.class);
 						Boolean sensorCreation = sensorDao.create(sensorToCreate);
 
 						toSend = sensorCreation.toString();
@@ -160,7 +160,7 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Location locationToCreate = objectMapper.readValue(parameters.get("locationToCreate").toString(), Location.class);
+						Location locationToCreate = objectMapper.readValue(parameters.toString(), Location.class);
 						
 						Boolean locationCreation = locationDao.create(locationToCreate);
 
@@ -207,7 +207,7 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Room roomToCreate = objectMapper.readValue(parameters.get("roomToCreate").toString(), Room.class);
+						Room roomToCreate = objectMapper.readValue(parameters.toString(), Room.class);
 						
 						Boolean roomCreation = roomDao.create(roomToCreate);
 
@@ -254,7 +254,7 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Building buildingToCreate = objectMapper.readValue(parameters.get("buildingToCreate").toString(), Building.class);
+						Building buildingToCreate = objectMapper.readValue(parameters.toString(), Building.class);
 						
 						Boolean buildingCreation = buildingDao.create(buildingToCreate);
 
@@ -301,7 +301,7 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "CREATE":
-						Floor floorToCreate = objectMapper.readValue(parameters.get("floorToCreate").toString(), Floor.class);
+						Floor floorToCreate = objectMapper.readValue(parameters.toString(), Floor.class);
 						
 						Boolean floorCreate = floorDao.create(floorToCreate);
 

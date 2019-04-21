@@ -229,18 +229,18 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 
 		// Début de la récupération des localisations
-//		findAllLocation fl = new findAllLocation(host, port);
-//		List <Location>locationsFoundList = fl.findAll(false);
+		findAllLocation fl = new findAllLocation(host, port);
+		List <Location>locationsFoundList = fl.findAll(false);
 		// Fin de la récupération des localisations
 
-//		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-//			if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
-//				String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
-//						.collect(Collectors.joining(", "));
-//				locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName() + 
-//						" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
-//			}
-//		}
+		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+			if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
+				String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
+						.collect(Collectors.joining(", "));
+				locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId() + 
+						" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+			}
+		}
 
 
 		locationPanel.add(buttonRefreshLocation);
@@ -313,48 +313,48 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
-//			findAllLocation fl = new findAllLocation(host, port);
-//			List<Location> locationsFoundList;
-//			
-//			try {
-//				locationsFoundList = fl.findAll(false);
-//				
-//				// On retire tout ce qui est contenu dans le panneau locationList
-//				locationList.removeAll();
-//				locationList.revalidate();
-//				locationList.repaint(); 
-//
-//				for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-//					if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
-//						String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
-//								.collect(Collectors.joining(", "));
-//						locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuilding().getTypeBuilding() + " - " + locationsFoundList.get(listIndex).getRoom().getTypeRoom() + " - " + locationsFoundList.get(listIndex).getFloor().getName() + 
-//								" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
-//					}
-//				}
-//
-//			} catch (JsonParseException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (JsonMappingException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (JSONException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (IOException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (InterruptedException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//
-//
-//			// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
-//			locationPanel.removeAll();
-//			locationPanel.add(buttonRefreshLocation);
-//			locationPanel.add(locationList);
+			findAllLocation fl = new findAllLocation(host, port);
+			List<Location> locationsFoundList;
+			
+			try {
+				locationsFoundList = fl.findAll(false);
+				
+				// On retire tout ce qui est contenu dans le panneau locationList
+				locationList.removeAll();
+				locationList.revalidate();
+				locationList.repaint(); 
+
+				for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+					if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
+						String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
+								.collect(Collectors.joining(", "));
+						locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId() + 
+								" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+					}
+				}
+
+			} catch (JsonParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (JsonMappingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+
+			// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
+			locationPanel.removeAll();
+			locationPanel.add(buttonRefreshLocation);
+			locationPanel.add(locationList);
 
 		}
 
