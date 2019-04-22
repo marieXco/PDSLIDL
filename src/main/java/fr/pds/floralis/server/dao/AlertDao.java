@@ -114,7 +114,7 @@ public class AlertDao implements DAO<Alert> {
 	}
  
 	@Override
-	public Object find(int id) {
+	public Alert find(int id) {
 		ObjectMapper mapper = new ObjectMapper(); 
 		List<Integer> emptyList = new ArrayList<Integer>(); 
 		emptyList.add(0); 
