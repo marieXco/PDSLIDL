@@ -37,15 +37,10 @@ public class findAllLocation  {
 		request.setEntity("LOCATION");
 		request.setFields(new JSONObject());
 		
-		ConnectionClient ccLocationfindAll = new ConnectionClient(host, port, request.toString());
+		ConnectionClient ccLocationfindAll = new ConnectionClient(host, port, request.toJSON().toString());
 		ccLocationfindAll.run();
 		
-		String retoursCcLocationFindAll = ccLocationfindAll.getResponse();
-		JSONObject locationsFound = new JSONObject();
-		locationsFound.put("locationsFound", retoursCcLocationFindAll);
-		System.out.println(locationsFound.get("locationsFound"));
-		
-		Location[] locationsFoundTab =  objectMapper.readValue(locationsFound.get("locationsFound").toString(), Location[].class);
+		Location[] locationsFoundTab =  objectMapper.readValue(ccLocationfindAll.getResponse(), Location[].class);
 		locationsList = Arrays.asList(locationsFoundTab);
 		
 		if(refresh) {

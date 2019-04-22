@@ -1,5 +1,7 @@
 package fr.pds.floralis.commons.bean.entity;
 
+import org.json.JSONObject;
+
 /**
  * Floor 
  * The entity made to map the Floor object and map it to JSON with the toJSON
@@ -38,9 +40,21 @@ public class Floor {
 		this.name = name;
 	}
 	
-	@Override
-	public String toString() {
-		return "{ \"id\" : " + id + ", \"name\" : \"" + name + "\"}";
+	public JSONObject toJSON() {
+		JSONObject floorToJson = new JSONObject();
+		floorToJson.put("id", id);
+		floorToJson.put("name", name);
+		
+		return floorToJson;
+	}
+	
+	public String jsonToString(Floor floorToJson) {
+		return floorToJson.toJSON().toString();
 	}
 
+	@Override
+	public String toString() {
+		return "Floor [id=" + id + ", name=" + name + "]";
+	}
+		
 }

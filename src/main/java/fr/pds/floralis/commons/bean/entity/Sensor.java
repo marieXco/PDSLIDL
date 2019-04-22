@@ -1,8 +1,9 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 
@@ -20,13 +21,16 @@ public class Sensor {
 	private TypeSensor type;
 	private int idLocation;
 	private Boolean state;
-	private List<Integer> alerts = new ArrayList<Integer>();
+	private Boolean alert;
 	private String brand;
-	private String macAdress;
+	private String macAddress;
+	private String ipAddress;
+	private String port;
+	private Boolean configure;
 	private Date installation;
 	private String min;
 	private String max;
-	private List<Integer> breakdowns = new ArrayList<Integer>();
+	private Boolean breakdown;
 
 	public int getId() {
 		return id;
@@ -68,12 +72,12 @@ public class Sensor {
 		this.brand = brand;
 	}
 
-	public String getMacAdress() {
-		return macAdress;
+	public String getMacAddress() {
+		return macAddress;
 	}
 
-	public void setMacAdress(String macAdress) {
-		this.macAdress = macAdress;
+	public void setMacAddress(String macAdress) {
+		this.macAddress = macAdress;
 	}
 
 	public Date getInstallation() {
@@ -100,67 +104,103 @@ public class Sensor {
 		this.max = max;
 	}
 
-	public List<Integer> getAlerts() {
-		return alerts;
+	public Boolean getAlert() {
+		return alert;
 	}
 
-	public void setAlerts(List<Integer> alerts) {
-		this.alerts = alerts;
+	public void setAlert(Boolean alert) {
+		this.alert = alert;
 	}
 
-	public List<Integer> getBreakdowns() {
-		return breakdowns;
+	public Boolean getBreakdown() {
+		return breakdown;
 	}
 
-	public void setBreakdowns(List<Integer> breakdowns) {
-		this.breakdowns = breakdowns;
+	public void setBreakdown(Boolean breakdown) {
+		this.breakdown = breakdown;
+	}
+	
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String iPAddress) {
+		ipAddress = iPAddress;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
+
+	public Boolean getConfigure() {
+		return configure;
+	}
+
+	public void setConfigure(Boolean configure) {
+		this.configure = configure;
 	}
 
 	public Sensor(int id, int idLocation, TypeSensor type, Boolean state,
-			List<Integer> alerts, String brand, String macAdress,
-			Date installation, String caracteristics, List<Integer> breakdowns) {
+			Boolean alert, String brand, String macAdress,
+			Date installation, String min, String max, Boolean breakdown, String ipAddress, 
+			String port, Boolean configure) {
 		super();
 		this.id = id;
 		this.idLocation = idLocation;
 		this.type = type;
 		this.state = state;
-		this.alerts = alerts;
+		this.alert = alert;
 		this.brand = brand;
-		this.macAdress = macAdress;
+		this.macAddress = macAdress;
 		this.installation = installation;
+		this.ipAddress = ipAddress;
+		this.port = port;
+		this.configure = configure;
 		this.min = min;
 		this.max = max;
-		this.breakdowns = breakdowns;
+		this.breakdown = breakdown;
 	}
 
 	public Sensor() {
 
 	}
-
+	
+	public JSONObject toJSON() {
+		JSONObject sensorToJson = new JSONObject(); 
+		sensorToJson.put("id", id);
+		sensorToJson.put("idLocation", idLocation);
+		sensorToJson.put("type", type);
+		sensorToJson.put("state", state);
+		sensorToJson.put("alert", alert);
+		sensorToJson.put("brand", brand);
+		sensorToJson.put("macAddress", macAddress);
+		sensorToJson.put("installation", installation);
+		sensorToJson.put("ipAddress", ipAddress);
+		sensorToJson.put("port", port);
+		sensorToJson.put("configure", configure);
+		sensorToJson.put("min", min);
+		sensorToJson.put("max", max);
+		sensorToJson.put("breakdown", breakdown);
+		
+		return sensorToJson;
+	}
+	
+	
 	@Override
 	public String toString() {
-		return "\n { \n\"id\" : "
-				+ id
-				+ ", \n\t \"idLocation\" : "
-				+ idLocation
-				+ ", \n\t \"type\" : "
-				+ type
-				+ ", \n\t \"state\" : "
-				+ state
-				+ ", \n\t \"alerts\" : "
-				+ alerts
-				+ ", \n\t \"brand\" : \""
-				+ brand
-				+ "\", \n\t \"macAdress\" : \""
-				+ macAdress
-				+ "\", \n\t \"installation\" : \""
-				+ installation
-				+ "\", \n\t \"min\" : \""
-				+ min
-				+ "\", \n\t \"max\" : \""
-				+ max
-				+ "\", \n\t \"breakdowns\" : "
-				+ breakdowns
-				+ "\n }";
+		return "Sensor [id=" + id + ", type=" + type + ", idLocation=" + idLocation + ", state=" + state + ", alert="
+				+ alert + ", brand=" + brand + ", macAddress=" + macAddress + ", ipAddress=" + ipAddress + ", port="
+				+ port + ", configure=" + configure + ", installation=" + installation + ", min=" + min + ", max=" + max
+				+ ", breakdown=" + breakdown + "]";
 	}
+
+	public JSONObject toJSON(List<Sensor> sensors) {
+		JSONObject listToJson = new JSONObject(sensors);
+		return listToJson;
+	}	
+	
 }

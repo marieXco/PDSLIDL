@@ -1,5 +1,7 @@
 package fr.pds.floralis.commons.bean.entity;
 
+import org.json.JSONObject;
+
 /**
  * Building 
  * The entity made to map the Building object and map it to JSON with the toJSON
@@ -40,7 +42,16 @@ public class Building {
 	}
 	
 	//TODO : rename typeBuilding to name
+	public JSONObject toJSON() {
+		JSONObject buildingToJson = new JSONObject();
+		buildingToJson.put("id", id);
+		buildingToJson.put("typeBuilding", typeBuilding);
+		
+		return buildingToJson;
+	}
+
+	@Override
 	public String toString() {
-		return "{ \"id\" : " + id + ", \"typeBuilding\" : \"" + typeBuilding + "\"}";
+		return "Building [id=" + id + ", typeBuilding=" + typeBuilding + "]";
 	}
 }

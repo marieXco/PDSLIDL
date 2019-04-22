@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Floor;
 
-public class FloorDao extends DAO<Floor> {
+public class FloorDao implements DAO<Floor> {
 	Connection connect = null;
 	
 	public FloorDao(Connection connect) throws ClassNotFoundException, SQLException {
@@ -23,9 +23,11 @@ public class FloorDao extends DAO<Floor> {
 	}
 
 	@Override
-	public JSONObject create(JSONObject jsonObject) {
+	public boolean create(Floor floorToCreate) {
+		JSONObject jsonObject = floorToCreate.toJSON();
 		int success = 0;
 		
+		// FIXME : trying without using PGObject
 		PGobject object = new PGobject();
 		try {
 			object.setValue(jsonObject.toString());
@@ -51,27 +53,22 @@ public class FloorDao extends DAO<Floor> {
 			System.exit(0);
 		}
 		
-		JSONObject floorCreated = new JSONObject();
-		
-		if(success > 0) {  
-			floorCreated.put("successCreate", "true");
+		if(success > 0) {
+			return true;
 		} else {
-			floorCreated.put("successCreate", "false");
+			return false;
 		}
 		
-		return floorCreated;
 	}
 
 	@Override
-	public JSONObject delete(JSONObject jsonObject) {
-		
+	public boolean delete(int id) {
 		int success = 0;
-		int floorId = jsonObject.getInt("id"); 
 
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM floors where (data -> 'id')::json::text = '" + floorId + "'::json::text;";
+			String sql = "DELETE FROM floors where (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -84,26 +81,21 @@ public class FloorDao extends DAO<Floor> {
 			System.exit(0);
 		}
 		
-		JSONObject floorDeleted = new JSONObject();
-		
 		if(success > 0) {
-			floorDeleted.put("successDelete", "true");
+			return true;
 		} else {
-			floorDeleted.put("successDelete", "false");
+			return false;
 		}
-
-		return floorDeleted;
 	}
 
 	@Override
-	public JSONObject update(JSONObject jsonObject) {
+	public boolean update(int id, Floor floorToUpdate) {
+		JSONObject jsonObject = floorToUpdate.toJSON();
 		int success = 0;
-		
-		int floorId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE floors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + floorId + "'::json::text;";
+			String sql = "UPDATE floors SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
@@ -118,28 +110,23 @@ public class FloorDao extends DAO<Floor> {
 			System.exit(0);
 		}
 		
-		JSONObject floorUpdated = new JSONObject();
-
 		if(success > 0) {
-			floorUpdated.put("successUpdate", "true");
+			return true;
 		} else {
-			floorUpdated.put("successUpdate", "false");
+			return false;
 		}
-
-		return floorUpdated;
+		
 	}
 
 	@Override
-	public JSONObject find(JSONObject jsonObject) {
+	public Floor find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
 		Floor floor = new Floor(0, null);
-
-		int floorId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM floors where (data -> 'id')::json::text = '" + floorId + "'::json::text;" );
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM floors where (data -> 'id')::json::text = '" + id + "'::json::text;" );
 
 			while (rs.next()) {
 				floor = mapper.readValue(rs.getObject(1).toString(), Floor.class);
@@ -153,13 +140,11 @@ public class FloorDao extends DAO<Floor> {
 			System.exit(0);
 		}
 		
-		JSONObject floorFound = new JSONObject();
-		floorFound.put("floorFound", floor.toString());
-		return floorFound;
+		return floor;
 	}
 
 	@Override
-	public JSONObject findAll() {
+	public List<Floor> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Floor> floors = new ArrayList<Floor>();
 		Floor floor = new Floor(0, null);
@@ -183,12 +168,8 @@ public class FloorDao extends DAO<Floor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-
-
-		JSONObject floorList = new JSONObject();
-		floorList.put("floorList", floors.toString());
 		
-		return floorList;
+		return floors;
 	}
 	
 

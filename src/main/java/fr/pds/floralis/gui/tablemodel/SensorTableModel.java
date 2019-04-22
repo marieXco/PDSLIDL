@@ -21,7 +21,7 @@ public class SensorTableModel extends AbstractTableModel {
 	
 	private List<Sensor> userData = new ArrayList<Sensor>();
 	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
-			"Seuil Min", "Seuil Max", "Alerte"};
+			"Seuil Min", "Seuil Max", "Alerte", "Congiguré"};
 
 	public SensorTableModel() {
 	}
@@ -66,22 +66,44 @@ public class SensorTableModel extends AbstractTableModel {
 		Sensor userObject = userData.get(row);
 		String on = "";
 
-		if(userObject.getState() == true) {
-			on = "Allumé";
-		} else {
+		//try {
+			if(userObject.getState()){
+				on = "Allumé";
+			} else {
+				on = "Eteint";
+			}
+		/*} catch (NullPointerException e) {
 			on = "Eteint";
-		}
+		}*/
 
 		String state = "";
 
-		if(userObject.getAlerts() != null) {
-			state = "Alerte";
-		} else {
-			state = "RAS";
+		try {
+			if(userObject.getAlert()) {
+				state = "Alerte";
+			} else {
+				state = "RAS";
+			}
+		} catch (NullPointerException e) {
+			state = "toto";
 		}
 
-		if(userObject.getBreakdowns() != null) {
-			state = "En panne";
+		try {
+			if(userObject.getBreakdown()) {
+				state = "En panne";
+			}
+		} catch (NullPointerException e) {}
+		
+		String configure = "";
+		
+		try {
+			if(userObject.getConfigure() || userObject.getConfigure() != null) {
+				configure = "Configuré";
+			} else {
+				configure = "A configurer";
+			}
+		} catch (NullPointerException e) {
+			configure = "A configurer";
 		}
 
 		switch (column) {
@@ -92,7 +114,7 @@ public class SensorTableModel extends AbstractTableModel {
 			userAttribute = userObject.getBrand();
 			break;
 		case 2:
-			userAttribute = userObject.getMacAdress();
+			userAttribute = userObject.getMacAddress();
 			break;
 		case 3:
 			userAttribute = userObject.getInstallation();
@@ -108,6 +130,15 @@ public class SensorTableModel extends AbstractTableModel {
 			break;
 		case 7:
 			userAttribute = state;
+			break;
+		case 8:
+			userAttribute = userObject.getIpAddress();
+			break;
+		case 9:
+			userAttribute = userObject.getPort();
+			break;
+		case 10:
+			userAttribute = configure;
 			break;
 		default:
 			break;
