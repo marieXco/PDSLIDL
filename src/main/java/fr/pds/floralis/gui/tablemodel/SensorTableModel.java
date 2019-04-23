@@ -21,7 +21,7 @@ public class SensorTableModel extends AbstractTableModel {
 	
 	private List<Sensor> userData = new ArrayList<Sensor>();
 	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
-			"Seuil Min", "Seuil Max", "Alerte", "Congiguré"};
+			"Seuil Min", "Seuil Max", "Alerte", "Configuration"};
 
 	public SensorTableModel() {
 	}
@@ -66,45 +66,31 @@ public class SensorTableModel extends AbstractTableModel {
 		Sensor userObject = userData.get(row);
 		String on = "";
 
-		//try {
 			if(userObject.getState()){
 				on = "Allumé";
 			} else {
 				on = "Eteint";
 			}
-		/*} catch (NullPointerException e) {
-			on = "Eteint";
-		}*/
 
 		String state = "";
 
-		try {
 			if(userObject.getAlert()) {
 				state = "Alerte";
 			} else {
 				state = "RAS";
 			}
-		} catch (NullPointerException e) {
-			state = "toto";
-		}
-
-		try {
+			
 			if(userObject.getBreakdown()) {
 				state = "En panne";
 			}
-		} catch (NullPointerException e) {}
-		
+
 		String configure = "";
 		
-		try {
-			if(userObject.getConfigure() || userObject.getConfigure() != null) {
+			if(userObject.getConfigure()) {
 				configure = "Configuré";
 			} else {
 				configure = "A configurer";
 			}
-		} catch (NullPointerException e) {
-			configure = "A configurer";
-		}
 
 		switch (column) {
 		case 0: 
@@ -132,12 +118,6 @@ public class SensorTableModel extends AbstractTableModel {
 			userAttribute = state;
 			break;
 		case 8:
-			userAttribute = userObject.getIpAddress();
-			break;
-		case 9:
-			userAttribute = userObject.getPort();
-			break;
-		case 10:
 			userAttribute = configure;
 			break;
 		default:
