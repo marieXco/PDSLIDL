@@ -86,6 +86,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
 	Button buttonUpdateSensorState = new Button("Allumer/Eteindre");
 	Button buttonRefreshSensor = new Button("Refresh");
+	Button buttonNoConfigSensor = new Button("Voir les capteurs non configurés");
 
 	/**
 	 * JMenubar and its componants
@@ -182,6 +183,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(buttonUpdateSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
 		infoSensorsPanel.add(buttonRefreshSensor);
+		infoSensorsPanel.add(buttonNoConfigSensor);
 
 
 		// Mise en place des raccourcis
