@@ -238,7 +238,7 @@ public class Simulation {
 
 
 
-		System.out.println("Cache" + sensorsCache.toString());
+		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
 
 	}
 
