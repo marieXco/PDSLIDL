@@ -20,6 +20,9 @@ public class PropertiesReader {
 	String result = "";
 	InputStream inputStream;
 	List<Entry<String, String>> entryList = new ArrayList<Map.Entry<String, String>>();
+	
+	// FIXME : deux valeurs ne peuvent avoir le même temps --> ajouter la value contenue dans
+	// value.iter.duration puis faire un substring de l'autre côté
 
 	public List<Entry<String, String>> getPropValues() throws IOException {
 

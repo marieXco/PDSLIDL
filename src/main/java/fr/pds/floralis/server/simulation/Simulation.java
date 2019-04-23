@@ -108,14 +108,13 @@ public class Simulation {
 			}
 
 			else {
-				
-				int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
-				int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
-				int realTimeValue = 1;
-
 				// TODO : vérifier qu'il est toujours allumé
 				while(!propertiesList.isEmpty()) { 
 
+					int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
+					int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
+					int realTimeValue = 1;
+					
 					if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
 
 						while(realTimeValue <= messageDuration) {
@@ -204,6 +203,7 @@ public class Simulation {
 					if(!propertiesList.isEmpty()) {
 						propertiesList.remove(propertiesList.size() - 1);
 					} 
+					
 				} 
 			}
 		}
