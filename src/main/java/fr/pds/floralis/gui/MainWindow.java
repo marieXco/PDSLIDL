@@ -12,8 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,19 +46,19 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	private int port;
 
 	ObjectMapper objectMapper = new ObjectMapper();
-	
+
 	static JFrame window = new JFrame();
-	
+
 	/**
 	 * Object to notify the end of the JFrame
 	 */
 	public final Object valueWait = new Object();
-	
+
 	/**
 	 * Principal container 
 	 */
 	JPanel mainContainer = new JPanel();
-	
+
 	/**
 	 * Two main panels, one above the other one
 	 */
@@ -136,18 +134,18 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		setHost(host);
 		setPort(port);
 
-		
+
 		window.setJMenuBar(menuBar);
 		menuBar.add(adding);
 		adding.add(addingSensor);
 		adding.add(addingLocation);		
 
-		
+
 		// Beginning of the sensor FindAll
 		findAllSensor fs = new findAllSensor(host, port);
 		sensorsFoundList = fs.findAll(false);
 		// End of the sensor FindAll
-		
+
 		SensorTableModel sensorModel = new SensorTableModel(sensorsFoundList);
 		sensorsTable = new JTable(sensorModel) {
 			// See WindowConfirm for serialVersionUID
@@ -178,7 +176,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		}
 
 		comboSensors = new JComboBox<Object>(sensorsComboBox);
-		
+
 
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
@@ -187,14 +185,14 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
 
-		
+
 		// Mise en place des raccourcis
 		addingSensor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
 				InputEvent.ALT_DOWN_MASK));
 		addingLocation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
 				InputEvent.ALT_DOWN_MASK));
 
-		
+
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
 		buttonUpdateSensorState.addActionListener(this);
@@ -203,12 +201,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		addingLocation.addActionListener(this);
 		buttonRefreshLocation.addActionListener(this);
 
-		
+
 		locationPanel.setBorder(BorderFactory.createTitledBorder("Localisations"));
 		sensorsPanel.setBorder(BorderFactory
 				.createTitledBorder("Liste des capteurs"));
 
-		
+
 		// Elements les uns à côté des autres
 		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel, BoxLayout.X_AXIS));
 		southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
@@ -220,7 +218,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
 		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
-		
+
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		window.setBounds(0, 0, screenSize.width, screenSize.height);
 
@@ -230,34 +228,23 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		sensorsPanel.setMaximumSize(new Dimension(900, screenSize.height - 400));
 		northPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
 		southPanel.setMaximumSize(new Dimension(screenSize.width, 400));
-		
-		
+
+
 		// Début de la récupération des localisations
-		Request request = new Request();
-		request.setType("FINDALL");
-		request.setEntity("LOCATION");
-		request.setFields(new JSONObject());
-		ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, request.toString());
-		ccLocationFindAll.run();
-
-		String retourCcLocationFindAll = ccLocationFindAll.getResponse();
-		JSONObject locationsFound = new JSONObject();	
-		locationsFound.put("locationsFound", retourCcLocationFindAll);
-
-		Location [] locationsFoundTab =  objectMapper.readValue(locationsFound.get("locationsFound").toString(), Location[].class);
-		List <Location> locationsFoundList = Arrays.asList(locationsFoundTab);
+		findAllLocation fl = new findAllLocation(host, port);
+		List <Location>locationsFoundList = fl.findAll(false);
 		// Fin de la récupération des localisations
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-			if(!(locationsFoundTab[listIndex].getSensorId().isEmpty())) {
-				String sensorsIdString = locationsFoundTab[listIndex].getSensorId().stream().map(Object::toString)
-	                    .collect(Collectors.joining(", "));
-			locationList.add(new JLabel(locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName() + 
-					" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+			if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
+				String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
+						.collect(Collectors.joining(", "));
+				locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId() + 
+						" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
 			}
 		}
-		
-		
+
+
 		locationPanel.add(buttonRefreshLocation);
 		locationPanel.add(locationList);
 		sensorsPanel.add(infoSensorsPanel);	
@@ -276,7 +263,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		// Bordures vides pour toute la fenêtre
 		mainContainer.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
-		
+
 		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de déconnection
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setContentPane(mainContainer);
@@ -328,53 +315,57 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
-			Request request = new Request();
-			request.setType("FINDALL");
-			request.setEntity("LOCATION");
-			request.setFields(new JSONObject());
-			ConnectionClient ccLocationFindAll = new ConnectionClient(host, port, request.toString());
-			ccLocationFindAll.run();
-
-			String retourCcLocationFindAll = ccLocationFindAll.getResponse();
-			JSONObject locationsFound = new JSONObject();	
-			locationsFound.put("locationsFound", retourCcLocationFindAll);
-
-			Location[] locationsFoundTab;
-
-			// On retire tout ce qui est contenu dans le panneau locationList
-			locationList.removeAll();
-			locationList.revalidate();
-			locationList.repaint(); 
-
+			findAllLocation fl = new findAllLocation(host, port);
+			List<Location> locationsFoundList;
+			
 			try {
-				locationsFoundTab = objectMapper.readValue(
-						locationsFound.get("locationsFound").toString(), Location[].class);
+				locationsFoundList = fl.findAll(false);
+				
+				// On retire tout ce qui est contenu dans le panneau locationList
+				locationList.removeAll();
+				locationList.revalidate();
+				locationList.repaint(); 
 
-				for (int listIndex = 0; listIndex < locationsFoundTab.length; listIndex++) {
-					if(!(locationsFoundTab[listIndex].getSensorId().isEmpty())) {
-						String sensorsIdString = locationsFoundTab[listIndex].getSensorId().stream().map(Object::toString)
-			                    .collect(Collectors.joining(", "));
-					locationList.add(new JLabel(locationsFoundTab[listIndex].getBuilding().getTypeBuilding() + " - " + locationsFoundTab[listIndex].getRoom().getTypeRoom() + " - " + locationsFoundTab[listIndex].getFloor().getName() + 
-							" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
+				for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+					if(!(locationsFoundList.get(listIndex).getSensorId().isEmpty())) {
+						String sensorsIdString = locationsFoundList.get(listIndex).getSensorId().stream().map(Object::toString)
+								.collect(Collectors.joining(", "));
+						locationList.add(new JLabel(locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId() + 
+								" - Identifiants des capteurs à cet endroit : " + sensorsIdString));
 					}
 				}
 
-				// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
-				locationPanel.removeAll();
-				locationPanel.add(buttonRefreshLocation);
-				locationPanel.add(locationList);
-
-			} catch (JSONException | IOException e1) {
+			} catch (JsonParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (JsonMappingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+
+
+			// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
+			locationPanel.removeAll();
+			locationPanel.add(buttonRefreshLocation);
+			locationPanel.add(locationList);
+
 		}
 
 		if (e.getSource() == buttonRefreshSensor) {
-			
+
 			try {
 				findAllSensor fs = new findAllSensor(host, port);
 				sensorsFoundList = fs.findAll(false);
-				
+
 				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
 				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
@@ -384,7 +375,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					int tabIndex = listIndex + 1;
 					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
 				}
-				
+
 				comboSensors.removeAllItems();
 
 				for (int i = 0; i < sensorsComboBox.length; i++) {
@@ -392,16 +383,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				}
 
 				sensorsTable.setModel(sensorModelRefresh);
-				
+
 			} catch (JSONException | IOException | InterruptedException e2) {
 				e2.printStackTrace();
 			}
-			
+
 		}
-		
+
 		if (e.getSource() == buttonUpdateSensorState) {
 			int indexSensor = comboSensors.getSelectedIndex();
-			
+
 			Sensor sensorUpdateState = sensorsFoundList.get(indexSensor - 1);
 			if (sensorUpdateState.getState() == true) {
 				sensorUpdateState.setState(false);
@@ -409,14 +400,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				sensorUpdateState.setState(true);
 			}
 
-			JSONObject sensorUpdateStateJson = new JSONObject(sensorUpdateState);
-			
+			JSONObject sensorUpdateStateJson = new JSONObject();
+			sensorUpdateStateJson.put("id", sensorUpdateState.getId());
+			sensorUpdateStateJson.put("sensorToUpdate", sensorUpdateState.toJSON());
+
 			Request request = new Request();		
 			request.setType("UPDATE");
 			request.setEntity("SENSOR");
 			request.setFields(sensorUpdateStateJson);
-			
-			ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toString());
+
+			ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toJSON().toString());
 			ccSensorUpdateState.run();
 			// Fin du sensorUpdate 
 		}
@@ -462,61 +455,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					request.setType("DELETE");
 					request.setEntity("SENSOR");
 					request.setFields(sensorFoundDelete);
-					
-					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toString());
+
+					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
 					ccSensorDelete.run();
 
-					// Ici, il faut récupérer la localisation qui est associée au capteur pour 
+					// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
-					Request secondRequest = new Request();		
-					secondRequest.setType("FINDBYID");
-					secondRequest.setEntity("LOCATION");
-					secondRequest.setFields(sensorFoundDelete);
-					
-					ConnectionClient ccLocationFindById = new ConnectionClient(host, port, secondRequest.toString());
-					ccLocationFindById.run();
-
-					String retoursLocationFindById = ccLocationFindById.getResponse();
-					JSONObject locationFoundJson = new JSONObject();	
-					locationFoundJson.put("retourLocation", retoursLocationFindById);
-
-					ObjectMapper objectMapper = new ObjectMapper();
-					Location locationFound;
-
-					try {
-						locationFound = objectMapper.readValue(
-								locationFoundJson.get("retourLocation").toString(), Location.class);
-
-						// Ici, on récupère tous les id des sensors de la localisation trouvée
-						List <Integer> oldListSensorLocation = new ArrayList<Integer>();
-						// On créer un nouveau tableau
-						List <Integer> newListSensorLocation = new ArrayList<Integer>();
-						
-
-						// On ajoute dans ce nouveau tableau, tous les capteurs sauf celui qu'on vient de supprimer
-						if(!oldListSensorLocation.contains(idSensorDelete)) {
-							newListSensorLocation.addAll(oldListSensorLocation);
-						}
-						else {
-							newListSensorLocation.addAll(oldListSensorLocation);
-							newListSensorLocation.add(idSensorDelete);
-						}
-
-						// On modifie en mettant notre nouveau tableau puis on fait l'update sur la table des localisations
-						locationFound.setSensorId(newListSensorLocation);
-						JSONObject parametersLocation = new JSONObject(locationFound);	
-
-						Request third = new Request();		
-						third.setType("UPDATE");
-						third.setEntity("LOCATION");
-						third.setFields(parametersLocation);
-						
-						ConnectionClient ccLocationUpdate = new ConnectionClient(host, port, third.toString());
-						ccLocationUpdate.run();
-
-					} catch (JSONException | IOException e1) {
-						e1.printStackTrace();
-					}
 
 				}
 			}
@@ -540,7 +484,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
 
 				try {
-					new WindowUpdate(getHost(), getPort()).initUpdateSensor(idSensor);
+					try {
+						new WindowUpdate(getHost(), getPort()).initUpdateSensor(idSensor);
+					} catch (HeadlessException | JSONException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				} catch (IOException e1) {
 
 					e1.printStackTrace();

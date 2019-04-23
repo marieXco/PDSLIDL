@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Building;
 
-public class BuildingDao extends DAO<Building> {
+public class BuildingDao implements DAO<Building> {
 	Connection connect = null;
 
 	public BuildingDao(Connection connect) throws ClassNotFoundException, SQLException {
@@ -23,7 +23,8 @@ public class BuildingDao extends DAO<Building> {
 	}
 
 	@Override
-	public JSONObject create(JSONObject jsonObject) {
+	public boolean create(Building buildingToCreate) {
+		JSONObject jsonObject = buildingToCreate.toJSON();
 		int success = 0;
 
 		// FIXME : trying without using PGObject
@@ -52,32 +53,28 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		JSONObject buildingCreated = new JSONObject();
-
+		
 		if(success > 0) {
-			buildingCreated.put("successCreate", "true");
+			return true;
 		} else {
-			buildingCreated.put("successCreate", "false");
+			return false;
 		}
-
-		return buildingCreated;
+		
 	}
 
 	@Override
-	public JSONObject delete(JSONObject jsonObject) {
+	public boolean delete(int id) {
 		int success = 0;
-		int buildingId = jsonObject.getInt("id"); //traduction de mon id en int 
-
+		
 		// Works like create
 		try {
 			connect.setAutoCommit(false);
 
-			String sql = "DELETE FROM buildings where (data -> 'id')::json::text = '" + buildingId + "'::json::text;";
+			String sql = "DELETE FROM buildings where (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
-			success = statement.executeUpdate();
+			statement.executeUpdate();
 			connect.commit();
 			statement.close();
 
@@ -85,31 +82,26 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		JSONObject buildingDeleted = new JSONObject();
-
+		
 		if(success > 0) {
-			buildingDeleted.put("successDelete", "true");
+			return true;
 		} else {
-			buildingDeleted.put("successDelete", "false");
+			return false;
 		}
-
-		return buildingDeleted;
 	}
 
 	@Override
-	public JSONObject update(JSONObject jsonObject) {
+	public boolean update(int id, Building buildingToCreate) {
+		JSONObject jsonObject = buildingToCreate.toJSON();
 		int success = 0;
-
-		int buildingId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
-			String sql = "UPDATE buildings SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + buildingId + "'::json::text;";
+			String sql = "UPDATE buildings SET data = '" + jsonObject + "' WHERE (data -> 'id')::json::text = '" + id + "'::json::text;";
 
 			PreparedStatement statement = connect.prepareStatement(sql);
 
-			success = statement.executeUpdate();
+			statement.executeUpdate();
 			connect.commit();
 
 
@@ -119,33 +111,26 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-
-		JSONObject buildingUpdated = new JSONObject();
-
+		
 		if(success > 0) {
-			buildingUpdated.put("successUpdate", "true");
+			return true;
 		} else {
-			buildingUpdated.put("successUpdate", "false");
+			return false;
 		}
 		
-		return buildingUpdated;
 	}
 
 	@Override
-	public JSONObject find(JSONObject jsonObject) {
+	public Building find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
 		Building building = new Building(0, null);
-
-		int locationId = jsonObject.getInt("id");
 
 		try {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM buildings where (data -> 'id')::json::text = '" + locationId + "'::json::text;" );
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM buildings where (data -> 'id')::json::text = '" + id + "'::json::text;" );
 
-			// traitement effectué tnat qu'il y a des lignes
 			while (rs.next()) {
-				//Poser questions sur ça 
 				building = mapper.readValue(rs.getObject(1).toString(), Building.class);
 			}			
 
@@ -155,20 +140,12 @@ public class BuildingDao extends DAO<Building> {
 		} catch (Exception e) {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
-		}
-
-		if (building.getTypeBuilding() != null) {
-			System.out.println("find success");
-		}
-
-		JSONObject buildingFound = new JSONObject();
-		buildingFound.put("buildingFound", building.toString());
-		
-		return buildingFound;
+		}		
+		return building;
 	}
 
 	@Override
-	public JSONObject findAll() {
+	public List<Building> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Building> buidings = new ArrayList<Building>();
 		Building buiding = new Building(0, null);
@@ -192,15 +169,8 @@ public class BuildingDao extends DAO<Building> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}	
-		// on regarde si mon tableau est vide ou pas pr voir si ça a fonctionné 
-		if (buidings != null) {
-			System.out.println("findAll success");
-		}
 
-		JSONObject buildingList = new JSONObject();
-		buildingList.put("buildingList", buidings.toString());
-
-		return buildingList;
+		return buidings;
 	}
 
 

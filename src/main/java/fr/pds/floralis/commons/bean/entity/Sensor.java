@@ -1,8 +1,9 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 
@@ -167,37 +168,39 @@ public class Sensor {
 	public Sensor() {
 
 	}
-
+	
+	public JSONObject toJSON() {
+		JSONObject sensorToJson = new JSONObject(); 
+		sensorToJson.put("id", id);
+		sensorToJson.put("idLocation", idLocation);
+		sensorToJson.put("type", type);
+		sensorToJson.put("state", state);
+		sensorToJson.put("alert", alert);
+		sensorToJson.put("brand", brand);
+		sensorToJson.put("macAddress", macAddress);
+		sensorToJson.put("installation", installation);
+		sensorToJson.put("ipAddress", ipAddress);
+		sensorToJson.put("port", port);
+		sensorToJson.put("configure", configure);
+		sensorToJson.put("min", min);
+		sensorToJson.put("max", max);
+		sensorToJson.put("breakdown", breakdown);
+		
+		return sensorToJson;
+	}
+	
+	
 	@Override
 	public String toString() {
-		return "\n { \n\"id\" : "
-				+ id
-				+ ", \n\t \"idLocation\" : "
-				+ idLocation
-				+ ", \n\t \"type\" : "
-				+ type
-				+ ", \n\t \"state\" : "
-				+ state
-				+ ", \n\t \"alert\" : "
-				+ alert
-				+ ", \n\t \"brand\" : \""
-				+ brand
-				+ "\", \n\t \"macAddress\" : \""
-				+ macAddress
-				+ "\", \n\t \"ipAddress\" : \""
-				+ ipAddress
-				+ "\", \n\t \"port\" : \""
-				+ port
-				+ "\", \n\t \"configure\" : \""
-				+ configure
-				+ "\", \n\t \"installation\" : \""
-				+ installation
-				+ "\", \n\t \"min\" : \""
-				+ min
-				+ "\", \n\t \"max\" : \""
-				+ max
-				+ "\", \n\t \"breakdown\" : "
-				+ breakdown
-				+ "\n }";
+		return "Sensor [id=" + id + ", type=" + type + ", idLocation=" + idLocation + ", state=" + state + ", alert="
+				+ alert + ", brand=" + brand + ", macAddress=" + macAddress + ", ipAddress=" + ipAddress + ", port="
+				+ port + ", configure=" + configure + ", installation=" + installation + ", min=" + min + ", max=" + max
+				+ ", breakdown=" + breakdown + "]";
 	}
+
+	public JSONObject toJSON(List<Sensor> sensors) {
+		JSONObject listToJson = new JSONObject(sensors);
+		return listToJson;
+	}	
+	
 }

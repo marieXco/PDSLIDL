@@ -33,12 +33,14 @@ public class Request {
 
 	
 	public String toString() {
-		return "\n { \n\t \"type\" : \""
-				+ type
-				+ "\", \n\t \"requested-view-entity\" : \""
-				+ entity
-				+ "\", \n\t \"requested-parameters\" : "
-				+ parameters
-				+ "\n }";
+		return "Request [type=" + type + ", entity=" + entity + ", parameters=" + parameters + "]";
+	}
+
+	public JSONObject toJSON() {
+		JSONObject requestToJson = new JSONObject();
+		requestToJson.put("type", type);
+		requestToJson.put("requested-view-entity", entity);
+		requestToJson.put("requested-parameters", parameters);
+		return requestToJson;
 	}
 }

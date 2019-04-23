@@ -37,19 +37,14 @@ public class findAllSensor  {
 		request.setEntity("SENSOR");
 		request.setFields(new JSONObject());
 		
-		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toString());
+		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toJSON().toString());
 		ccSensorFindAll.run();
 		
-		String retoursCcSensorFindAll = ccSensorFindAll.getResponse();
-		JSONObject sensorsFound = new JSONObject();
-		sensorsFound.put("sensorsFound", retoursCcSensorFindAll);
-		System.out.println(sensorsFound.get("sensorsFound"));
-		
-		Sensor[] sensorsFoundTab =  objectMapper.readValue(sensorsFound.get("sensorsFound").toString(), Sensor[].class);
+		Sensor[] sensorsFoundTab =  objectMapper.readValue(ccSensorFindAll.getResponse(), Sensor[].class);
 		sensorsList = Arrays.asList(sensorsFoundTab);
 		
-		if(refresh) {
-			//Thread.sleep(6000);
+		if(refresh) { 
+			Thread.sleep(6000);
 			findAll(true);
 		}
 		
