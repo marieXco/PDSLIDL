@@ -1,12 +1,10 @@
 package fr.pds.floralis.server.simulation;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -25,7 +23,7 @@ public class Simulation {
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
-	public static void simulationTest() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static void simulationTest() throws IOException, InterruptedException {
 		Logger logger = Logger.getLogger("Simulaiton Logger");
 
 		/**
@@ -62,17 +60,22 @@ public class Simulation {
 		 * We get the .properties properties
 		 * We stock the id and the type in two String and remove it from the propertiesList
 		 */
-		List<Entry<String, String>> propertiesList = new ArrayList<Map.Entry<String, String>>();
-
+		int propertiesId = 0;
 		PropertiesReader properties = new PropertiesReader();
-		propertiesList = properties.getPropValues();
-		int propertiesId = Integer.parseInt(propertiesList.get(0).getValue());
-		String propertiesType = propertiesList.get(1).getValue();
+		List<Entry<String, String>> propertiesList = properties.getPropValues();
+		if(propertiesList == null) {
+			logger.warning("We get no messages at all, something went wrong");
+			return;
+		} else {
+			propertiesId = Integer.parseInt(propertiesList.get(0).getValue());
+			String propertiesType = propertiesList.get(1).getValue();
 
-		propertiesList.remove(0);
-		propertiesList.remove(0);
+			propertiesList.remove(0);
+			propertiesList.remove(0);
 
-		System.out.println("Type : " + propertiesType + "\nId : " + propertiesId);
+			System.out.println("Type : " + propertiesType + "\nId : " + propertiesId);
+		}
+
 
 		/**
 		 * With the id from the properties, we find the id
@@ -103,8 +106,30 @@ public class Simulation {
 		if(sensorFound.getState()) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
 
-			if (propertiesList.isEmpty()) {
-				logger.warning("The sensor is on but we get no messages, is the sensor broken ?");
+			int breakdownTrigger = 10;
+			int waitingToConfirmBreakdown = 1;
+
+			if(propertiesList.isEmpty()) {
+				while (waitingToConfirmBreakdown <= breakdownTrigger) {
+					logger.warning("The sensor is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+					Thread.sleep(1000);
+					waitingToConfirmBreakdown++;
+				}
+
+				if(sensorFound.getBreakdown() == false) {
+					JSONObject newStateOnBreakdown = new JSONObject();
+					sensorFound.setBreakdown(true);
+					newStateOnBreakdown.put("id", sensorFound.getId());
+					newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
+
+					Request thirdRequest = new Request();
+					thirdRequest.setType("UPDATE");
+					thirdRequest.setEntity("SENSOR");
+					thirdRequest.setFields(newStateOnBreakdown);
+
+					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+					ccr.run();
+				}
 			}
 
 			else {
@@ -114,7 +139,7 @@ public class Simulation {
 					int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
 					int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
 					int realTimeValue = 1;
-					
+
 					if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
 
 						while(realTimeValue <= messageDuration) {
@@ -171,7 +196,7 @@ public class Simulation {
 						}
 
 						while(realTimeValue <= messageDuration) {
-							
+
 							sensorsCache.put("NOALERT", realTimeValue);
 							logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
 									realTimeValue + " seconds with the value " + messageValue);
@@ -192,18 +217,18 @@ public class Simulation {
 								ccrr.run();
 
 							}
-							
+
 							realTimeValue++;
 							Thread.sleep(1000);
 
 						}
 
 					}
-					
+
 					if(!propertiesList.isEmpty()) {
 						propertiesList.remove(propertiesList.size() - 1);
 					} 
-					
+
 				} 
 			}
 		}
