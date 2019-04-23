@@ -137,9 +137,15 @@ public class RequestHandler implements Runnable {
 						break;
 						
 					case "FINDBYCONFIG":
-						JSONObject sensorFoundByConfig = sensorDao.find(parameters);
+						// FIXME 
+						// Le find ne fonctionne que si on lui passe un id en paramètre, si on lui passe une 
+						// config en parametre, il faut alors créer findByConfig dans le sensorDAO
+						// qui prend une config en paramètre et qui renvoi tous les sensor de
+						// cette configuration
+						// Pour plus de précisions, contactez lolo du 77
+						//JSONObject sensorFoundByConfig = sensorDao.find(parameters);
 
-						toSend = sensorFoundByConfig.get("sensorFoundByConfig").toString();
+						//toSend = sensorFoundByConfig.get("sensorFoundByConfig").toString();
 						break;
 					default:
 						toSend = "Unkwown command for the Sensors table !";
