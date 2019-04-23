@@ -49,7 +49,7 @@ public class findAllSensor  {
 		sensorsList = Arrays.asList(sensorsFoundTab);
 		
 		if(refresh) {
-			Thread.sleep(6000);
+			//Thread.sleep(6000);
 			findAll(true);
 		}
 		

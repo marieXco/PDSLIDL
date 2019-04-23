@@ -118,6 +118,12 @@ public class RequestHandler implements Runnable {
 
 						toSend = jsonSensorDaoUpdate.get("successUpdate").toString();
 						break;
+						
+					case "FINDBYCONFIG":
+						JSONObject sensorFoundByConfig = sensorDao.find(parameters);
+
+						toSend = sensorFoundByConfig.get("sensorFoundByConfig").toString();
+						break;
 					default:
 						toSend = "Unkwown command for the Sensors table !";
 						break;
