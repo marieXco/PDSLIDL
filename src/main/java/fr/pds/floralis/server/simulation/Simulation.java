@@ -1,11 +1,15 @@
 package fr.pds.floralis.server.simulation;
 
 import java.io.IOException;
+import static java.util.concurrent.TimeUnit.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
@@ -22,8 +26,11 @@ import fr.pds.floralis.gui.connexion.ConnectionClient;
 public class Simulation {
 
 	static ObjectMapper objectMapper = new ObjectMapper();
+	private Sensor sensorFound = new Sensor();
+	private final ScheduledExecutorService scheduler =
+			Executors.newScheduledThreadPool(1);
 
-	public static void simulationTest() throws IOException, InterruptedException {
+	public void simulationTest() throws IOException, InterruptedException {
 		Logger logger = Logger.getLogger("Simulaiton Logger");
 
 		/**
@@ -63,6 +70,7 @@ public class Simulation {
 		int propertiesId = 0;
 		PropertiesReader properties = new PropertiesReader();
 		List<Entry<String, String>> propertiesList = properties.getPropValues();
+
 		if(propertiesList == null) {
 			logger.warning("We get no messages at all, something went wrong");
 			return;
@@ -80,30 +88,19 @@ public class Simulation {
 		/**
 		 * With the id from the properties, we find the id
 		 */
-		JSONObject sensorId = new JSONObject();
-		sensorId.put("id", propertiesId);
-
-		Request request = new Request();
-		request.setType("FINDBYID");
-		request.setEntity("SENSOR");
-		request.setFields(sensorId);
-
-		ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
-		cc.run();
-
-		String response = cc.getResponse();
-		Sensor sensorFound =  objectMapper.readValue(response.toString(), Sensor.class);
+		refreshSensorInfos();
 
 		HashMap<String, Integer> sensorsCache = new HashMap<String, Integer>();
 
-
+		System.out.println(getSensorFound().toJSON());
 
 		// TODO : instead of 10 --> get the sensor time before alert thanks to the day/nightTime
 		// TODO : possible alert again when the value changes but still too high ? 
 		// TODO : stop when we find an alert ? 
 		// TODO : update only when the state before is not the new one
 
-		if(sensorFound.getState()) {
+		Thread.sleep(4000);
+		if(getSensorFound().getState()) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
 
 			int breakdownTrigger = 10;
@@ -133,15 +130,16 @@ public class Simulation {
 			}
 
 			else {
-				// TODO : vérifier qu'il est toujours allumé
-				while(!propertiesList.isEmpty()) { 
+				// TODO : vérifier qu'il est toujours allumé, test en changeant les valeurs en direct
+				// TODO : changer le logger pour qu'il soit moins visible ainisi que dans le connectionclient
+				while(!propertiesList.isEmpty()) {
 
 					int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
 					int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
 					int realTimeValue = 1;
 
 					if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
-
+						
 						while(realTimeValue <= messageDuration) {
 
 							while(realTimeValue < 10) {
@@ -150,8 +148,12 @@ public class Simulation {
 								}
 
 								sensorsCache.put("POSSIBLEALERT", realTimeValue);
-								logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
-										realTimeValue + " seconds with the value " + messageValue);
+
+								if(realTimeValue % 5 == 0 || realTimeValue == 10  || realTimeValue == 1) {
+									logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
+											realTimeValue + " seconds with the value " + messageValue);
+								}
+
 								Thread.sleep(1000);
 								realTimeValue++;
 							}
@@ -164,8 +166,10 @@ public class Simulation {
 
 							sensorsCache.put("ALERT", realTimeValue);
 
-							logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
-									realTimeValue + " seconds with the value " + messageValue);
+							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
+								logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
+										realTimeValue + " seconds with the value " + messageValue);
+							}
 
 
 							if(sensorFound.getAlert() == false) {
@@ -197,9 +201,12 @@ public class Simulation {
 
 						while(realTimeValue <= messageDuration) {
 
+
 							sensorsCache.put("NOALERT", realTimeValue);
-							logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
-									realTimeValue + " seconds with the value " + messageValue);
+							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
+								logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
+										realTimeValue + " seconds with the value " + messageValue);
+							}
 
 							if(sensorFound.getAlert()) {
 								JSONObject newStateNoAlert = new JSONObject();
@@ -242,7 +249,61 @@ public class Simulation {
 
 	}
 
+	public Sensor refreshSensorInfos() {
+		final Runnable refresh = new Runnable() {
+
+			public void run() { 
+				JSONObject sensorId = new JSONObject();
+				sensorId.put("id", 1);
+
+				Request request = new Request();
+				request.setType("FINDBYID");
+				request.setEntity("SENSOR");
+				request.setFields(sensorId);
+
+				ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
+				cc.run();
+
+				String response = cc.getResponse();
+				try {
+					sensorFound = objectMapper.readValue(response.toString(), Sensor.class);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		};
+
+		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
+
+		scheduler.schedule(
+				new Runnable() {
+					public void run() { 
+						refreshHandle.cancel(true); 
+					}
+				}, 60 * 60, SECONDS
+				);
+
+		return sensorFound;
+	}
+
+	/**
+	 * @return the sensorFound
+	 */
+	public Sensor getSensorFound() {
+		return sensorFound;
+	}
+
+	/**
+	 * @param sensorFound the sensorFound to set
+	 */
+	public void setSensorFound(Sensor sensorFound) {
+		this.sensorFound = sensorFound;
+	}
+
 	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
-		Simulation.simulationTest();
+		Simulation simu = new Simulation() ;
+		simu.simulationTest();
 	}
 }
