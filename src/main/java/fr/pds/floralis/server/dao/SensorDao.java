@@ -176,7 +176,7 @@ public class SensorDao implements DAO<Sensor> {
 		return sensors;
 	}
 
-	public List<Sensor> findByConfig() {
+	public List<Sensor> findByConfig(Boolean configure) {
 		// TODO Auto-generated method stub
 		return null;
 	}

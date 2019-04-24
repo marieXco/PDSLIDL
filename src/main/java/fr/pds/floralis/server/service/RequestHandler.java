@@ -128,7 +128,8 @@ public class RequestHandler implements Runnable {
 						break;
 						
 					case "FINDBYCONFIG":
-						List<Sensor> sensorListConfig = sensorDao.findByConfig();
+						List<Sensor> sensorListConfig = sensorDao.findByConfig(parameters.getBoolean("configure"));
+						
 						JSONArray sensorFoundByConfig = new JSONArray(sensorListConfig);
 
 						toSend = sensorFoundByConfig.toString();
