@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
 
+
 public class SensorDao implements DAO<Sensor> {
 	Connection connect = null;
 	
@@ -175,10 +176,34 @@ public class SensorDao implements DAO<Sensor> {
 		
 		return sensors;
 	}
+	
 
 	public List<Sensor> findByConfig(Boolean configure) {
-		// TODO Auto-generated method stub
-		return null;
+		ObjectMapper mapper = new ObjectMapper();
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		Sensor sensor = new Sensor();
+
+		try {
+			connect.setAutoCommit(false);
+			Statement stmt = connect.createStatement();
+
+			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors where (data -> 'configure')::json::text = '" + configure + "'::json::text;");
+
+			while (rs.next()) {
+				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
+				sensors.add(sensor);
+			}
+
+			rs.close();
+			stmt.close();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}	
+		System.out.println();
+		
+		return sensors;
 	}
 
 }
