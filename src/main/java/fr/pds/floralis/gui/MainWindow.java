@@ -2,6 +2,7 @@ package fr.pds.floralis.gui;
 
 import java.awt.Button;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -231,6 +232,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		window.setBounds(0, 0, screenSize.width, screenSize.height);
 
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
+		infoSensorsPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 300));
 		locationList.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
 		locationPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
 		sensorsPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
