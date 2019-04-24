@@ -2,6 +2,8 @@ package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
 
+import org.json.JSONObject;
+
 import fr.pds.floralis.commons.bean.entity.type.TypeLevel;
 
 /**
@@ -69,11 +71,13 @@ public class Alert {
 		this.level = level;
 	}
 
-	
-	public String toJSON() {
-		return "Alert [id=" + id + ", level=" + level + ", sensor=" + sensor + ", start=" + start + ", end=" + end
-				+ "]";
+	public JSONObject toJSON() {
+		JSONObject alertToJson = new JSONObject();
+		alertToJson.put("id", id);
+		alertToJson.put("level", level);
+		alertToJson.put("sensor", sensor);
+		alertToJson.put("start", start);
+		alertToJson.put("end", end);
+		return alertToJson;
 	}
-	
-	
 }

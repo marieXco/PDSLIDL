@@ -9,10 +9,10 @@ package fr.pds.floralis.commons.bean.entity;
  */
 
 public abstract class Person {
-	private int id;
-	private String lastname;
-	private String firstname;
-	private int code;
+	protected int id;
+	protected String lastname;
+	protected String firstname;
+	protected int code;
 
 	public int getId() {
 		return id;

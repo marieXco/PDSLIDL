@@ -87,6 +87,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	Button buttonUpdateSensorState = new Button("Allumer/Eteindre");
 	Button buttonRefreshSensor = new Button("Refresh");
 	Button buttonNoConfigSensor = new Button("Voir les capteurs non configurés");
+	Button buttonYesConfigSensor = new Button("Voir les capteurs déjà configurés");
+	Button buttonConfigSensor = new Button ("Configurer le capteur");
 
 	/**
 	 * JMenubar and its componants
@@ -182,8 +184,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
+		infoSensorsPanel.add(buttonConfigSensor);
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
+		infoSensorsPanel.add(buttonYesConfigSensor);
 
 
 		// Mise en place des raccourcis
@@ -199,7 +203,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		buttonRefreshSensor.addActionListener(this);
 		addingSensor.addActionListener(this);
 		addingLocation.addActionListener(this);
+		buttonConfigSensor.addActionListener(this);
 		buttonRefreshLocation.addActionListener(this);
+		buttonNoConfigSensor.addActionListener(this);
+		buttonYesConfigSensor.addActionListener(this);
+		
 
 
 		locationPanel.setBorder(BorderFactory.createTitledBorder("Localisations"));
@@ -223,11 +231,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		window.setBounds(0, 0, screenSize.width, screenSize.height);
 
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
-		locationList.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
-		locationPanel.setMaximumSize(new Dimension(screenSize.width - 900, screenSize.height - 400));
-		sensorsPanel.setMaximumSize(new Dimension(900, screenSize.height - 400));
-		northPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
-		southPanel.setMaximumSize(new Dimension(screenSize.width, 400));
+		locationList.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
+		locationPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
+		sensorsPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 400));
+		northPanel.setMaximumSize(new Dimension(screenSize.width, 500));
+		southPanel.setMaximumSize(new Dimension(screenSize.width, screenSize.height - 500));
 
 
 		// Début de la récupération des localisations
@@ -249,19 +257,19 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		locationPanel.add(locationList);
 		sensorsPanel.add(infoSensorsPanel);	
 		sensorsPanel.add(new JScrollPane(paneSensors));
+		southPanel.add(sensorsPanel);
 		northPanel.add(locationPanel);
-		northPanel.add(sensorsPanel);
 		mainContainer.add(northPanel);
 		mainContainer.add(southPanel);
 
 
 		// Bordures vides pour l'espace entre les deux gros panneaux
-		northPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-		southPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+		northPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		// Bordures vides pour l'espace dans le panneau des capteurs (du padding)
-		locationList.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		locationList.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
 		// Bordures vides pour toute la fenêtre
-		mainContainer.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+		mainContainer.setBorder(BorderFactory.createEmptyBorder(5, 3, 5, 3));
 
 
 		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de déconnection
@@ -312,6 +320,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				e1.printStackTrace();
 			}
 		}
+		
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
@@ -494,6 +503,86 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 					e1.printStackTrace();
 				}
+			}
+
+		}
+		
+		if(e.getSource() == buttonConfigSensor) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			
+			if (indexSensor > 0) {
+				System.out.println(sensorsFoundList.get(indexSensor - 1).getId());
+
+				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
+
+				/*try {
+					try {
+						//TODO open the window to configure sensor
+					} catch (HeadlessException | JSONException | InterruptedException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+				} catch (IOException e2) {
+
+					e2.printStackTrace();
+				} */
+			}
+		}
+		
+		if (e.getSource() == buttonNoConfigSensor) {
+			try {
+				FindSensorByConfig fs = new FindSensorByConfig(host, port);
+				sensorsFoundList = fs.findByConfig(false, false);
+
+				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
+
+				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+				sensorsComboBox[0]= "-- Identifiant du capteur --";
+
+				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+					int tabIndex = listIndex + 1;
+					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+				}
+
+				comboSensors.removeAllItems();
+
+				for (int i = 0; i < sensorsComboBox.length; i++) {
+					comboSensors.addItem(sensorsComboBox[i]);
+				}
+
+				sensorsTable.setModel(sensorModelRefresh);
+
+			} catch (JSONException | IOException | InterruptedException e2) {
+				e2.printStackTrace();
+			}
+
+		}
+		
+		if (e.getSource() == buttonYesConfigSensor) {
+			try {
+				FindSensorByConfig fs = new FindSensorByConfig(host, port);
+				sensorsFoundList = fs.findByConfig(false, true);
+
+				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
+
+				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+				sensorsComboBox[0]= "-- Identifiant du capteur --";
+
+				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+					int tabIndex = listIndex + 1;
+					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+				}
+
+				comboSensors.removeAllItems();
+
+				for (int i = 0; i < sensorsComboBox.length; i++) {
+					comboSensors.addItem(sensorsComboBox[i]);
+				}
+
+				sensorsTable.setModel(sensorModelRefresh);
+
+			} catch (JSONException | IOException | InterruptedException e2) {
+				e2.printStackTrace();
 			}
 
 		}
