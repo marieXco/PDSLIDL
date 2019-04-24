@@ -408,6 +408,22 @@ public class RequestHandler implements Runnable {
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
+				case "TYPESENSOR":
+					TypeSensorDao typeSensorDao = new TypeSensorDao(connection);
+
+					switch (command.toUpperCase()) {
+					case "FINDSENSITIVITY":
+						TypeSensor typeSensor = typeSensorDao.findByType(parameters.getString("type"));		
+						
+						toSend = typeSensor.toJSON().toString();
+						break;
+
+					default:
+						toSend = "Unkwown command for the TypeSensor table !";
+						break;
+					}
+					DataSource.backConnection(jdbc, connection);
+					break;
 
 				default:
 					toSend = "Unkwown table !";
