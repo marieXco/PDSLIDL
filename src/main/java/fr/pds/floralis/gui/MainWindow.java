@@ -2,7 +2,6 @@ package fr.pds.floralis.gui;
 
 import java.awt.Button;
 import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
