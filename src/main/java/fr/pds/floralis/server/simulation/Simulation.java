@@ -30,56 +30,30 @@ public class Simulation {
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 	private Sensor sensorFound = new Sensor();
+	private String periodOfDay = "";	
 	private int propertiesId = 0;
+	private int sensitivity = 0;
 	private final ScheduledExecutorService scheduler =
 			Executors.newScheduledThreadPool(1);
 
 	public void simulationTest() throws IOException, InterruptedException {
 		Logger logger = Logger.getLogger("Logger");
-		
+
 		try {
-
 			FileHandler fh=new FileHandler("%hMonLog.log");
-
 			logger.addHandler(fh);
-
-			} catch (SecurityException e) {
-
+		} catch (SecurityException e) {
 			e.printStackTrace();
-
-			} catch (IOException e) {
-
+		} catch (IOException e) {
 			e.printStackTrace();
+		}
 
-			}
-		
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
 		 * From 09:00:00 to 19:59:00 --> Daytime
 		 */
-		String periodOfDay = "";
-
-		Calendar now = Calendar.getInstance();
-		
-		Calendar night = new GregorianCalendar();	
-		night.set(Calendar.HOUR_OF_DAY, 20);
-		night.set(Calendar.MINUTE, 00);
-		night.set(Calendar.SECOND, 00);
-
-		Calendar day = new GregorianCalendar();	
-		day.set(Calendar.HOUR_OF_DAY, 8);
-		day.set(Calendar.MINUTE, 59);
-		day.set(Calendar.SECOND, 59);
-		
-
-		// TODO : refresh if it changes during simulation
-		if(now.before(night) && now.after(day)) {
-			periodOfDay = "DAYTIME";
-		} else {
-			periodOfDay = "NIGHTTIME";
-		}
-		
+		refreshPeriodOfDay();
 
 		/**
 		 * We get the .properties properties
@@ -88,7 +62,7 @@ public class Simulation {
 		String propertiesType = "";
 		PropertiesReader properties = new PropertiesReader();
 		List<Entry<String, String>> propertiesList = properties.getPropValues();
-		
+
 
 		if(propertiesList == null) {
 			logger.warning("We get no messages at all, something went wrong");
@@ -99,9 +73,9 @@ public class Simulation {
 
 			propertiesList.remove(0);
 			propertiesList.remove(0);
-			
+
 		}
-		
+
 		JSONObject requestSensitivities = new JSONObject();
 		requestSensitivities.put("type", propertiesType.toUpperCase());
 
@@ -112,11 +86,11 @@ public class Simulation {
 
 		ConnectionClient ccRequestSensitivities = new ConnectionClient("127.0.0.1", 2412, forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
-		
+
 		String response = ccRequestSensitivities.getResponse();
 		TypeSensor typeFound = objectMapper.readValue(response.toString(), TypeSensor.class);
-		
-		int sensitivity = 0;
+
+
 		if (periodOfDay.equals("DAYTIME")) {
 			sensitivity = typeFound.getDaySensitivity();
 			logger.info("We're in daytime : sensitivity of daytime --> " + sensitivity + " seconds");
@@ -124,7 +98,7 @@ public class Simulation {
 			sensitivity = typeFound.getNightSensitivity();
 			logger.info("We're in nighttime : sensitivity of nighttime --> " + sensitivity + " seconds");
 		}
-		
+
 		/**
 		 * With the id from the properties, we find the id; we refresh it so we get the last infos from the sensor
 		 */
@@ -132,157 +106,159 @@ public class Simulation {
 
 		HashMap<String, Integer> sensorsCache = new HashMap<String, Integer>();
 
-
-		// TODO : possible alert again when the value changes but still too high ? 
 		Thread.sleep(4000);
-		if(sensorFound.getState()) {
+		// TODO : possible alert again when the value changes but still too high ? 
+		// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
+		while(sensorFound != null) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
 
-			int breakdownTrigger = 10;
-			int waitingToConfirmBreakdown = 1;
 
-			if(propertiesList.isEmpty()) {
-				while (waitingToConfirmBreakdown <= breakdownTrigger) {
-					logger.warning("The sensor is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
-					Thread.sleep(1000);
-					waitingToConfirmBreakdown++;
-				}
-
-				if(sensorFound.getBreakdown() == false) {
-					JSONObject newStateOnBreakdown = new JSONObject();
-					sensorFound.setBreakdown(true);
-					newStateOnBreakdown.put("id", sensorFound.getId());
-					newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
-
-					Request thirdRequest = new Request();
-					thirdRequest.setType("UPDATE");
-					thirdRequest.setEntity("SENSOR");
-					thirdRequest.setFields(newStateOnBreakdown);
-
-					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
-					ccr.run();
-				}
+			while(!sensorFound.getState()) {
+				logger.info("Sensor with the id "+ sensorFound.getId() + " is off, but we get messages");
+				Thread.sleep(5000);
 			}
 
-			else {
-				// TODO : vérifier qu'il est toujours allumé, test en changeant les valeurs en direct
-				// TODO : changer le logger pour qu'il soit moins visible ainisi que dans le connectionclient
-				while(!propertiesList.isEmpty()) {
-					int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
-					int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
-					int realTimeValue = 1;
+			while(sensorFound.getState()) {
+				if(propertiesList.isEmpty()) {
+					int breakdownTrigger = 10;
+					int waitingToConfirmBreakdown = 1;
 
-					if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
-						
-						while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
+					while (waitingToConfirmBreakdown <= breakdownTrigger) {
+						logger.warning("The sensor is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+						Thread.sleep(1000);
+						waitingToConfirmBreakdown++;
+					}
 
-							while(realTimeValue < sensitivity) {
-								if(sensorsCache.containsKey("POSSIBLEALERT")) {
-									sensorsCache.remove("POSSIBLEALERT");
+					if(sensorFound.getBreakdown() == false) {
+						JSONObject newStateOnBreakdown = new JSONObject();
+						sensorFound.setBreakdown(true);
+						newStateOnBreakdown.put("id", sensorFound.getId());
+						newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
+
+						Request thirdRequest = new Request();
+						thirdRequest.setType("UPDATE");
+						thirdRequest.setEntity("SENSOR");
+						thirdRequest.setFields(newStateOnBreakdown);
+
+						ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+						ccr.run();
+					}
+				}
+
+				else {
+					while(!propertiesList.isEmpty() && sensorFound.getState()) {
+						logger.info("Sensor with the id "+ sensorFound.getId() + " is on and we get messages");
+						int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
+						int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
+						int realTimeValue = 1;
+
+						if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
+
+							while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
+
+								while(realTimeValue < sensitivity) {
+									if(sensorsCache.containsKey("POSSIBLEALERT")) {
+										sensorsCache.remove("POSSIBLEALERT");
+									}
+
+									sensorsCache.put("POSSIBLEALERT", realTimeValue);
+
+									if(realTimeValue % 5 == 0 || realTimeValue == 1) {
+										logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
+												realTimeValue + " seconds with the value " + messageValue);
+									}
+
+									Thread.sleep(1000);
+									realTimeValue++;
 								}
 
-								sensorsCache.put("POSSIBLEALERT", realTimeValue);
+								sensorsCache.remove("POSSIBLEALERT");
 
-								if(realTimeValue % 5 == 0 || realTimeValue == 10  || realTimeValue == 1) {
-									logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
+								if(sensorsCache.containsKey("ALERT")) {
+									sensorsCache.remove("ALERT");
+								}
+
+								sensorsCache.put("ALERT", realTimeValue);
+
+								if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
+									logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
 											realTimeValue + " seconds with the value " + messageValue);
 								}
 
-								Thread.sleep(1000);
+
+								if(sensorFound.getAlert() == false) {
+									JSONObject newStateOnAlert = new JSONObject();
+									sensorFound.setAlert(true);
+									newStateOnAlert.put("id", sensorFound.getId());
+									newStateOnAlert.put("sensorToUpdate", sensorFound.toJSON());
+
+									Request secondRequest = new Request();
+									secondRequest.setType("UPDATE");
+									secondRequest.setEntity("SENSOR");
+									secondRequest.setFields(newStateOnAlert);
+
+									ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, secondRequest.toJSON().toString());
+									ccr.run();
+								}
+
 								realTimeValue++;
+								Thread.sleep(1000);
+
 							}
-
-							sensorsCache.remove("POSSIBLEALERT");
-
-							if(sensorsCache.containsKey("ALERT")) {
-								sensorsCache.remove("ALERT");
-							}
-
-							sensorsCache.put("ALERT", realTimeValue);
-
-							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-								logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
-										realTimeValue + " seconds with the value " + messageValue);
-							}
-
-
-							if(sensorFound.getAlert() == false) {
-								JSONObject newStateOnAlert = new JSONObject();
-								sensorFound.setAlert(true);
-								newStateOnAlert.put("id", sensorFound.getId());
-								newStateOnAlert.put("sensorToUpdate", sensorFound.toJSON());
-
-								Request secondRequest = new Request();
-								secondRequest.setType("UPDATE");
-								secondRequest.setEntity("SENSOR");
-								secondRequest.setFields(newStateOnAlert);
-
-								ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, secondRequest.toJSON().toString());
-								ccr.run();
-							}
-
-							realTimeValue++;
-							Thread.sleep(1000);
-
-						}
-					}
-
-					else {
-
-						if(sensorsCache.containsKey("NOALERT")) {
-							sensorsCache.remove("NOALERT");
 						}
 
-						while(realTimeValue <= messageDuration && sensorFound.getState()) {
+						else {
 
-
-							sensorsCache.put("NOALERT", realTimeValue);
-							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
-								logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
-										realTimeValue + " seconds with the value " + messageValue);
+							if(sensorsCache.containsKey("NOALERT")) {
+								sensorsCache.remove("NOALERT");
 							}
 
-							if(sensorFound.getAlert()) {
-								JSONObject newStateNoAlert = new JSONObject();
-								sensorFound.setAlert(false);
-								newStateNoAlert.put("id", sensorFound.getId());
-								newStateNoAlert.put("sensorToUpdate", sensorFound.toJSON());
-
-								Request thridRequest = new Request();
-								thridRequest.setType("UPDATE");
-								thridRequest.setEntity("SENSOR");
-								thridRequest.setFields(newStateNoAlert);
+							while(realTimeValue <= messageDuration && sensorFound.getState()) {
 
 
-								ConnectionClient ccrr = new ConnectionClient("127.0.0.1", 2412, thridRequest.toJSON().toString());
-								ccrr.run();
+								sensorsCache.put("NOALERT", realTimeValue);
+								if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
+									logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
+											realTimeValue + " seconds with the value " + messageValue);
+								}
+
+								if(sensorFound.getAlert()) {
+									JSONObject newStateNoAlert = new JSONObject();
+									sensorFound.setAlert(false);
+									newStateNoAlert.put("id", sensorFound.getId());
+									newStateNoAlert.put("sensorToUpdate", sensorFound.toJSON());
+
+									Request thridRequest = new Request();
+									thridRequest.setType("UPDATE");
+									thridRequest.setEntity("SENSOR");
+									thridRequest.setFields(newStateNoAlert);
+
+
+									ConnectionClient ccUpdateSensor = new ConnectionClient("127.0.0.1", 2412, thridRequest.toJSON().toString());
+									ccUpdateSensor.run();
+
+								}
+
+								realTimeValue++;
+								Thread.sleep(1000);
 
 							}
-
-							realTimeValue++;
-							Thread.sleep(1000);
 
 						}
 
-					}
+						if(!propertiesList.isEmpty()) {
+							propertiesList.remove(propertiesList.size() - 1);
+						} 
 
-					if(!propertiesList.isEmpty()) {
-						propertiesList.remove(propertiesList.size() - 1);
 					} 
-
-				} 
+				}
 			}
 		}
-		
-		if(sensorFound.getState() == false) {
-			logger.info("Sensor with the id "+ sensorFound.getId() + " is off, but we get messages");
-		}
-
 
 
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
-		
-		
+
+
 
 	}
 
@@ -305,7 +281,6 @@ public class Simulation {
 				try {
 					sensorFound = objectMapper.readValue(response.toString(), Sensor.class);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -319,10 +294,47 @@ public class Simulation {
 					public void run() { 
 						refreshHandle.cancel(true); 
 					}
-				}, 60 * 60, SECONDS
+				}, 360, SECONDS
 				);
 
 		return sensorFound;
+	}
+
+	public String refreshPeriodOfDay() {
+		final Runnable refresh = new Runnable() {
+
+			public void run() { 
+				Calendar night = new GregorianCalendar();	
+				night.set(Calendar.HOUR_OF_DAY, 20);
+				night.set(Calendar.MINUTE, 00);
+				night.set(Calendar.SECOND, 00);
+
+				Calendar day = new GregorianCalendar();	
+				day.set(Calendar.HOUR_OF_DAY, 8);
+				day.set(Calendar.MINUTE, 59);
+				day.set(Calendar.SECOND, 59);
+
+				Calendar now = Calendar.getInstance();
+				if(now.before(night) && now.after(day)) {
+					periodOfDay = "DAYTIME";
+				} else {
+					periodOfDay = "NIGHTTIME";
+				}
+			}
+
+		};
+
+		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 0 , 30, SECONDS);
+
+		scheduler.schedule(
+				new Runnable() {
+					public void run() { 
+						refreshHandle.cancel(true); 
+					}
+				}, 360, SECONDS
+				);
+
+		return periodOfDay;
 	}
 
 	/**
@@ -338,7 +350,7 @@ public class Simulation {
 	public void setSensorFound(Sensor sensorFound) {
 		this.sensorFound = sensorFound;
 	}
-	
+
 	/**
 	 * @return the propertiesId
 	 */
