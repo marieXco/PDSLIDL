@@ -38,6 +38,7 @@ import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Room;
 import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class WindowAdd extends JFrame implements ActionListener {
@@ -63,6 +64,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JComboBox<Object> room = new JComboBox<Object>();
 
 	JComboBox<Object> location = new JComboBox<Object>();
+	
+	JComboBox<Object> typeSensor = new JComboBox<Object>();
 
 	JComboBox<Object> building = new JComboBox<Object>();
 
@@ -141,6 +144,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	List<Location> locationsFoundList = new ArrayList<Location>();
 
+	List<TypeSensor> typeSensorsFoundList = new ArrayList<TypeSensor>();
+	
 	Location[] locationsFoundTab = null;
 
 	Building[] buildingsFoundTab;
@@ -219,6 +224,24 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 		location = new JComboBox<Object>(locationsComboBox);
 		// End ccLocationFindAll
+		
+		//Begginig typeSensor
+		
+		FindAllTypeSensor tf = new FindAllTypeSensor(host, port);
+		typeSensorsFoundList = tf.findAll(false);
+
+		String[] typeSensorComboBox = new String[typeSensorsFoundList.size() + 1];
+		typeSensorComboBox[0] = "--Type du capteur--";
+
+		for (int listIndex = 0; listIndex < typeSensorsFoundList.size(); listIndex++) {
+			int tabIndex = listIndex + 1;
+			typeSensorComboBox[tabIndex] = typeSensorsFoundList.get(listIndex).getType();
+		}
+		
+		typeSensor = new JComboBox<Object>(typeSensorComboBox);
+		
+		//End ccTypeSensorsFindAll 
+
 
 		container.setPreferredSize(new Dimension(LG, HT));
 
@@ -228,6 +251,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		mainInfosPanel.add(macAddress);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
+		mainInfosPanel.add(typeSensor);
 
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
