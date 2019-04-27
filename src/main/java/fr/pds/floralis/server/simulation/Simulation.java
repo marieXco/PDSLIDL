@@ -41,7 +41,7 @@ public class Simulation {
 		Logger logger = Logger.getLogger("Logger");
 
 		try {
-			FileHandler fh=new FileHandler("%simulationLogger.log");
+			FileHandler fh=new FileHandler("%hsimulationLogger.log");
 			logger.addHandler(fh);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fh.setFormatter(formatter);
@@ -111,8 +111,7 @@ public class Simulation {
 		// TODO : possible alert again when the value changes but still too high ? 
 		// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
 		while(sensorFound != null) {
-			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
-			logger.info("The sensor will be put in alert after "+ sensitivity + " of seconds");
+			logger.info("Sensor with the id "+ sensorFound.getId() + " is on\nThe sensor will be put in alert after "+ sensitivity + " of seconds");
 
 
 			while(!sensorFound.getState()) {
@@ -248,7 +247,7 @@ public class Simulation {
 
 						}
 
-						if(!propertiesList.isEmpty()) {
+						if(!propertiesList.isEmpty() && sensorFound.getState()) {
 							propertiesList.remove(propertiesList.size() - 1);
 						} 
 
