@@ -28,7 +28,7 @@ public class PropertiesReader {
 
 		try {
 			Properties prop = new Properties();
-			String propFileName = "fire.properties";
+			String propFileName = "config.properties";
 
 			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 
@@ -73,14 +73,14 @@ public class PropertiesReader {
 				
 				while(numberOfValues > index) {
 					
-					if(map.containsKey("value.iter." + numberOfValues + ".value")) {
-						value = map.get("value.iter." + numberOfValues + ".value");
-						map.remove("value.iter." + numberOfValues + ".value");		
+					if(map.containsKey("iter." + numberOfValues + ".value")) {
+						value = map.get("iter." + numberOfValues + ".value");
+						map.remove("iter." + numberOfValues + ".value");		
 					}
 
-					if (map.containsKey("value.iter." + numberOfValues + ".duration")){ 
-						duration = map.get("value.iter." + numberOfValues + ".duration");
-						map.remove("value.iter." + numberOfValues + ".duration");							
+					if (map.containsKey("iter." + numberOfValues + ".duration")){ 
+						duration = map.get("iter." + numberOfValues + ".duration");
+						map.remove("iter." + numberOfValues + ".duration");							
 					}
 					
 					list.put(duration, value);

@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
@@ -34,7 +35,24 @@ public class Simulation {
 			Executors.newScheduledThreadPool(1);
 
 	public void simulationTest() throws IOException, InterruptedException {
-		Logger logger = Logger.getLogger("Simulaiton Logger");
+		Logger logger = Logger.getLogger("Logger");
+		
+		try {
+
+			FileHandler fh=new FileHandler("%hMonLog.log");
+
+			logger.addHandler(fh);
+
+			} catch (SecurityException e) {
+
+			e.printStackTrace();
+
+			} catch (IOException e) {
+
+			e.printStackTrace();
+
+			}
+		
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -150,9 +168,6 @@ public class Simulation {
 				// TODO : vérifier qu'il est toujours allumé, test en changeant les valeurs en direct
 				// TODO : changer le logger pour qu'il soit moins visible ainisi que dans le connectionclient
 				while(!propertiesList.isEmpty()) {
-					
-					System.out.println(getSensorFound().getMin());
-
 					int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
 					int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
 					int realTimeValue = 1;
@@ -266,6 +281,8 @@ public class Simulation {
 
 
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
+		
+		
 
 	}
 

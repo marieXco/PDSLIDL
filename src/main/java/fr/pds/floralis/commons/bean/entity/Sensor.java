@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
+//‡import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 
 /**
  * Sensor 
@@ -18,7 +18,7 @@ import fr.pds.floralis.commons.bean.entity.type.TypeSensor;
 public class Sensor {
 
 	private int id;
-	private TypeSensor type;
+	private String type;
 	private int idLocation;
 	private Boolean state;
 	private Boolean alert;
@@ -48,11 +48,11 @@ public class Sensor {
 		this.idLocation = idLocation;
 	}
 
-	public TypeSensor getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(TypeSensor type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 
@@ -144,7 +144,7 @@ public class Sensor {
 		this.configure = configure;
 	}
 
-	public Sensor(int id, int idLocation, TypeSensor type, Boolean state,
+	public Sensor(int id, int idLocation, String type, Boolean state,
 			Boolean alert, String brand, String macAdress,
 			Date installation, String min, String max, Boolean breakdown, String ipAddress, 
 			String port, Boolean configure) {
