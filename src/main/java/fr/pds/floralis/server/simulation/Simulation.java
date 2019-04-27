@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,14 +41,15 @@ public class Simulation {
 		Logger logger = Logger.getLogger("Logger");
 
 		try {
-			FileHandler fh=new FileHandler("%hMonLog.log");
+			FileHandler fh=new FileHandler("%simulationLogger.log");
 			logger.addHandler(fh);
+			SimpleFormatter formatter = new SimpleFormatter();  
+			fh.setFormatter(formatter);
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -90,7 +92,6 @@ public class Simulation {
 		String response = ccRequestSensitivities.getResponse();
 		TypeSensor typeFound = objectMapper.readValue(response.toString(), TypeSensor.class);
 
-
 		if (periodOfDay.equals("DAYTIME")) {
 			sensitivity = typeFound.getDaySensitivity();
 			logger.info("We're in daytime : sensitivity of daytime --> " + sensitivity + " seconds");
@@ -111,6 +112,7 @@ public class Simulation {
 		// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
 		while(sensorFound != null) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
+			logger.info("The sensor will be put in alert after "+ sensitivity + " of seconds");
 
 
 			while(!sensorFound.getState()) {
@@ -254,6 +256,7 @@ public class Simulation {
 				}
 			}
 		}
+
 
 
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
