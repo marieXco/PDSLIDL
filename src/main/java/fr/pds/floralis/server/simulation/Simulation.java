@@ -3,6 +3,8 @@ package fr.pds.floralis.server.simulation;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.pds.floralis.commons.bean.entity.Alert;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
@@ -37,6 +40,7 @@ public class Simulation {
 	private final ScheduledExecutorService scheduler =
 			Executors.newScheduledThreadPool(1);
 
+	@SuppressWarnings("deprecation")
 	public void simulationTest() throws IOException, InterruptedException {
 		Logger logger = Logger.getLogger("Logger");
 
@@ -50,6 +54,8 @@ public class Simulation {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -152,9 +158,10 @@ public class Simulation {
 						int messageDuration = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getKey());
 						int messageValue = Integer.parseInt(propertiesList.get(propertiesList.size() - 1).getValue());
 						int realTimeValue = 1;
+						Boolean alertCreated = false;
 
 						if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
-
+							alertCreated = false;
 							while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
 
 								while(realTimeValue < sensitivity) {
@@ -174,6 +181,8 @@ public class Simulation {
 								}
 
 								sensorsCache.remove("POSSIBLEALERT");
+
+								
 
 								if(sensorsCache.containsKey("ALERT")) {
 									sensorsCache.remove("ALERT");
@@ -206,6 +215,33 @@ public class Simulation {
 								Thread.sleep(1000);
 
 							}
+							
+							if(alertCreated == false) {
+								Calendar dateNow = Calendar.getInstance();
+								Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH), dateNow.get(Calendar.DAY_OF_MONTH));
+								Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND) - 1);
+								
+								Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
+								
+								if(messageDuration > 60) {
+									beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
+								} else {
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
+								}
+
+								Alert alerte = new Alert(2, sensorFound.getId(),beginningOfAlert, endOfAlert , today);
+
+								Request fifthRequest = new Request();
+								fifthRequest.setType("CREATE");
+								fifthRequest.setEntity("HISTORY_ALERTS");
+								fifthRequest.setFields(alerte.toJSON());
+
+								ConnectionClient ccSensorInAlert = new ConnectionClient("127.0.0.1", 2412, fifthRequest.toJSON().toString());
+								ccSensorInAlert.run();
+								alertCreated = true;
+							}
+							
 						}
 
 						else {
