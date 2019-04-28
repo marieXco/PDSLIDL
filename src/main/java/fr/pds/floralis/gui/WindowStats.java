@@ -2,9 +2,12 @@
 	package fr.pds.floralis.gui;
 
 
-	import java.awt.Button;
+	import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.HeadlessException;
+import java.io.IOException;
 
-	import javax.swing.BorderFactory;
+import javax.swing.BorderFactory;
 	import javax.swing.BoxLayout;
 	import javax.swing.JComboBox;
 	import javax.swing.JFrame;
@@ -16,44 +19,77 @@
 	import javax.swing.text.SimpleAttributeSet;
 	import javax.swing.text.StyleConstants;
 
+import org.json.JSONException;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
 	//TODO: faire les scripts
 	
 	// this is the window where 
-	public class WindowStats {
+	public class WindowStats extends JFrame {
+		private String host;
+		private int port;
+		private int LG = 950;
+		private int HT = 180;
+		
+		public WindowStats(String host, int port) throws HeadlessException {
+			super();
+			this.host = host;
+			this.port = port;
+		}
 		
 		
 		// Creation of panels
 		JPanel container = new JPanel();
-		JPanel RequestPanel = new JPanel();
-		JPanel ResultPanel = new JPanel(); //TODO: contient tableau + Une ligne plus gros pour highlight 
+		JPanel requestPanel = new JPanel();
+		JPanel resultPanel = new JPanel(); 
 		
-
 
 		// Creation of all parameters necessary 
-		public void initIndicators() {
-
-		// TODO: creation of button "compare" which showing a comparaison with last value
-
-		// TODO: Combobox for indicators
+		Button countBedroom = new Button("Nombre de logement");
+		Button countAllSensor = new Button("Nombre de capteurs");
+		Button countOffSensor = new Button("Nombre de capteurs éteint");
+		Button countOnSensor = new Button("Nombre de capteurs allumés");
+		Button countNoLocationSensor = new Button("Nombres de capteurs non placés");
+		//Button countRoom = new Button("Nombre d'espace communs");
 		
-		JComboBox<Object> indicators = new JComboBox<Object>(); 
-		indicators.addItem("Home");
-		indicators.addItem("Sensor");
-		indicators.addItem("Breakdown");
-		indicators.addItem("Alert");
-		indicators.addItem("room");
-		indicators.addItem("patient");
-		// TODO: combo box to add dynamic parameters
-		JComboBox<Object> parameters = new JComboBox<Object>(); 
+		
+		
+
+		public void initIndicators() throws IOException{
+			
+			
+			//adding button to JPanel
+			requestPanel.add(countAllSensor);
+			requestPanel.add(countBedroom);
+			requestPanel.add(countOffSensor);
+			requestPanel.add(countNoLocationSensor);
+			requestPanel.add(countOnSensor);
+			container.add(BorderLayout.WEST, requestPanel); 
+			container.add(BorderLayout.EAST, resultPanel);
+			
+			/*
+			countBedroom.addActionListener(this);
+			countAllSensor.addActionListener(this);
+			countOffSensor.addActionListener(this);
+			countOnSensor.addActionListener(this);
+			countNoLocationSensor.addActionListener(this);
+			*/
+			this.setTitle("Floralis - Indicateurs");
+		    this.setSize(800, 800);
+			this.setContentPane(container);
+			this.setLocationRelativeTo(null);
+			this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			this.setVisible(true);
+			
 		}
 
-		// Button to have the results of the request
-		Button buttonResult = new Button("Filtrer");
-		//button to associate many request (?) OPTIONAL
-		//Button buttonAddFilter = new Button("+");
+
 		
 		//TODO: adding action performed method
+		
 		
 		//TODO: How am I supposed to be connected with de bdd ??
 		

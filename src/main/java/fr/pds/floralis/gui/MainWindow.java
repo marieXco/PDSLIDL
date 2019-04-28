@@ -102,6 +102,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	JMenu adding = new JMenu("Ajouts");
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
 	JMenuItem addingLocation = new JMenuItem("Ajouter une localisation");
+	JMenu indicators = new JMenu("Indicateurs"); 
+	JMenuItem stats = new JMenuItem("Consulter les indicateurs");
 
 	/**
 	 * Button for the locations
@@ -145,7 +147,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		window.setJMenuBar(menuBar);
 		menuBar.add(adding);
 		adding.add(addingSensor);
-		adding.add(addingLocation);		
+		adding.add(addingLocation);	
+		menuBar.add(indicators);
+		indicators.add(stats);
 
 
 		// Beginning of the sensor FindAll
@@ -212,6 +216,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		buttonRefreshLocation.addActionListener(this);
 		buttonNoConfigSensor.addActionListener(this);
 		buttonYesConfigSensor.addActionListener(this);
+		stats.addActionListener(this);
 		
 
 
@@ -326,6 +331,20 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == addingLocation) {
 			try {
 				new WindowAdd(getHost(), getPort()).initAddLocation();
+			} catch (JsonParseException e1) {
+
+				e1.printStackTrace();
+			} catch (JsonMappingException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+
+				e1.printStackTrace();
+			}
+		}
+		
+		if (e.getSource() == stats) {
+			try {
+				new WindowStats(getHost(), getPort()).initIndicators();
 			} catch (JsonParseException e1) {
 
 				e1.printStackTrace();
