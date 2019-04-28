@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,23 +37,17 @@ public class Simulation {
 
 	public void simulationTest() throws IOException, InterruptedException {
 		Logger logger = Logger.getLogger("Logger");
-		
+
 		try {
-
-			FileHandler fh=new FileHandler("%hMonLog.log");
-
+			FileHandler fh=new FileHandler("%simulationLogger.log");
 			logger.addHandler(fh);
-
-			} catch (SecurityException e) {
-
+			SimpleFormatter formatter = new SimpleFormatter();  
+			fh.setFormatter(formatter);
+		} catch (SecurityException e) {
 			e.printStackTrace();
-
-			} catch (IOException e) {
-
+		} catch (IOException e) {
 			e.printStackTrace();
-
-			}
-		
+		}
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -61,7 +56,7 @@ public class Simulation {
 		String periodOfDay = "";
 
 		Calendar now = Calendar.getInstance();
-		
+
 		Calendar night = new GregorianCalendar();	
 		night.set(Calendar.HOUR_OF_DAY, 20);
 		night.set(Calendar.MINUTE, 00);
@@ -71,7 +66,7 @@ public class Simulation {
 		day.set(Calendar.HOUR_OF_DAY, 8);
 		day.set(Calendar.MINUTE, 59);
 		day.set(Calendar.SECOND, 59);
-		
+
 
 		// TODO : refresh if it changes during simulation
 		if(now.before(night) && now.after(day)) {
@@ -79,7 +74,7 @@ public class Simulation {
 		} else {
 			periodOfDay = "NIGHTTIME";
 		}
-		
+
 
 		/**
 		 * We get the .properties properties
@@ -88,7 +83,7 @@ public class Simulation {
 		String propertiesType = "";
 		PropertiesReader properties = new PropertiesReader();
 		List<Entry<String, String>> propertiesList = properties.getPropValues();
-		
+
 
 		if(propertiesList == null) {
 			logger.warning("We get no messages at all, something went wrong");
@@ -99,9 +94,9 @@ public class Simulation {
 
 			propertiesList.remove(0);
 			propertiesList.remove(0);
-			
+
 		}
-		
+
 		JSONObject requestSensitivities = new JSONObject();
 		requestSensitivities.put("type", propertiesType.toUpperCase());
 
@@ -112,10 +107,10 @@ public class Simulation {
 
 		ConnectionClient ccRequestSensitivities = new ConnectionClient("127.0.0.1", 2412, forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
-		
+
 		String response = ccRequestSensitivities.getResponse();
 		TypeSensor typeFound = objectMapper.readValue(response.toString(), TypeSensor.class);
-		
+
 		int sensitivity = 0;
 		if (periodOfDay.equals("DAYTIME")) {
 			sensitivity = typeFound.getDaySensitivity();
@@ -124,7 +119,7 @@ public class Simulation {
 			sensitivity = typeFound.getNightSensitivity();
 			logger.info("We're in nighttime : sensitivity of nighttime --> " + sensitivity + " seconds");
 		}
-		
+
 		/**
 		 * With the id from the properties, we find the id; we refresh it so we get the last infos from the sensor
 		 */
@@ -137,6 +132,7 @@ public class Simulation {
 		Thread.sleep(4000);
 		if(sensorFound.getState()) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is on");
+			logger.info("The sensor will be put in alert after "+ sensitivity + " of seconds");
 
 			int breakdownTrigger = 10;
 			int waitingToConfirmBreakdown = 1;
@@ -173,7 +169,7 @@ public class Simulation {
 					int realTimeValue = 1;
 
 					if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
-						
+
 						while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
 
 							while(realTimeValue < sensitivity) {
@@ -273,7 +269,7 @@ public class Simulation {
 				} 
 			}
 		}
-		
+
 		if(sensorFound.getState() == false) {
 			logger.info("Sensor with the id "+ sensorFound.getId() + " is off, but we get messages");
 		}
@@ -281,8 +277,8 @@ public class Simulation {
 
 
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
-		
-		
+
+
 
 	}
 
@@ -338,7 +334,7 @@ public class Simulation {
 	public void setSensorFound(Sensor sensorFound) {
 		this.sensorFound = sensorFound;
 	}
-	
+
 	/**
 	 * @return the propertiesId
 	 */
