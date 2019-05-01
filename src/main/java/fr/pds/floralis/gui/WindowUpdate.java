@@ -189,7 +189,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		// Beginning of location Find All
 		// To see WindowWorker lines 269
-		findAllLocation fl = new findAllLocation(host, port);
+		FindAllLocation fl = new FindAllLocation(host, port);
 		locationsFoundList = fl.findAll(false);
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
