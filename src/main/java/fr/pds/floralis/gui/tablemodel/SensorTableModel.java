@@ -18,9 +18,9 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 public class SensorTableModel extends AbstractTableModel {
 	// Adding a serialVersionUID as the AbstractTableModel class extend Serializable
 	private static final long serialVersionUID = 4371698137427718534L;
-	
+
 	private List<Sensor> userData = new ArrayList<Sensor>();
-	private String[] columnNames = {"Id" ,"Marque", "Adresse Mac", "Date Installation", "Etat",
+	private String[] columnNames = {"Id" ,"Marque", "Type", "Adresse Mac", "Date Installation", "Etat",
 			"Seuil Min", "Seuil Max", "Alerte", "Configuration"};
 
 	public SensorTableModel() {
@@ -66,31 +66,33 @@ public class SensorTableModel extends AbstractTableModel {
 		Sensor userObject = userData.get(row);
 		String on = "";
 
-			if(userObject.getState()){
-				on = "Allumé";
-			} else {
-				on = "Eteint";
-			}
+		if(userObject.getState()){
+			on = "Allumé";
+		} else {
+			on = "Eteint";
+		}
 
 		String state = "";
 
-			if(userObject.getAlert()) {
-				state = "Alerte";
-			} else {
-				state = "RAS";
-			}
-			
-			if(userObject.getBreakdown()) {
-				state = "En panne";
-			}
+		if(userObject.getAlert()) {
+			state = "Alerte";
+		} else {
+			state = "RAS";
+		}
+
+		if(userObject.getBreakdown()) {
+			state = "En panne";
+		}
 
 		String configure = "";
-		
-			if(userObject.getConfigure()) {
-				configure = "Configuré";
-			} else {
-				configure = "A configurer";
-			}
+
+		if(userObject.getConfigure()) {
+			configure = "Configuré";
+		} else {
+			configure = "A configurer";
+		}
+
+
 
 		switch (column) {
 		case 0: 
@@ -100,24 +102,27 @@ public class SensorTableModel extends AbstractTableModel {
 			userAttribute = userObject.getBrand();
 			break;
 		case 2:
-			userAttribute = userObject.getMacAddress();
+			userAttribute = userObject.getType();
 			break;
 		case 3:
-			userAttribute = userObject.getInstallation();
+			userAttribute = userObject.getMacAddress();
 			break;
 		case 4:
-			userAttribute = on;
+			userAttribute = userObject.getInstallation();
 			break;
 		case 5:
-			userAttribute = userObject.getMin();
+			userAttribute = on;
 			break;
 		case 6:
-			userAttribute = userObject.getMax();
+			userAttribute = userObject.getMin();
 			break;
 		case 7:
-			userAttribute = state;
+			userAttribute = userObject.getMax();
 			break;
 		case 8:
+			userAttribute = state;
+			break;
+		case 9:
 			userAttribute = configure;
 			break;
 		default:

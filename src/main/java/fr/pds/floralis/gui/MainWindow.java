@@ -149,7 +149,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 
 		// Beginning of the sensor FindAll
-		findAllSensor fs = new findAllSensor(host, port);
+		FindAllSensor fs = new FindAllSensor(host, port);
 		sensorsFoundList = fs.findAll(false);
 		// End of the sensor FindAll
 
@@ -251,7 +251,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 
 		// Beginning of the locations recovery
-		findAllLocation fl = new findAllLocation(host, port);
+		FindAllLocation fl = new FindAllLocation(host, port);
 		List <Location>locationsFoundList = fl.findAll(false);
 		// End of the locations recovery
 
@@ -340,7 +340,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
-			findAllLocation fl = new findAllLocation(host, port);
+			FindAllLocation fl = new FindAllLocation(host, port);
 			List<Location> locationsFoundList;
 			
 			try {
@@ -388,7 +388,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == buttonRefreshSensor) {
 
 			try {
-				findAllSensor fs = new findAllSensor(host, port);
+				FindAllSensor fs = new FindAllSensor(host, port);
 				sensorsFoundList = fs.findAll(false);
 
 				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
@@ -464,14 +464,14 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				boolean sure = new WindowConfirm()
 						.init("supprimer ce capteur");
 
-				int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
+				//int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
 
-				JSONObject sensorFoundDelete = new JSONObject();
+				//JSONObject sensorFoundDelete = new JSONObject();
 
 				// On ajout dans cet object une clé "id" dont la valeur est
 				// idSensor
 				// { "id" : idSensor valeur } ;
-				sensorFoundDelete.put("id", idLocationUpdate);
+				//sensorFoundDelete.put("id", idLocationUpdate);
 
 				// Si sure est à true alors on lance la supression en insérant
 				// l'object JSON contenant l'id
@@ -479,7 +479,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					Request request = new Request();		
 					request.setType("DELETE");
 					request.setEntity("SENSOR");
-					request.setFields(sensorFoundDelete);
+					request.setFields(objSensorDelete);
 
 					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
 					ccSensorDelete.run();
@@ -488,6 +488,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					// supprimer dans cette localisation l'occurence du capteur supprimé
 
 				}
+			} else {
+				message.setText("Vous devez selectionner l'identifiant du capteur à Supprimer");
 			}
 
 		}
