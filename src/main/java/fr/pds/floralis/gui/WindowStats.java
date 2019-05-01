@@ -7,6 +7,7 @@
 	import java.awt.HeadlessException;
 	import java.awt.event.*;
 	import java.io.IOException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 	import javax.swing.BoxLayout;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import fr.pds.floralis.commons.bean.entity.Room;
+import fr.pds.floralis.server.dao.DAO;
 
 	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
 	//TODO: faire les scripts
@@ -57,6 +59,10 @@ import fr.pds.floralis.commons.bean.entity.Room;
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
 		Button countNoLocationSensor = new Button("Nombres de capteurs non placés");
 		//Button countRoom = new Button("Nombre d'espace communs");
+		
+		
+		// Indicators values
+		List<Room> roomFoundList; 
 		
 		
 		
@@ -92,11 +98,16 @@ import fr.pds.floralis.commons.bean.entity.Room;
 		public void actionPerformed(ActionEvent e) {
 			//when the user wants to know how many home there's on EHPAD
 			if (e.getSource() == countBedroom) {
-				
-				Room nbBedroom = 
-				
-			}
-			
+					FindAllRoom allrm = new FindAllRoom(host, port);
+					try {
+						roomFoundList = allrm.findAll(false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countRoom = roomFoundList.size(); 	
+					System.out.println("Nombre de logement : " + countRoom);
+				}
 			if(e.getSource() == countAllSensor) {
 				
 			}
