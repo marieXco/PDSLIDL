@@ -483,14 +483,14 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				boolean sure = new WindowConfirm()
 						.init("supprimer ce capteur");
 
-				int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
+				//int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
 
-				JSONObject sensorFoundDelete = new JSONObject();
+				//JSONObject sensorFoundDelete = new JSONObject();
 
 				// On ajout dans cet object une clé "id" dont la valeur est
 				// idSensor
 				// { "id" : idSensor valeur } ;
-				sensorFoundDelete.put("id", idLocationUpdate);
+				//sensorFoundDelete.put("id", idLocationUpdate);
 
 				// Si sure est à true alors on lance la supression en insérant
 				// l'object JSON contenant l'id
@@ -498,7 +498,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					Request request = new Request();		
 					request.setType("DELETE");
 					request.setEntity("SENSOR");
-					request.setFields(sensorFoundDelete);
+					request.setFields(objSensorDelete);
 
 					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
 					ccSensorDelete.run();
@@ -507,6 +507,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					// supprimer dans cette localisation l'occurence du capteur supprimé
 
 				}
+			} else {
+				message.setText("Vous devez selectionner l'identifiant du capteur à Supprimer");
 			}
 
 		}
