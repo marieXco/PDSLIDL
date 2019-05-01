@@ -26,7 +26,10 @@ import org.json.JSONException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import fr.pds.floralis.commons.bean.entity.Alert;
+import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Room;
+import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.server.dao.DAO;
 
 	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
@@ -36,8 +39,6 @@ import fr.pds.floralis.server.dao.DAO;
 	public class WindowStats extends JFrame implements ActionListener {
 		private String host;
 		private int port;
-		private int LG = 950;
-		private int HT = 180;
 		
 		public WindowStats(String host, int port) throws HeadlessException {
 			super();
@@ -53,16 +54,23 @@ import fr.pds.floralis.server.dao.DAO;
 		
 
 		// Creation of all parameters necessary 
-		Button countBedroom = new Button("Nombre de logement");
+		Button countRoom = new Button("Nombre de pièce");
 		Button countAllSensor = new Button("Nombre de capteurs");
 		Button countOffSensor = new Button("Nombre de capteurs éteint");
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
 		Button countNoLocationSensor = new Button("Nombres de capteurs non placés");
-		//Button countRoom = new Button("Nombre d'espace communs");
+		Button countAlert = new Button("Nombre d'alerte");
+		Button countSmokeAlert = new Button("Nombre de pièce");
+		Button countLightAlert = new Button("Nombre de pièce");
+		Button countGasAlert = new Button("Nombre de pièce");
+		Button countMoveAlert = new Button("Nombre de pièce");
+		Button countTempAlert = new Button("Nombre d'alerte de ");
 		
 		
 		// Indicators values
-		List<Room> roomFoundList; 
+		List<Location> roomFoundList; 
+		List<Sensor> sensorFoundList;
+		List<Alert> alertFoundList;
 		
 		
 		
@@ -72,46 +80,70 @@ import fr.pds.floralis.server.dao.DAO;
 			
 			//adding button to JPanel
 			requestPanel.add(countAllSensor);
-			requestPanel.add(countBedroom);
+			requestPanel.add(countRoom);
 			requestPanel.add(countOffSensor);
 			requestPanel.add(countNoLocationSensor);
 			requestPanel.add(countOnSensor);
+			requestPanel.add(countAlert);
+
 			container.add(BorderLayout.WEST, requestPanel); 
 			container.add(BorderLayout.EAST, resultPanel);
 			
 
-			countBedroom.addActionListener(this);
+			countRoom.addActionListener(this);
 			countAllSensor.addActionListener(this);
 			countOffSensor.addActionListener(this);
 			countOnSensor.addActionListener(this);
 			countNoLocationSensor.addActionListener(this);
+			countAlert.addActionListener(this);
 		
 			this.setTitle("Floralis - Indicateurs");
-		    pack(); //permet d'avoir une bonne dimension pour la fenetre
 			this.setContentPane(container);
 			this.setLocationRelativeTo(null);
 			this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			this.setVisible(true);
+			this.setSize(900, 800);
 			
 		}
 		
 		public void actionPerformed(ActionEvent e) {
 			//when the user wants to know how many home there's on EHPAD
-			if (e.getSource() == countBedroom) {
-					FindAllRoom allrm = new FindAllRoom(host, port);
-					try {
-						roomFoundList = allrm.findAll(false);
-					} catch (JSONException | IOException | InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					int countRoom = roomFoundList.size(); 	
-					System.out.println("Nombre de logement : " + countRoom);
+			if (e.getSource() == countRoom) {
+				FindAllLocation allloc = new FindAllLocation(host, port);
+				try {
+					roomFoundList = allloc.findAll(false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-			if(e.getSource() == countAllSensor) {
-				
+				int countRoom = roomFoundList.size(); 	
+				System.out.println("Nombre de pièce : " + countRoom);
 			}
 			
+			if(e.getSource() == countAllSensor) {
+				FindAllSensor allsens = new FindAllSensor(host, port);
+				try {
+					sensorFoundList = allsens.findAll(false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countSensor = sensorFoundList.size(); 	
+				System.out.println("Nombre de capteurs : " + countSensor);
+			}
+			
+			if(e.getSource() == countAlert) {
+				FindAllAlert allAl = new FindAllAlert(host, port);
+				try {
+					alertFoundList = allAl.findAll(false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countAlert = alertFoundList.size(); 	
+				System.out.println("Nombre d'Alerte : " + countAlert);
+
+			}
 			if(e.getSource() == countOffSensor) {
 				
 			}
