@@ -93,6 +93,8 @@ public class PropertiesReader {
 					list.clear();
 
 				}
+				
+				map.clear();
 
 			}
 
