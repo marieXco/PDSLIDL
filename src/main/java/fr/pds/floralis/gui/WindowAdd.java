@@ -160,6 +160,52 @@ public class WindowAdd extends JFrame implements ActionListener {
 		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
 		buttonAddSensor.addActionListener(this);
+
+
+		days[0] = "Jour";
+
+		months[0] = "Mois";
+
+		years[0] = "Annee";
+
+		for (int dayIndex = 1; dayIndex < days.length; dayIndex++) {
+			String daysMax = (dayIndex) + "";
+			days[dayIndex] = daysMax;
+		}
+
+		for (int monthIndex = 1; monthIndex < months.length; monthIndex++) {
+			String monthMax = (monthIndex) + "";
+			months[monthIndex] = monthMax;
+		}
+
+		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
+			String yearMax = (yearIndex + 2018) + "";
+			years[yearIndex] = yearMax;
+		}
+
+		day = new JComboBox<Object>(days);
+
+		month = new JComboBox<Object>(months);
+
+		year = new JComboBox<Object>(years);
+
+		// To see WindowWorker lines 269-287
+		FindAllLocation fl = new FindAllLocation(host, port);
+		locationsFoundList = fl.findAll(false);
+
+		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
+		locationsComboBox[0] = "--Localisation--";
+
+		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
+			int tabIndex = listIndex + 1;
+			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId();
+		}
+
+		location = new JComboBox<Object>(locationsComboBox);
+		// End ccLocationFindAll
+		
+		//Begginig typeSensor
+
 		
 		//Beginning typeSensor
 		FindAllTypeSensor tf = new FindAllTypeSensor(host, port);
