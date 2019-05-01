@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -71,37 +70,28 @@ public class PropertiesReader {
 						map.remove(numberOfSensors + ".id");							
 					}
 
-					if (map.containsKey(numberOfSensors + ".type")){ 
-						type = map.get(numberOfSensors + ".type");
-						map.remove(numberOfSensors + ".type");							
-					}
-					
 					list.put("id", id);
-					list.put("type", type);
-					
+
 					numberOfValues = 2;
 
 					while(numberOfValues > index) {
-
-						if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value")) {
+						if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
 							value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");		
-						}
-
-						if (map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")){ 
 							duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");							
+							map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
+							map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
+							list.put(duration, value);
+							
 						}
-
-						list.put(duration, value);
 						numberOfValues--;
-
 					}
-					
+
 					testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
 					entryList[numberOfSensors - 1] = testList;
 					numberOfSensors--;
+					System.out.println(list.toString());
 					list.clear();
+
 				}
 
 			}
