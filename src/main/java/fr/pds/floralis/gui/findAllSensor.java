@@ -15,13 +15,13 @@ import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class FindAllSensor  {
+public class findAllSensor  {
 	
 	private static ObjectMapper objectMapper;
 	private static String host;
 	private static int port;
 
-	public FindAllSensor(String host, int port) {
+	public findAllSensor(String host, int port) {
 		super();
 		this.host = host;
 		this.port = port;

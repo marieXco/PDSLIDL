@@ -353,7 +353,7 @@ public class RequestHandler implements Runnable {
 						Boolean alertUpdate = alertDao.update(parameters.getInt("id"), alertToUpdate);
 						toSend = alertUpdate.toString();
 						break;
-						
+
 					default:
 						toSend = "Unkwown command for the Floors table !";
 						break;

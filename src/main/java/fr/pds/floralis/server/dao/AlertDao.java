@@ -14,6 +14,7 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Alert;
+import fr.pds.floralis.commons.bean.entity.type.TypeLevel;
 
 public class AlertDao implements DAO<Alert> {
 	
@@ -111,7 +112,6 @@ public class AlertDao implements DAO<Alert> {
 			return false; 
 		}  
 	}
-	
  
 	@Override
 	public Alert find(int id) {
@@ -119,7 +119,7 @@ public class AlertDao implements DAO<Alert> {
 		List<Integer> emptyList = new ArrayList<Integer>(); 
 		emptyList.add(0); 
 		emptyList.add(0); 
-		Alert alert = new Alert(0, 0, null, null, null);
+		Alert alert = new Alert(0, TypeLevel.LEVEL1, 0, null, null);
 
 		try {  
 			connect.setAutoCommit(false); 
@@ -146,7 +146,7 @@ public class AlertDao implements DAO<Alert> {
 	public List<Alert> findAll() {
 		ObjectMapper mapper = new ObjectMapper(); 
 		List<Alert> alertList = new ArrayList<Alert>(); 
-		Alert alert = new Alert(0, 0, null, null, null);
+		Alert alert = new Alert(0, TypeLevel.LEVEL1, 0, null, null);
  
 		try { 
 			connect.setAutoCommit(false); 

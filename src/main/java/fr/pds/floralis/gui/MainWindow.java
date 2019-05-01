@@ -149,7 +149,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 
 		// Beginning of the sensor FindAll
-		FindAllSensor fs = new FindAllSensor(host, port);
+		findAllSensor fs = new findAllSensor(host, port);
 		sensorsFoundList = fs.findAll(false);
 		// End of the sensor FindAll
 
@@ -251,7 +251,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 
 		// Beginning of the locations recovery
-		FindAllLocation fl = new FindAllLocation(host, port);
+		findAllLocation fl = new findAllLocation(host, port);
 		List <Location>locationsFoundList = fl.findAll(false);
 		// End of the locations recovery
 
@@ -340,7 +340,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if (e.getSource() == buttonRefreshLocation) {
 			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
-			FindAllLocation fl = new FindAllLocation(host, port);
+			findAllLocation fl = new findAllLocation(host, port);
 			List<Location> locationsFoundList;
 			
 			try {
@@ -388,7 +388,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		if (e.getSource() == buttonRefreshSensor) {
 
 			try {
-				FindAllSensor fs = new FindAllSensor(host, port);
+				findAllSensor fs = new findAllSensor(host, port);
 				sensorsFoundList = fs.findAll(false);
 
 				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
