@@ -247,11 +247,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 		mainInfosPanel.add(brandLabel);
 		mainInfosPanel.add(brand);
-		mainInfosPanel.add(macAddressLabel);
-		mainInfosPanel.add(macAddress);
+		mainInfosPanel.add(typeSensor);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
-		mainInfosPanel.add(typeSensor);
+		mainInfosPanel.add(macAddressLabel);
+		mainInfosPanel.add(macAddress);
+		
+		
 
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
@@ -528,6 +530,10 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			
+			else if(typeSensor.getSelectedIndex() <= 0) {
+				infos.setText("Veuillez selectionner un type de capteur valable");
+			}
+			
 			// If date = 0 : any selected location
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une date valide");
@@ -575,7 +581,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 						// Creation of a sensor 
 						// Recovery of all informations to insert
 						Sensor sensorCreate = new Sensor();
-						sensorCreate.setBrand(brand.getText().trim()); 
+						sensorCreate.setBrand(brand.getText().trim());
+						sensorCreate.setType(typeSensorsFoundList.get(typeSensor.getSelectedIndex() - 1).getType().toString());
 						sensorCreate.setMacAddress(macAddress.getText().trim());
 						sensorCreate.setMin(min.getText().trim());
 						sensorCreate.setMax(max.getText().trim());
