@@ -47,6 +47,9 @@ public class Simulation {
 
 	@SuppressWarnings("deprecation")
 	public void simulationTest() throws IOException, InterruptedException {
+		
+		System.setProperty("java.util.logging.SimpleFormatter.format", 
+	            "%1$tF %1$tT %4$s %5$s%6$s%n");
 
 		try {
 			FileHandler fh1=new FileHandler("%hsimulationLogger1.log");
@@ -99,7 +102,6 @@ public class Simulation {
 
 
 		for(int i = 0; i < 2; i++) { 
-			System.out.println(i + "IIIII");
 			propertiesId = Integer.parseInt((propertiesList[i].get(0)).getValue());
 
 			propertiesList[i].remove(0);
@@ -107,7 +109,6 @@ public class Simulation {
 			refreshSensorInfos();
 
 			Thread.sleep(3000);
-
 			JSONObject requestSensitivities = new JSONObject();
 			requestSensitivities.put("type", sensorFound.getType().toUpperCase());
 
@@ -134,16 +135,14 @@ public class Simulation {
 			// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
 
 			if(sensorFound.getState()) {
-				logger1.info("Sensor with the id "+ sensorFound.getId() + " is on\nThe sensor will be put in alert after "+ sensitivity + " of seconds");
-
 				try {
 					propertiesList[i].get(0).getValue();
 				} catch (IndexOutOfBoundsException e) {
 					int breakdownTrigger = 10;
 					int waitingToConfirmBreakdown = 1;
 
-					while (waitingToConfirmBreakdown <= breakdownTrigger) {
-						logger1.warning("The sensors are on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+					while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
+						logger1.warning("The sensor with the id "+ sensorFound.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
 						Thread.sleep(1000);
 						waitingToConfirmBreakdown++;
 					}
@@ -163,9 +162,25 @@ public class Simulation {
 						ccr.run();
 					}
 				}
-				
+
 				while(!propertiesList[i].isEmpty() && sensorFound.getState()) {
 					logger1.info("Sensor with the id "+ sensorFound.getId() + " is on and we get messages");
+
+					if(sensorFound.getBreakdown() == true) {
+						JSONObject newStateOnBreakdown = new JSONObject();
+						sensorFound.setBreakdown(false);
+						newStateOnBreakdown.put("id", sensorFound.getId());
+						newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
+
+						Request thirdRequest = new Request();
+						thirdRequest.setType("UPDATE");
+						thirdRequest.setEntity("SENSOR");
+						thirdRequest.setFields(newStateOnBreakdown);
+
+						ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+						ccr.run();
+					}
+
 					int messageDuration = Integer.parseInt(((Entry<String, String>) propertiesList[i].get(propertiesList[i].size() - 1)).getKey());
 					int messageValue = Integer.parseInt(((Entry<String, String>) propertiesList[i].get(propertiesList[i].size() - 1)).getValue());
 					int realTimeValue = 1;
@@ -176,11 +191,11 @@ public class Simulation {
 						while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
 
 							while(realTimeValue < sensitivity) {
-								if(sensorsCache.containsKey("POSSIBLEALERT")) {
-									sensorsCache.remove("POSSIBLEALERT");
+								if(sensorsCache.containsKey("POSSIBLEALERT" + sensorFound.getId())) {
+									sensorsCache.remove("POSSIBLEALERT" + sensorFound.getId());
 								}
 
-								sensorsCache.put("POSSIBLEALERT", realTimeValue);
+								sensorsCache.put("POSSIBLEALERT" + sensorFound.getId(), realTimeValue);
 
 								if(realTimeValue % 5 == 0 || realTimeValue == 1) {
 									logger1.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
@@ -191,15 +206,15 @@ public class Simulation {
 								realTimeValue++;
 							}
 
-							sensorsCache.remove("POSSIBLEALERT");
+							sensorsCache.remove("POSSIBLEALERT" + sensorFound.getId());
 
 
 
-							if(sensorsCache.containsKey("ALERT")) {
-								sensorsCache.remove("ALERT");
+							if(sensorsCache.containsKey("ALERT" + sensorFound.getId())) {
+								sensorsCache.remove("ALERT" + sensorFound.getId());
 							}
 
-							sensorsCache.put("ALERT", realTimeValue);
+							sensorsCache.put("ALERT" + sensorFound.getId(), realTimeValue);
 
 							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
 								logger1.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
@@ -257,14 +272,14 @@ public class Simulation {
 
 					else {
 
-						if(sensorsCache.containsKey("NOALERT")) {
-							sensorsCache.remove("NOALERT");
+						if(sensorsCache.containsKey("NOALERT" + sensorFound.getId())) {
+							sensorsCache.remove("NOALERT" + sensorFound.getId());
 						}
 
 						while(realTimeValue <= messageDuration && sensorFound.getState()) {
 
 
-							sensorsCache.put("NOALERT", realTimeValue);
+							sensorsCache.put("NOALERT" + sensorFound.getId(), realTimeValue);
 							if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
 								logger1.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
 										realTimeValue + " seconds with the value " + messageValue);
@@ -298,12 +313,18 @@ public class Simulation {
 						propertiesList[i].remove(propertiesList[i].size() - 1);
 					} 
 
+					if(!propertiesList[i].isEmpty() && !sensorFound.getState()) {
+						logger1.warning("The sensor is now off but we get messages, something went wrong");
+					}
+
 
 				}
 
 			} else {
 				logger1.warning("Sensor with the id "+ sensorFound.getId() + " is off, but we get messages");
 			}
+			
+			logger1.info("Messages ended for this sensor");
 		}
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
 		System.exit(0);
@@ -420,9 +441,5 @@ public class Simulation {
 	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		Simulation simu = new Simulation() ;
 		simu.simulationTest();
-
-		//		PropertiesReader properties = new PropertiesReader();
-		//		ArrayList<Entry<String, String>>[] propertiesList = properties.getPropValues();
-		//		System.out.println(propertiesList[0].toString());
 	}
 }
