@@ -412,12 +412,18 @@ public class RequestHandler implements Runnable {
 					TypeSensorDao typeSensorDao = new TypeSensorDao(connection);
 
 					switch (command.toUpperCase()) {
+					case "FINDALL":
+						List<TypeSensor> typeSensorList = typeSensorDao.findAll();		
+						
+						JSONArray TypeSensorListToJson = new JSONArray(typeSensorList);
+
+						toSend = TypeSensorListToJson.toString();
+						break;
 					case "FINDSENSITIVITY":
 						TypeSensor typeSensor = typeSensorDao.findByType(parameters.getString("type"));		
 						
 						toSend = typeSensor.toJSON().toString();
 						break;
-
 					default:
 						toSend = "Unkwown command for the TypeSensor table !";
 						break;

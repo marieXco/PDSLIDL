@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,7 +24,7 @@ public class TypeSensorDao implements DAO<TypeSensor>{
 		this.connect = connect;
 	}
 
-	@Override
+	
 	public boolean create(TypeSensor objToCreate) {
 		JSONObject jsonObject = objToCreate.toJSON();
 		int success = 0;
@@ -94,6 +95,35 @@ public class TypeSensorDao implements DAO<TypeSensor>{
 		return null;
 	}
 	
+	@Override
+	public List<TypeSensor> findAll() {
+		ObjectMapper mapper = new ObjectMapper();
+		List<TypeSensor> typeSensors = new ArrayList<TypeSensor>();
+		TypeSensor type = new TypeSensor();
+		
+		try {
+			connect.setAutoCommit(false);
+			Statement stmt = connect.createStatement();
+
+			ResultSet rs = stmt.executeQuery("SELECT data FROM ref_sensors;");
+
+			while (rs.next()) {
+				type = mapper.readValue(rs.getObject(1).toString(), TypeSensor.class);
+				typeSensors.add(type);
+			}
+			rs.close();
+			stmt.close();
+
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		
+		return typeSensors;
+
+	}
+	
 	public TypeSensor findByType(String type) {
 		ObjectMapper mapper = new ObjectMapper();
 		TypeSensor typeSensor = new TypeSensor();
@@ -120,11 +150,6 @@ public class TypeSensorDao implements DAO<TypeSensor>{
 		return typeSensor;
 	}
 
-	@Override
-	public List<TypeSensor> findAll() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	
 }
