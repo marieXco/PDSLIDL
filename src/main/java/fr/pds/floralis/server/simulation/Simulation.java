@@ -38,7 +38,7 @@ public class Simulation {
 
 	private final ScheduledExecutorService scheduler =
 			Executors.newScheduledThreadPool(1);
-	private Sensor sensorFound = new Sensor();
+	private Sensor sensorFound [] = new Sensor[5];
 	HashMap<String, Integer> sensorsCache;
 	private String periodOfDay = "";
 
@@ -48,8 +48,8 @@ public class Simulation {
 
 
 	@SuppressWarnings("deprecation")
-	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger logger) throws IOException, InterruptedException {
-		Sensor sensorUsed = new Sensor();
+	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex) throws IOException, InterruptedException {
+		Sensor sensorUsed;
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -57,23 +57,25 @@ public class Simulation {
 		 */
 		refreshPeriodOfDay();
 
-		/**
-		 * We get the .properties properties
-		 * We stock the id and the type in two String and remove it from the propertiesList
-		 */
-		
 
 		/**
-		 * With the id from the properties, we find the id; we refresh it so we get the last infos from the sensor
+		 * With the id from the properties, we find the id and we remove it from our values
 		 */
-
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
 
 		propertiesList.remove(0);
 
-		sensorUsed = refreshSensorInfos(propertiesId);
+		/**
+		 * We get the sensor infos every 3 seconds thanks to the id
+		 */
+		refreshSensorInfos(propertiesId, sensorIndex);
 
-		Thread.sleep(3000);
+		Thread.sleep(4000);
+		sensorUsed = sensorFound[sensorIndex];
+		
+		/**
+		 * We request the sensor sensitivity thanks to the type of the sensor
+		 */
 		JSONObject requestSensitivities = new JSONObject();
 		requestSensitivities.put("type", sensorUsed.getType().toUpperCase());
 
@@ -91,14 +93,12 @@ public class Simulation {
 		int sensitivity = 0;
 		if (periodOfDay.equals("DAYTIME")) {
 			sensitivity = typeFound.getDaySensitivity();				
-			logger.info("We're in daytime : sensitivity of daytime --> " + sensitivity + " seconds");
+			sensorLogger.info("We're in daytime : sensitivity of daytime --> " + sensitivity + " seconds");
 		} else {
 			sensitivity = typeFound.getNightSensitivity();
-			logger.info("We're in nighttime : sensitivity of nighttime --> " + sensitivity + " seconds");
+			sensorLogger.info("We're in nighttime : sensitivity of nighttime --> " + sensitivity + " seconds");
 		}
-
-		// TODO : possible alert again when the value changes but still too high ? 
-		// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
+		// End of requestSensitivities
 
 		if(sensorUsed.getState()) {
 			try {
@@ -108,7 +108,7 @@ public class Simulation {
 				int waitingToConfirmBreakdown = 1;
 
 				while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
-					logger.warning("The sensor with the id "+ sensorUsed.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+					sensorLogger.warning("The sensor with the id "+ sensorUsed.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
 					Thread.sleep(1000);
 					waitingToConfirmBreakdown++;
 				}
@@ -130,7 +130,7 @@ public class Simulation {
 			}
 
 			while(!propertiesList.isEmpty() && sensorUsed.getState()) {
-				logger.info("Sensor with the id "+ sensorUsed.getId() + " is on and we get messages");
+				sensorLogger.info("Sensor with the id "+ sensorUsed.getId() + " is on and we get messages");
 
 				if(sensorUsed.getBreakdown() == true) {
 					JSONObject newStateOnBreakdown = new JSONObject();
@@ -164,7 +164,7 @@ public class Simulation {
 							sensorsCache.put("POSSIBLEALERT" + sensorUsed.getId(), realTimeValue);
 
 							if(realTimeValue % 5 == 0 || realTimeValue == 1) {
-								logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()  + " for " + 
+								sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()  + " for " + 
 										realTimeValue + " seconds with the value " + messageValue);
 							}
 
@@ -183,7 +183,7 @@ public class Simulation {
 						sensorsCache.put("ALERT" + sensorUsed.getId(), realTimeValue);
 
 						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-							logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()  + " for " + 
+							sensorLogger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()  + " for " + 
 									realTimeValue + " seconds with the value " + messageValue);
 						}
 
@@ -247,7 +247,7 @@ public class Simulation {
 
 						sensorsCache.put("NOALERT" + sensorUsed.getId(), realTimeValue);
 						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
-							logger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + 
+							sensorLogger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + 
 									realTimeValue + " seconds with the value " + messageValue);
 						}
 
@@ -280,60 +280,61 @@ public class Simulation {
 				} 
 
 				if(!propertiesList.isEmpty() && !sensorUsed.getState()) {
-					logger.warning("The sensor is now off but we get messages, something went wrong");
+					sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
 				}
 
 
 			}
 
 		} else {
-			logger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages");
+			sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages");
 		}
 
-		logger.info("Messages ended for this sensor");
+		sensorLogger.info("Messages ended for this sensor");
 
 		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
 
 	}
 
 
-		public Sensor refreshSensorInfos(int sensorId) {
-			final Runnable refresh = new Runnable() {
-	
-				public void run() { 
-					JSONObject sensorJsonId = new JSONObject();
-					sensorJsonId.put("id", sensorId);
-	
-					Request request = new Request();
-					request.setType("FINDBYID");
-					request.setEntity("SENSOR");
-					request.setFields(sensorJsonId);
-	
-					ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
-					cc.run();
-	
-					String response = cc.getResponse();
-					try {
-						sensorFound = objectMapper.readValue(response.toString(), Sensor.class);
-					} catch (IOException e) {
-	
-					}
-					
+	public Sensor refreshSensorInfos(int sensorId, int sensorIndex) {
+		Sensor sensorToChange = new Sensor();
+		final Runnable refresh = new Runnable() {
+
+			public void run() { 
+				JSONObject sensorJsonId = new JSONObject();
+				sensorJsonId.put("id", sensorId);
+
+				Request request = new Request();
+				request.setType("FINDBYID");
+				request.setEntity("SENSOR");
+				request.setFields(sensorJsonId);
+
+				ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
+				cc.run();
+
+				String response = cc.getResponse();
+				try {
+					sensorFound[sensorIndex] = objectMapper.readValue(response.toString(), Sensor.class);
+
+				} catch (IOException e) {
+
 				}
-			};
-	
-			final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
-	
-			scheduler.schedule(
-					new Runnable() {
-						public void run() { 
-							refreshHandle.cancel(true); 
-						}
-					}, 360, SECONDS
-					);
-	
-			return sensorFound;
-		}
+			}
+		};
+
+		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
+
+		scheduler.schedule(
+				new Runnable() {
+					public void run() { 
+						refreshHandle.cancel(true); 
+					}
+				}, 360, SECONDS
+				);
+
+		return sensorToChange;
+	}
 
 	public String refreshPeriodOfDay() {
 		final Runnable refresh = new Runnable() {
@@ -376,9 +377,9 @@ public class Simulation {
 	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException, BrokenBarrierException {
 		Logger logger1 = Logger.getLogger("Logger1");
 		Logger logger2 = Logger.getLogger("Logger2");
-		Logger logger3 = Logger.getLogger("Logger3");
-		Logger logger4 = Logger.getLogger("Logger4");
-		Logger logger5 = Logger.getLogger("Logger5");
+//		Logger logger3 = Logger.getLogger("Logger3");
+//		Logger logger4 = Logger.getLogger("Logger4");
+//		Logger logger5 = Logger.getLogger("Logger5");
 
 		System.setProperty("java.util.logging.SimpleFormatter.format", 
 				"%1$tF %1$tT %4$s %5$s%6$s%n");
@@ -386,23 +387,23 @@ public class Simulation {
 		try {
 			FileHandler fh1=new FileHandler("%hsimulationLogger1.log");
 			FileHandler fh2=new FileHandler("%hsimulationLogger2.log");
-//			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
-//			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
-//			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
+			//			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
+			//			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
+			//			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
 
 			logger1.addHandler(fh1);
 			logger2.addHandler(fh2);
-//			logger3.addHandler(fh3);
-//			logger4.addHandler(fh4);
-//			logger5.addHandler(fh5);
+			//			logger3.addHandler(fh3);
+			//			logger4.addHandler(fh4);
+			//			logger5.addHandler(fh5);
 
 			SimpleFormatter formatter = new SimpleFormatter();  
 
 			fh1.setFormatter(formatter);
 			fh2.setFormatter(formatter);
-//			fh3.setFormatter(formatter);
-//			fh4.setFormatter(formatter);
-//			fh5.setFormatter(formatter);
+			//			fh3.setFormatter(formatter);
+			//			fh4.setFormatter(formatter);
+			//			fh5.setFormatter(formatter);
 
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -429,7 +430,7 @@ public class Simulation {
 					e.printStackTrace();
 				}
 				try {
-					simu.simulationTest(propertiesList[0], logger1);
+					simu.simulationTest(propertiesList[0], logger1, 0);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -443,7 +444,7 @@ public class Simulation {
 						e.printStackTrace();
 					}
 					try {
-						simu.simulationTest(propertiesList[1], logger2);
+						simu.simulationTest(propertiesList[1], logger2, 1);
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -453,6 +454,7 @@ public class Simulation {
 				t2.start();
 
 				gate.await();
-				System.out.println("all threads started");
+				System.out.println("All thread started at the same time");
+				
 	}
 }
