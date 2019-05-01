@@ -211,7 +211,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		year = new JComboBox<Object>(years);
 
 		// To see WindowWorker lines 269-287
-		findAllLocation fl = new findAllLocation(host, port);
+		FindAllLocation fl = new FindAllLocation(host, port);
 		locationsFoundList = fl.findAll(false);
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
