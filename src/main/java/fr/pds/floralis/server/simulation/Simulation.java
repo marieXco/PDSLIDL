@@ -38,7 +38,7 @@ public class Simulation {
 
 	private final ScheduledExecutorService scheduler =
 			Executors.newScheduledThreadPool(1);
-
+	private Sensor sensorFound = new Sensor();
 	HashMap<String, Integer> sensorsCache;
 	private String periodOfDay = "";
 
@@ -49,7 +49,7 @@ public class Simulation {
 
 	@SuppressWarnings("deprecation")
 	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger logger) throws IOException, InterruptedException {
-		Sensor sensorFound = new Sensor();
+		Sensor sensorUsed = new Sensor();
 
 		/**
 		 * Taking care of the warning levels depending of the period of day 
@@ -61,38 +61,21 @@ public class Simulation {
 		 * We get the .properties properties
 		 * We stock the id and the type in two String and remove it from the propertiesList
 		 */
-
+		
 
 		/**
 		 * With the id from the properties, we find the id; we refresh it so we get the last infos from the sensor
 		 */
 
-
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
 
 		propertiesList.remove(0);
 
-		JSONObject sensorId = new JSONObject();
-		sensorId.put("id", propertiesId);
-
-		Request request = new Request();
-		request.setType("FINDBYID");
-		request.setEntity("SENSOR");
-		request.setFields(sensorId);
-
-		ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
-		cc.run();
-
-		String response1 = cc.getResponse();
-		try {
-			sensorFound = objectMapper.readValue(response1.toString(), Sensor.class);
-		} catch (IOException e) {
-
-		}
+		sensorUsed = refreshSensorInfos(propertiesId);
 
 		Thread.sleep(3000);
 		JSONObject requestSensitivities = new JSONObject();
-		requestSensitivities.put("type", sensorFound.getType().toUpperCase());
+		requestSensitivities.put("type", sensorUsed.getType().toUpperCase());
 
 		Request forthRequest = new Request();
 		forthRequest.setType("FINDSENSITIVITY");
@@ -117,7 +100,7 @@ public class Simulation {
 		// TODO : possible alert again when the value changes but still too high ? 
 		// TODO : continuer a tester si il est éteint et qu'on reçoit des messages 
 
-		if(sensorFound.getState()) {
+		if(sensorUsed.getState()) {
 			try {
 				propertiesList.get(0).getValue();
 			} catch (IndexOutOfBoundsException e) {
@@ -125,16 +108,16 @@ public class Simulation {
 				int waitingToConfirmBreakdown = 1;
 
 				while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
-					logger.warning("The sensor with the id "+ sensorFound.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+					logger.warning("The sensor with the id "+ sensorUsed.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
 					Thread.sleep(1000);
 					waitingToConfirmBreakdown++;
 				}
 
-				if(sensorFound.getBreakdown() == false) {
+				if(sensorUsed.getBreakdown() == false) {
 					JSONObject newStateOnBreakdown = new JSONObject();
-					sensorFound.setBreakdown(true);
-					newStateOnBreakdown.put("id", sensorFound.getId());
-					newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
+					sensorUsed.setBreakdown(true);
+					newStateOnBreakdown.put("id", sensorUsed.getId());
+					newStateOnBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
 
 					Request thirdRequest = new Request();
 					thirdRequest.setType("UPDATE");
@@ -146,14 +129,14 @@ public class Simulation {
 				}
 			}
 
-			while(!propertiesList.isEmpty() && sensorFound.getState()) {
-				logger.info("Sensor with the id "+ sensorFound.getId() + " is on and we get messages");
+			while(!propertiesList.isEmpty() && sensorUsed.getState()) {
+				logger.info("Sensor with the id "+ sensorUsed.getId() + " is on and we get messages");
 
-				if(sensorFound.getBreakdown() == true) {
+				if(sensorUsed.getBreakdown() == true) {
 					JSONObject newStateOnBreakdown = new JSONObject();
-					sensorFound.setBreakdown(false);
-					newStateOnBreakdown.put("id", sensorFound.getId());
-					newStateOnBreakdown.put("sensorToUpdate", sensorFound.toJSON());
+					sensorUsed.setBreakdown(false);
+					newStateOnBreakdown.put("id", sensorUsed.getId());
+					newStateOnBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
 
 					Request thirdRequest = new Request();
 					thirdRequest.setType("UPDATE");
@@ -169,19 +152,19 @@ public class Simulation {
 				int realTimeValue = 1;
 				Boolean alertCreated = false;
 
-				if(Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) {
+				if(Integer.parseInt(sensorUsed.getMax()) < messageValue || Integer.parseInt(sensorUsed.getMin()) > messageValue) {
 					alertCreated = false;
-					while(realTimeValue <= messageDuration && (Integer.parseInt(sensorFound.getMax()) < messageValue || Integer.parseInt(sensorFound.getMin()) > messageValue) && sensorFound.getState()) {
+					while(realTimeValue <= messageDuration && (Integer.parseInt(sensorUsed.getMax()) < messageValue || Integer.parseInt(sensorUsed.getMin()) > messageValue) && sensorUsed.getState()) {
 
 						while(realTimeValue < sensitivity) {
-							if(sensorsCache.containsKey("POSSIBLEALERT" + sensorFound.getId())) {
-								sensorsCache.remove("POSSIBLEALERT" + sensorFound.getId());
+							if(sensorsCache.containsKey("POSSIBLEALERT" + sensorUsed.getId())) {
+								sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
 							}
 
-							sensorsCache.put("POSSIBLEALERT" + sensorFound.getId(), realTimeValue);
+							sensorsCache.put("POSSIBLEALERT" + sensorUsed.getId(), realTimeValue);
 
 							if(realTimeValue % 5 == 0 || realTimeValue == 1) {
-								logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound.getId()  + " for " + 
+								logger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()  + " for " + 
 										realTimeValue + " seconds with the value " + messageValue);
 							}
 
@@ -189,27 +172,27 @@ public class Simulation {
 							realTimeValue++;
 						}
 
-						sensorsCache.remove("POSSIBLEALERT" + sensorFound.getId());
+						sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
 
 
 
-						if(sensorsCache.containsKey("ALERT" + sensorFound.getId())) {
-							sensorsCache.remove("ALERT" + sensorFound.getId());
+						if(sensorsCache.containsKey("ALERT" + sensorUsed.getId())) {
+							sensorsCache.remove("ALERT" + sensorUsed.getId());
 						}
 
-						sensorsCache.put("ALERT" + sensorFound.getId(), realTimeValue);
+						sensorsCache.put("ALERT" + sensorUsed.getId(), realTimeValue);
 
 						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-							logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound.getId()  + " for " + 
+							logger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()  + " for " + 
 									realTimeValue + " seconds with the value " + messageValue);
 						}
 
 
-						if(sensorFound.getAlert() == false) {
+						if(sensorUsed.getAlert() == false) {
 							JSONObject newStateOnAlert = new JSONObject();
-							sensorFound.setAlert(true);
-							newStateOnAlert.put("id", sensorFound.getId());
-							newStateOnAlert.put("sensorToUpdate", sensorFound.toJSON());
+							sensorUsed.setAlert(true);
+							newStateOnAlert.put("id", sensorUsed.getId());
+							newStateOnAlert.put("sensorToUpdate", sensorUsed.toJSON());
 
 							Request secondRequest = new Request();
 							secondRequest.setType("UPDATE");
@@ -239,7 +222,7 @@ public class Simulation {
 							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
 						}
 
-						Alert alerte = new Alert(2, sensorFound.getId(),beginningOfAlert, endOfAlert , today);
+						Alert alerte = new Alert(2, sensorUsed.getId(),beginningOfAlert, endOfAlert , today);
 
 						Request fifthRequest = new Request();
 						fifthRequest.setType("CREATE");
@@ -255,24 +238,24 @@ public class Simulation {
 
 				else {
 
-					if(sensorsCache.containsKey("NOALERT" + sensorFound.getId())) {
-						sensorsCache.remove("NOALERT" + sensorFound.getId());
+					if(sensorsCache.containsKey("NOALERT" + sensorUsed.getId())) {
+						sensorsCache.remove("NOALERT" + sensorUsed.getId());
 					}
 
-					while(realTimeValue <= messageDuration && sensorFound.getState()) {
+					while(realTimeValue <= messageDuration && sensorUsed.getState()) {
 
 
-						sensorsCache.put("NOALERT" + sensorFound.getId(), realTimeValue);
+						sensorsCache.put("NOALERT" + sensorUsed.getId(), realTimeValue);
 						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
-							logger.info("No alert for the sensor: " + sensorFound.getId() + " for " + 
+							logger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + 
 									realTimeValue + " seconds with the value " + messageValue);
 						}
 
-						if(sensorFound.getAlert()) {
+						if(sensorUsed.getAlert()) {
 							JSONObject newStateNoAlert = new JSONObject();
-							sensorFound.setAlert(false);
-							newStateNoAlert.put("id", sensorFound.getId());
-							newStateNoAlert.put("sensorToUpdate", sensorFound.toJSON());
+							sensorUsed.setAlert(false);
+							newStateNoAlert.put("id", sensorUsed.getId());
+							newStateNoAlert.put("sensorToUpdate", sensorUsed.toJSON());
 
 							Request thridRequest = new Request();
 							thridRequest.setType("UPDATE");
@@ -292,11 +275,11 @@ public class Simulation {
 
 				}
 
-				if(!propertiesList.isEmpty() && sensorFound.getState()) {
+				if(!propertiesList.isEmpty() && sensorUsed.getState()) {
 					propertiesList.remove(propertiesList.size() - 1);
 				} 
 
-				if(!propertiesList.isEmpty() && !sensorFound.getState()) {
+				if(!propertiesList.isEmpty() && !sensorUsed.getState()) {
 					logger.warning("The sensor is now off but we get messages, something went wrong");
 				}
 
@@ -304,7 +287,7 @@ public class Simulation {
 			}
 
 		} else {
-			logger.warning("Sensor with the id "+ sensorFound.getId() + " is off, but we get messages");
+			logger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages");
 		}
 
 		logger.info("Messages ended for this sensor");
@@ -314,7 +297,7 @@ public class Simulation {
 	}
 
 
-		public Sensor refreshSensorInfos(int sensorId, Sensor sensorToUpdate) {
+		public Sensor refreshSensorInfos(int sensorId) {
 			final Runnable refresh = new Runnable() {
 	
 				public void run() { 
@@ -335,8 +318,8 @@ public class Simulation {
 					} catch (IOException e) {
 	
 					}
+					
 				}
-	
 			};
 	
 			final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
