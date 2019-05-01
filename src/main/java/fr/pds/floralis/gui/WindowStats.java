@@ -3,9 +3,10 @@
 
 
 	import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.HeadlessException;
-import java.io.IOException;
+	import java.awt.Button;
+	import java.awt.HeadlessException;
+	import java.awt.event.*;
+	import java.io.IOException;
 
 import javax.swing.BorderFactory;
 	import javax.swing.BoxLayout;
@@ -24,11 +25,13 @@ import org.json.JSONException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import fr.pds.floralis.commons.bean.entity.Room;
+
 	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
 	//TODO: faire les scripts
 	
 	// this is the window where 
-	public class WindowStats extends JFrame {
+	public class WindowStats extends JFrame implements ActionListener {
 		private String host;
 		private int port;
 		private int LG = 950;
@@ -70,19 +73,45 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 			container.add(BorderLayout.WEST, requestPanel); 
 			container.add(BorderLayout.EAST, resultPanel);
 			
-			/*
+
 			countBedroom.addActionListener(this);
 			countAllSensor.addActionListener(this);
 			countOffSensor.addActionListener(this);
 			countOnSensor.addActionListener(this);
 			countNoLocationSensor.addActionListener(this);
-			*/
+		
 			this.setTitle("Floralis - Indicateurs");
-		    this.setSize(800, 800);
+		    pack(); //permet d'avoir une bonne dimension pour la fenetre
 			this.setContentPane(container);
 			this.setLocationRelativeTo(null);
 			this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			this.setVisible(true);
+			
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			//when the user wants to know how many home there's on EHPAD
+			if (e.getSource() == countBedroom) {
+				
+				Room nbBedroom = 
+				
+			}
+			
+			if(e.getSource() == countAllSensor) {
+				
+			}
+			
+			if(e.getSource() == countOffSensor) {
+				
+			}
+			
+			if(e.getSource() == countOnSensor) {
+				
+			}
+			
+			if(e.getSource() == countNoLocationSensor) {
+				
+			}
 			
 		}
 
