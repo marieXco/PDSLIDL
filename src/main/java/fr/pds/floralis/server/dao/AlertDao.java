@@ -119,7 +119,7 @@ public class AlertDao implements DAO<Alert> {
 		List<Integer> emptyList = new ArrayList<Integer>(); 
 		emptyList.add(0); 
 		emptyList.add(0); 
-		Alert alert = new Alert(0, TypeLevel.LEVEL1, 0, null, null);
+		Alert alert = new Alert();
 
 		try {  
 			connect.setAutoCommit(false); 
@@ -146,7 +146,7 @@ public class AlertDao implements DAO<Alert> {
 	public List<Alert> findAll() {
 		ObjectMapper mapper = new ObjectMapper(); 
 		List<Alert> alertList = new ArrayList<Alert>(); 
-		Alert alert = new Alert(0, TypeLevel.LEVEL1, 0, null, null);
+		Alert alert = new Alert();
  
 		try { 
 			connect.setAutoCommit(false); 
