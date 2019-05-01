@@ -15,13 +15,13 @@ import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class findAllLocation  {
+public class FindAllLocation  {
 	
 	private static ObjectMapper objectMapper;
 	private static String host;
 	private static int port;
 
-	public findAllLocation(String host, int port) {
+	public FindAllLocation(String host, int port) {
 		super();
 		this.host = host;
 		this.port = port;

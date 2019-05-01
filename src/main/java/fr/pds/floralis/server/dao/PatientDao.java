@@ -119,7 +119,7 @@ public class PatientDao implements DAO<Patient> {
 	}
 
 	@Override
-	public Object find(int id) {
+	public Patient find(int id) {
 		ObjectMapper mapper = new ObjectMapper(); 
 		List<Integer> emptyList = new ArrayList<Integer>(); 
 		emptyList.add(0); 

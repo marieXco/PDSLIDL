@@ -15,40 +15,41 @@ import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class findAllSensor  {
-	
+public class FindSensorByConfig {
 	private static ObjectMapper objectMapper;
 	private static String host;
 	private static int port;
 
-	public findAllSensor(String host, int port) {
+	public FindSensorByConfig(String host, int port) {
 		super();
 		this.host = host;
 		this.port = port;
 	}
 
-	public static List<Sensor> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findByConfig(Boolean refresh, Boolean config) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
-		List<Sensor> sensorsList;
+		List<Sensor> sensorsConfigList;
+		
+		JSONObject sensorToConfig = new JSONObject();
+		sensorToConfig.put("configure", config);
 		
 		Request request = new Request();
-		request.setType("FINDALL");
+		request.setType("FINDBYCONFIG");
 		request.setEntity("SENSOR");
-		request.setFields(new JSONObject());
+		request.setFields(sensorToConfig);
 		
-		ConnectionClient ccSensorFindAll = new ConnectionClient(host, port, request.toJSON().toString());
-		ccSensorFindAll.run();
+		ConnectionClient ccSensorFindByConfig= new ConnectionClient(host, port, request.toJSON().toString());
+		ccSensorFindByConfig.run();
 		
-		Sensor[] sensorsFoundTab =  objectMapper.readValue(ccSensorFindAll.getResponse(), Sensor[].class);
-		sensorsList = Arrays.asList(sensorsFoundTab);
+		Sensor[] sensorsConfigTab =  objectMapper.readValue(ccSensorFindByConfig.getResponse(), Sensor[].class);
+		sensorsConfigList = Arrays.asList(sensorsConfigTab);
 		
 		if(refresh) { 
 			Thread.sleep(6000);
-			findAll(true);
+			findByConfig(true, config);
 		}
 		
-		return sensorsList;
+		return sensorsConfigList;
 	}
-
 }

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
@@ -15,12 +16,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
 
+
 public class SensorDao implements DAO<Sensor> {
 	Connection connect = null;
-	
+	Logger logger = Logger.getLogger(this.getClass().getName());
+
 	public SensorDao(Connection connect) throws ClassNotFoundException, SQLException {
 		this.connect = connect;
 	}
+
 
 	public boolean create(Sensor sensorToCreate) {
 		JSONObject jsonObject = sensorToCreate.toJSON();
@@ -28,11 +32,13 @@ public class SensorDao implements DAO<Sensor> {
 
 		PGobject object1 = new PGobject();
 		try {
-			object1.setValue(jsonObject.toString());
+			object1.setValue(jsonObject.toString()); // TODO Move in other try block
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
 		object1.setType("json");
+
+
 
 		try {
 			connect.setAutoCommit(false);
@@ -47,19 +53,35 @@ public class SensorDao implements DAO<Sensor> {
 			connect.commit();
 
 			statement.close();
-		} catch (Exception e) {
+		} catch (SQLException e) {
+			logger.severe(e.getMessage());
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
-			System.exit(0);
+			//System.exit(0);
+			success = 0;
+		} finally {
+			// TODO Release resources
 		}
-		
+
+		//		JSONObject sensorCreated = new JSONObject();
+		//		if (success > 0) {
+		//			sensorCreated.put("successCreate", "true");
+		//			return sensorCreated;
+		//		} else {
+		//			sensorCreated.put("successCreate", "false");
+		//		}
+		//
+		//		return null;
 		if(success > 0) {
 			return true;
 		} else {
 			return false;
 		}
-		
+
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#delete(org.json.JSONObject)
+	 */
 	@Override
 	public boolean delete(int id) {
 		int success = 0;
@@ -87,10 +109,13 @@ public class SensorDao implements DAO<Sensor> {
 		} else {
 			return false;
 		}
-		
+
 	}
 
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#update(org.json.JSONObject)
+	 */
 	@Override
 	public boolean update(int id, Sensor sensorToUpdate) {
 		int success = 0;
@@ -112,15 +137,18 @@ public class SensorDao implements DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
+
 		if(success > 0) {
 			return true;
 		} else {
 			return false;
 		}
-		
+
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#find(org.json.JSONObject)
+	 */
 	@Override
 	public Sensor find(int id) {
 		ObjectMapper mapper = new ObjectMapper();
@@ -143,10 +171,13 @@ public class SensorDao implements DAO<Sensor> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
+
 		return sensor;
 	}
 
+	/* (non-Javadoc)
+	 * @see fr.pds.floralis.server.dao.TestDAO#findAll()
+	 */
 	@Override
 	public List<Sensor> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
@@ -158,6 +189,34 @@ public class SensorDao implements DAO<Sensor> {
 			Statement stmt = connect.createStatement();
 
 			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors;");
+
+			while (rs.next()) {
+				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
+				sensors.add(sensor);
+			}
+			rs.close();
+			stmt.close();
+
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+		
+		return sensors;
+	}
+	
+
+	public List<Sensor> findByConfig(Boolean configure) {
+		ObjectMapper mapper = new ObjectMapper();
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		Sensor sensor = new Sensor();
+
+		try {
+			connect.setAutoCommit(false);
+			Statement stmt = connect.createStatement();
+
+			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors where (data -> 'configure')::json::text = '" + configure + "'::json::text;");
 
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);

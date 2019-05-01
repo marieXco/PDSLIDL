@@ -15,18 +15,10 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.pds.floralis.commons.bean.entity.Building;
-import fr.pds.floralis.commons.bean.entity.Floor;
-import fr.pds.floralis.commons.bean.entity.Location;
-import fr.pds.floralis.commons.bean.entity.Room;
-import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.*;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-import fr.pds.floralis.server.dao.BuildingDao;
-import fr.pds.floralis.server.dao.FloorDao;
-import fr.pds.floralis.server.dao.LocationDao;
-import fr.pds.floralis.server.dao.RoomDao;
-import fr.pds.floralis.server.dao.SensorDao;
+import fr.pds.floralis.server.dao.*;
 
 /**
  * RequestHandler 
@@ -71,6 +63,7 @@ public class RequestHandler implements Runnable {
 				reader = new BufferedInputStream(sock.getInputStream());
 
 				String request = read();
+			
 				JSONObject requestJson = new JSONObject(request);	
 				ObjectMapper objectMapper = new ObjectMapper();
 				
@@ -133,6 +126,14 @@ public class RequestHandler implements Runnable {
 						Boolean sensorUpdating = sensorDao.update(parameters.getInt("id"), sensorToUpdate);
 
 						toSend = sensorUpdating.toString();
+						break;
+						
+					case "FINDBYCONFIG":
+						List<Sensor> sensorListConfig = sensorDao.findByConfig(parameters.getBoolean("configure"));
+						
+						JSONArray sensorFoundByConfig = new JSONArray(sensorListConfig);
+
+						toSend = sensorFoundByConfig.toString();
 						break;
 					default:
 						toSend = "Unkwown command for the Sensors table !";
@@ -282,6 +283,85 @@ public class RequestHandler implements Runnable {
 					DataSource.backConnection(jdbc, connection);
 					break;
 
+				case "PATIENTS":
+					PatientDao patientDao = new PatientDao(connection);
+ 
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						List<Patient> patientList = patientDao.findAll();		
+						JSONArray patientListToJson = new JSONArray(patientList);
+						toSend = patientListToJson.toString();
+						break; 
+
+					case "FINDBYID":
+						Patient patientFound = patientDao.find(parameters.getInt("id"));
+						toSend = patientFound.toJSON().toString();
+						break;
+
+					case "CREATE":
+						Patient patientToCreate = objectMapper.readValue(parameters.toString(), Patient.class);
+						Boolean patientCreate = patientDao.create(patientToCreate);
+						toSend = patientCreate.toString();
+						break;
+
+					case "DELETE":
+						Boolean patientDelete = patientDao.delete(parameters.getInt("id"));
+						toSend = patientDelete.toString();
+						break;
+
+					case "UPDATE":
+						Patient patientToUpdate = objectMapper.readValue(parameters.get("patientToUpdate").toString(), Patient.class);
+						Boolean patientUpdate = patientDao.update(parameters.getInt("id"), patientToUpdate);
+						toSend = patientUpdate.toString();
+						break;
+
+					default:
+						toSend = "Unkwown command for the Floors table !";
+						break;
+					}
+					DataSource.backConnection(jdbc, connection);
+					break;
+					
+				case "HISTORY_ALERTS":
+					AlertDao alertDao = new AlertDao(connection);
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						List<Alert> alertList = alertDao.findAll();		
+						JSONArray alertListToJson = new JSONArray(alertList);
+						toSend = alertListToJson.toString();
+						break;
+
+					case "FINDBYID":
+						Alert alertFound = alertDao.find(parameters.getInt("id"));
+						toSend = alertFound.toJSON().toString();
+						break;
+
+					case "CREATE":
+						Alert alertToCreate = objectMapper.readValue(parameters.toString(), Alert.class);
+						Boolean alertCreate = alertDao.create(alertToCreate);
+						toSend = alertCreate.toString();
+						break;
+
+					case "DELETE":
+						Boolean alertDelete = alertDao.delete(parameters.getInt("id"));
+						toSend = alertDelete.toString();
+						break;
+
+					case "UPDATE":
+						Alert alertToUpdate = objectMapper.readValue(parameters.get("alertToUpdate").toString(), Alert.class);
+						Boolean alertUpdate = alertDao.update(parameters.getInt("id"), alertToUpdate);
+						toSend = alertUpdate.toString();
+						break;
+
+					default:
+						toSend = "Unkwown command for the Floors table !";
+						break;
+					}
+					DataSource.backConnection(jdbc, connection);
+					break;
+
+
 				case "FLOOR":
 					FloorDao floorDao = new FloorDao(connection);
 
@@ -324,6 +404,28 @@ public class RequestHandler implements Runnable {
 
 					default:
 						toSend = "Unkwown command for the Floors table !";
+						break;
+					}
+					DataSource.backConnection(jdbc, connection);
+					break;
+				case "TYPESENSOR":
+					TypeSensorDao typeSensorDao = new TypeSensorDao(connection);
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						List<TypeSensor> typeSensorList = typeSensorDao.findAll();		
+						
+						JSONArray TypeSensorListToJson = new JSONArray(typeSensorList);
+
+						toSend = TypeSensorListToJson.toString();
+						break;
+					case "FINDSENSITIVITY":
+						TypeSensor typeSensor = typeSensorDao.findByType(parameters.getString("type"));		
+						
+						toSend = typeSensor.toJSON().toString();
+						break;
+					default:
+						toSend = "Unkwown command for the TypeSensor table !";
 						break;
 					}
 					DataSource.backConnection(jdbc, connection);

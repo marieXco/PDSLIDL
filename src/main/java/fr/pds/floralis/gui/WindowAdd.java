@@ -38,6 +38,7 @@ import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Room;
 import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class WindowAdd extends JFrame implements ActionListener {
@@ -63,6 +64,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JComboBox<Object> room = new JComboBox<Object>();
 
 	JComboBox<Object> location = new JComboBox<Object>();
+	
+	JComboBox<Object> typeSensor = new JComboBox<Object>();
 
 	JComboBox<Object> building = new JComboBox<Object>();
 
@@ -141,6 +144,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	List<Location> locationsFoundList = new ArrayList<Location>();
 
+	List<TypeSensor> typeSensorsFoundList = new ArrayList<TypeSensor>();
+	
 	Location[] locationsFoundTab = null;
 
 	Building[] buildingsFoundTab;
@@ -206,7 +211,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		year = new JComboBox<Object>(years);
 
 		// To see WindowWorker lines 269-287
-		findAllLocation fl = new findAllLocation(host, port);
+		FindAllLocation fl = new FindAllLocation(host, port);
 		locationsFoundList = fl.findAll(false);
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
@@ -219,15 +224,36 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 		location = new JComboBox<Object>(locationsComboBox);
 		// End ccLocationFindAll
+		
+		//Begginig typeSensor
+		
+		FindAllTypeSensor tf = new FindAllTypeSensor(host, port);
+		typeSensorsFoundList = tf.findAll(false);
+
+		String[] typeSensorComboBox = new String[typeSensorsFoundList.size() + 1];
+		typeSensorComboBox[0] = "--Type du capteur--";
+
+		for (int listIndex = 0; listIndex < typeSensorsFoundList.size(); listIndex++) {
+			int tabIndex = listIndex + 1;
+			typeSensorComboBox[tabIndex] = typeSensorsFoundList.get(listIndex).getType();
+		}
+		
+		typeSensor = new JComboBox<Object>(typeSensorComboBox);
+		
+		//End ccTypeSensorsFindAll 
+
 
 		container.setPreferredSize(new Dimension(LG, HT));
 
 		mainInfosPanel.add(brandLabel);
 		mainInfosPanel.add(brand);
-		mainInfosPanel.add(macAddressLabel);
-		mainInfosPanel.add(macAddress);
+		mainInfosPanel.add(typeSensor);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
+		mainInfosPanel.add(macAddressLabel);
+		mainInfosPanel.add(macAddress);
+		
+		
 
 		otherInfosPanel.add(dateInstallationLabel);
 		otherInfosPanel.add(day);
@@ -504,6 +530,10 @@ public class WindowAdd extends JFrame implements ActionListener {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			
+			else if(typeSensor.getSelectedIndex() <= 0) {
+				infos.setText("Veuillez selectionner un type de capteur valable");
+			}
+			
 			// If date = 0 : any selected location
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner une date valide");
@@ -551,13 +581,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 						// Creation of a sensor 
 						// Recovery of all informations to insert
 						Sensor sensorCreate = new Sensor();
-						sensorCreate.setBrand(brand.getText().trim()); 
+						sensorCreate.setBrand(brand.getText().trim());
+						sensorCreate.setType(typeSensorsFoundList.get(typeSensor.getSelectedIndex() - 1).getType().toString());
 						sensorCreate.setMacAddress(macAddress.getText().trim());
 						sensorCreate.setMin(min.getText().trim());
 						sensorCreate.setMax(max.getText().trim());
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
 						sensorCreate.setIdLocation(locationsFoundList.get(location.getSelectedIndex() - 1).getId());
-						sensorCreate.setAlert(true);
+						sensorCreate.setAlert(false);
 						sensorCreate.setBreakdown(false);
 						sensorCreate.setConfigure(false);
 						sensorCreate.setIpAddress(null);
