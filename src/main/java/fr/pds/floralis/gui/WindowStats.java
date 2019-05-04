@@ -60,11 +60,11 @@ import fr.pds.floralis.server.dao.DAO;
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
 		Button countNoLocationSensor = new Button("Nombres de capteurs non placés");
 		Button countAlert = new Button("Nombre d'alerte");
-		Button countSmokeAlert = new Button("Nombre de pièce");
-		Button countLightAlert = new Button("Nombre de pièce");
-		Button countGasAlert = new Button("Nombre de pièce");
-		Button countMoveAlert = new Button("Nombre de pièce");
-		Button countTempAlert = new Button("Nombre d'alerte de ");
+		Button countSmokeSensor = new Button("Nombre de capteurs de fumée");
+		Button countLightSensor = new Button("Nombre de capteurs de lumière");
+		Button countGasSensor = new Button("Nombre de capteurs de gaz");
+		Button countMoveSensor = new Button("Nombre de capteurs de mouvement");
+		Button countTempSensor = new Button("Nombre de capteurs température ");
 		
 		
 		// Indicators values
@@ -85,6 +85,12 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countNoLocationSensor);
 			requestPanel.add(countOnSensor);
 			requestPanel.add(countAlert);
+			requestPanel.add(countSmokeSensor);
+			requestPanel.add(countLightSensor);
+			requestPanel.add(countGasSensor);
+			requestPanel.add(countMoveSensor);
+			requestPanel.add(countTempSensor);
+			
 
 			container.add(BorderLayout.WEST, requestPanel); 
 			container.add(BorderLayout.EAST, resultPanel);
@@ -96,6 +102,22 @@ import fr.pds.floralis.server.dao.DAO;
 			countOnSensor.addActionListener(this);
 			countNoLocationSensor.addActionListener(this);
 			countAlert.addActionListener(this);
+			countSmokeSensor.addActionListener(this);
+			countLightSensor.addActionListener(this);
+			countGasSensor.addActionListener(this);
+			countMoveSensor.addActionListener(this);
+			countTempSensor.addActionListener(this);
+			
+			
+			/*countSmokeSensor.setVisible(false);
+			countLightSensor.setVisible(false);
+			countGasSensor.setVisible(false);
+			countMoveSensor.setVisible(false);
+			countTempSensor.setVisible(false);
+			countOffSensor.setVisible(false);
+			countOnSensor.setVisible(false);
+			countNoLocationSensor.setVisible(false);*/
+			
 		
 			this.setTitle("Floralis - Indicateurs");
 			this.setContentPane(container);
@@ -130,6 +152,14 @@ import fr.pds.floralis.server.dao.DAO;
 				}
 				int countSensor = sensorFoundList.size(); 	
 				System.out.println("Nombre de capteurs : " + countSensor);
+				/*countSmokeSensor.setVisible(true);
+				countLightSensor.setVisible(true);
+				countGasSensor.setVisible(true);
+				countMoveSensor.setVisible(true);
+				countTempSensor.setVisible(true);
+				countOffSensor.setVisible(true);
+				countOnSensor.setVisible(true);
+				countNoLocationSensor.setVisible(true);*/
 			}
 			
 			if(e.getSource() == countAlert) {
@@ -155,6 +185,37 @@ import fr.pds.floralis.server.dao.DAO;
 			if(e.getSource() == countNoLocationSensor) {
 				
 			}
+			
+			if(e.getSource() == countSmokeSensor) {
+				String smoke = 	"FIRE"; 
+				FindSensorByType allloc = new FindSensorByType(host, port);
+				try {
+					sensorFoundList = allloc.findByType(false, smoke);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countRoom = roomFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de fumée : " + countRoom);
+			}
+	
+			
+			if(e.getSource() == countLightSensor) {
+				
+			}
+			
+			if(e.getSource() == countGasSensor) {
+							
+			}
+			
+			if(e.getSource() == countMoveSensor) {
+				
+			}
+			
+			if(e.getSource() == countTempSensor) {
+				
+			}
+
 			
 		}
 

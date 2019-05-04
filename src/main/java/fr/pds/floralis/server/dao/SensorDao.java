@@ -15,6 +15,7 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.TypeSensor;
 
 
 public class SensorDao implements DAO<Sensor> {
@@ -217,6 +218,34 @@ public class SensorDao implements DAO<Sensor> {
 			Statement stmt = connect.createStatement();
 
 			ResultSet rs = stmt.executeQuery("SELECT data FROM sensors where (data -> 'configure')::json::text = '" + configure + "'::json::text;");
+
+			while (rs.next()) {
+				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
+				sensors.add(sensor);
+			}
+
+			rs.close();
+			stmt.close();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}	
+		System.out.println();
+		
+		return sensors;
+	}
+	
+	public List<Sensor> findByType (String type) {
+		ObjectMapper mapper = new ObjectMapper();
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		Sensor sensor = new Sensor();
+
+		try {
+			connect.setAutoCommit(false);
+			Statement stmt = connect.createStatement();
+
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data ->> 'type')::text = '" + type + "'::text;" );
 
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
