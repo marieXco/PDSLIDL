@@ -41,6 +41,7 @@ public class Simulation {
 	private Sensor sensorFound [] = new Sensor[5];
 	HashMap<String, Integer> sensorsCache;
 	private String periodOfDay = "";
+	ScheduledFuture<?> refreshHandle[] = new ScheduledFuture<?>[5] ;
 
 	public Simulation(HashMap<String, Integer> sensorsCache) {
 		this.sensorsCache = sensorsCache;
@@ -61,6 +62,14 @@ public class Simulation {
 		/**
 		 * With the id from the properties, we find the id and we remove it from our values
 		 */
+
+		try {
+			Integer.parseInt((propertiesList.get(0)).getValue());
+		} catch (Exception e) {
+			sensorLogger.warning("The id is not a number");
+			Thread.currentThread().stop();
+		}
+
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
 
 		propertiesList.remove(0);
@@ -72,7 +81,7 @@ public class Simulation {
 
 		Thread.sleep(4000);
 		sensorUsed = sensorFound[sensorIndex];
-		
+
 		/**
 		 * We request the sensor sensitivity thanks to the type of the sensor
 		 */
@@ -100,7 +109,8 @@ public class Simulation {
 		}
 		// End of requestSensitivities
 
-		if(sensorUsed.getState()) {
+
+		if(sensorUsed.getState() && sensorUsed.getConfigure()) {
 			try {
 				propertiesList.get(0).getValue();
 			} catch (IndexOutOfBoundsException e) {
@@ -287,13 +297,22 @@ public class Simulation {
 			}
 
 		} else {
-			sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages");
+			if (!sensorUsed.getState() && !sensorUsed.getConfigure()) {
+				sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off and does't have any warning limits, but we get messages;\nExit");
+			}
+			
+			else if (!sensorUsed.getState()) {
+				sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages;\nExit");
+			}
+			
+			else if (!sensorUsed.getConfigure()) {
+				sensorLogger.warning("The sensor with the id "+ sensorUsed.getId() +" does't have any warning limits;\nExit");
+			}
 		}
 
 		sensorLogger.info("Messages ended for this sensor");
 
-		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
-
+		refreshHandle[sensorIndex].cancel(false);
 	}
 
 
@@ -323,15 +342,7 @@ public class Simulation {
 			}
 		};
 
-		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
-
-		scheduler.schedule(
-				new Runnable() {
-					public void run() { 
-						refreshHandle.cancel(true); 
-					}
-				}, 360, SECONDS
-				);
+		refreshHandle[sensorIndex] = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
 
 		return sensorToChange;
 	}
@@ -377,9 +388,9 @@ public class Simulation {
 	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException, BrokenBarrierException {
 		Logger logger1 = Logger.getLogger("Logger1");
 		Logger logger2 = Logger.getLogger("Logger2");
-//		Logger logger3 = Logger.getLogger("Logger3");
-//		Logger logger4 = Logger.getLogger("Logger4");
-//		Logger logger5 = Logger.getLogger("Logger5");
+		//		Logger logger3 = Logger.getLogger("Logger3");
+		//		Logger logger4 = Logger.getLogger("Logger4");
+		//		Logger logger5 = Logger.getLogger("Logger5");
 
 		System.setProperty("java.util.logging.SimpleFormatter.format", 
 				"%1$tF %1$tT %4$s %5$s%6$s%n");
@@ -448,13 +459,16 @@ public class Simulation {
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
-				}};
 
-				t1.start();
-				t2.start();
+				}
+			};
 
-				gate.await();
-				System.out.println("All thread started at the same time");
-				
+
+			t1.start();
+			t2.start();
+
+			gate.await();
+
+			System.out.println("All thread started at the same time");
 	}
 }
