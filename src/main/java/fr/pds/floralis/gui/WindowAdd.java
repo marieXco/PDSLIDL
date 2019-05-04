@@ -55,7 +55,6 @@ public class WindowAdd extends JFrame implements ActionListener {
 	JPanel container = new JPanel();
 	JPanel otherInfosPanel = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
-	JPanel locationPanel = new JPanel();
 
 
 	// Creation of all parameters necessary 
@@ -77,27 +76,6 @@ public class WindowAdd extends JFrame implements ActionListener {
 
 	JTextField macAddress = new JTextField(10);
 	JLabel macAddressLabel = new JLabel("Adresse Mac :");
-
-	JTextField dateInstallation = new JTextField(10);
-	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
-
-	JComboBox<Object> day = new JComboBox<Object>();
-
-	String[] days = new String[32];
-
-	JComboBox<Object> month = new JComboBox<Object>();
-
-	String[] months = new String[13];
-
-	JComboBox<Object> year = new JComboBox<Object>();
-
-	String[] years = new String[12];
-
-	JTextField min = new JTextField(5);
-	JLabel minLabel = new JLabel("Seuil Min :");
-	
-	JTextField max = new JTextField(5);
-	JLabel maxLabel = new JLabel("Seuil Max :");
 	
 	// Parameters for patients/personnel
 	JTextField firstname = new JTextField(10);
@@ -182,51 +160,8 @@ public class WindowAdd extends JFrame implements ActionListener {
 		infos.setText("L'identifiant ne peut contenir que des chiffres, il sera impossible de le changer");
 
 		buttonAddSensor.addActionListener(this);
-
-		days[0] = "Jour";
-
-		months[0] = "Mois";
-
-		years[0] = "Annee";
-
-		for (int dayIndex = 1; dayIndex < days.length; dayIndex++) {
-			String daysMax = (dayIndex) + "";
-			days[dayIndex] = daysMax;
-		}
-
-		for (int monthIndex = 1; monthIndex < months.length; monthIndex++) {
-			String monthMax = (monthIndex) + "";
-			months[monthIndex] = monthMax;
-		}
-
-		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
-			String yearMax = (yearIndex + 2018) + "";
-			years[yearIndex] = yearMax;
-		}
-
-		day = new JComboBox<Object>(days);
-
-		month = new JComboBox<Object>(months);
-
-		year = new JComboBox<Object>(years);
-
-		// To see WindowWorker lines 269-287
-		FindAllLocation fl = new FindAllLocation(host, port);
-		locationsFoundList = fl.findAll(false);
-
-		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
-		locationsComboBox[0] = "--Localisation--";
-
-		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-			int tabIndex = listIndex + 1;
-			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId();
-		}
-
-		location = new JComboBox<Object>(locationsComboBox);
-		// End ccLocationFindAll
 		
-		//Begginig typeSensor
-		
+		//Beginning typeSensor
 		FindAllTypeSensor tf = new FindAllTypeSensor(host, port);
 		typeSensorsFoundList = tf.findAll(false);
 
@@ -239,40 +174,25 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 		
 		typeSensor = new JComboBox<Object>(typeSensorComboBox);
-		
 		//End ccTypeSensorsFindAll 
 
 
 		container.setPreferredSize(new Dimension(LG, HT));
 
-		mainInfosPanel.add(brandLabel);
-		mainInfosPanel.add(brand);
+		
 		mainInfosPanel.add(typeSensor);
 		mainInfosPanel.add(identifiantLabel);
 		mainInfosPanel.add(identifiant);
-		mainInfosPanel.add(macAddressLabel);
-		mainInfosPanel.add(macAddress);
 		
-		
-
-		otherInfosPanel.add(dateInstallationLabel);
-		otherInfosPanel.add(day);
-		otherInfosPanel.add(month);
-		otherInfosPanel.add(year);
-
-		otherInfosPanel.add(minLabel);
-		otherInfosPanel.add(min);
-		
-		otherInfosPanel.add(maxLabel);
-		otherInfosPanel.add(max);
-
-		locationPanel.add(location);
+		otherInfosPanel.add(brandLabel);
+		otherInfosPanel.add(brand);
+		otherInfosPanel.add(macAddressLabel);
+		otherInfosPanel.add(macAddress);
 
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
 		container.add(BorderLayout.NORTH, mainInfosPanel);
 		container.add(BorderLayout.NORTH, otherInfosPanel);
-		container.add(BorderLayout.NORTH, locationPanel);
 		container.add(infos);
 		container.add(buttonAddSensor);
 
@@ -517,38 +437,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 			
 			
 			// Verification that the sill contains just number
-			try {
-				Integer.parseInt(min.getText());
-				Integer.parseInt(max.getText());
-			} catch (java.lang.NumberFormatException ex) {
-				infos.setText("Les seuils ne peuvent contenir que des chiffres");
-			}
-			
-			
-			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty()
-					|| min.getText().isEmpty() || max.getText().isEmpty()) {
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty() || identifiant.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
 			}
 			
 			else if(typeSensor.getSelectedIndex() <= 0) {
 				infos.setText("Veuillez selectionner un type de capteur valable");
 			}
-			
-			// If date = 0 : any selected location
-			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
-				infos.setText("Veuillez selectionner une date valide");
-			}
-			
-			// If index = 0 : Any selected location
-			else if (location.getSelectedIndex() <= 0 ) {
-				infos.setText("Veuillez selectionner une localisation valable");
-			}
-			
-			// If min > max
-			else if (Integer.parseInt(min.getText()) > Integer.parseInt(max.getText())) {
-				infos.setText("La valeur minimum doit être inferieure à la valeur maximum");
-			}
-			
+	
 			else {
 				// Beginning of sensor Find By Id, to see lines 384-412
 				JSONObject sensorIdFindById = new JSONObject();
@@ -584,31 +480,21 @@ public class WindowAdd extends JFrame implements ActionListener {
 						sensorCreate.setBrand(brand.getText().trim());
 						sensorCreate.setType(typeSensorsFoundList.get(typeSensor.getSelectedIndex() - 1).getType().toString());
 						sensorCreate.setMacAddress(macAddress.getText().trim());
-						sensorCreate.setMin(min.getText().trim());
-						sensorCreate.setMax(max.getText().trim());
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
-						sensorCreate.setIdLocation(locationsFoundList.get(location.getSelectedIndex() - 1).getId());
+						
+						//To configure
+						sensorCreate.setMin(null);
+						sensorCreate.setMax(null);
+						sensorCreate.setIdLocation(0);
 						sensorCreate.setAlert(false);
 						sensorCreate.setBreakdown(false);
-						sensorCreate.setConfigure(false);
 						sensorCreate.setIpAddress(null);
 						sensorCreate.setPort(null);
 						sensorCreate.setState(false);
-
-						int dayInstallation;
-						int monthInstallation;
-						int yearInstallation;
-
-						dayInstallation = day.getSelectedIndex();
-						monthInstallation = month.getSelectedIndex() - 1;
-						yearInstallation = Integer.parseInt(years[year.getSelectedIndex()]);
+						sensorCreate.setInstallation(null);
 						
-						// Creation of Date - 1900 because the parameter 'Year' of the date beginning in 1900
-						// For example if you choose the year 2018, You have to insert the year 2018-1900
-						// Thus the date is in good shape
-						Date dateInst = new Date(yearInstallation - 1900, monthInstallation, dayInstallation);
-
-						sensorCreate.setInstallation(dateInst);
+						//The sensor is not configure
+						sensorCreate.setConfigure(false);
 
 						JSONObject sensorCreateJson = new JSONObject(sensorCreate);
 						

@@ -502,6 +502,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
 					ccSensorDelete.run();
+					
+					message.setText("Le capteur " + idSensorDelete + " a été supprimé avec succès");
 
 					// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
@@ -666,5 +668,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	public void setPort(int port) {
 		this.port = port;
 	}
+
+	
 
 }

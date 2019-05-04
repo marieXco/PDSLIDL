@@ -21,7 +21,6 @@ public class Alert {
 	private Time end;
 	private Date date;
 	
-	
 
 
 	public Alert() {
