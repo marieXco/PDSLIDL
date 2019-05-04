@@ -195,24 +195,64 @@ import fr.pds.floralis.server.dao.DAO;
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				int countRoom = roomFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de fumée : " + countRoom);
+				int countSmoke = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de fumée : " + countSmoke);
 			}
 	
 			
 			if(e.getSource() == countLightSensor) {
+				String light = 	"LIGHT"; 
+				FindSensorByType allloc = new FindSensorByType(host, port);
+				try {
+					sensorFoundList = allloc.findByType(false, light);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countLight = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de lumière : " + countLight);
 				
 			}
 			
 			if(e.getSource() == countGasSensor) {
+				String light = 	"GAS"; 
+				FindSensorByType allloc = new FindSensorByType(host, port);
+				try {
+					sensorFoundList = allloc.findByType(false, light);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countGas = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de lumière : " + countGas);
 							
 			}
 			
 			if(e.getSource() == countMoveSensor) {
+				String light = 	"PRESENCE"; 
+				FindSensorByType allloc = new FindSensorByType(host, port);
+				try {
+					sensorFoundList = allloc.findByType(false, light);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countMove = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de présence: " + countMove);
 				
 			}
 			
 			if(e.getSource() == countTempSensor) {
+				String light = 	"TEMPERATURE"; 
+				FindSensorByType allloc = new FindSensorByType(host, port);
+				try {
+					sensorFoundList = allloc.findByType(false, light);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countTemperature = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs de température : " + countTemperature);
 				
 			}
 

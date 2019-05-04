@@ -33,7 +33,7 @@ public class FindSensorByType {
 		List<Sensor> sensorsConfigList;
 		
 		JSONObject sensorToType = new JSONObject();
-		sensorToType.put("typeSensor", type);
+		sensorToType.put("type", type);
 		
 		Request request = new Request();
 		request.setType("FINDBYTYPE");

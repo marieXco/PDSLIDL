@@ -262,6 +262,7 @@ public class SensorDao implements DAO<Sensor> {
 		System.out.println();
 		
 		return sensors;
+		
 	}
 
 }

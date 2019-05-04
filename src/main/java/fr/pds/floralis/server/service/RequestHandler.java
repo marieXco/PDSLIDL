@@ -138,9 +138,7 @@ public class RequestHandler implements Runnable {
 						
 					case "FINDBYTYPE": 
 						List<Sensor> sensorListType = sensorDao.findByType(parameters.getString("type"));
-						
 						JSONArray sensorFoundByType = new JSONArray(sensorListType);
-
 						toSend = sensorFoundByType.toString();
 						break;
 				 
