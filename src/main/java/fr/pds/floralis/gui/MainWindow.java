@@ -89,16 +89,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	JLabel message = new JLabel("Aucun message pour le moment :)");
 
 	/**
-	 * Buttons for the sesnors
 	 * Buttons for the sensors
 	 */
-	Button buttonDeleteSensor = new Button("Supprimer le capteur");
-	Button buttonUpdateSensor = new Button("Modifier les infos du capteur");
-	Button buttonUpdateSensorState = new Button("Allumer/Eteindre");
-	Button buttonRefreshSensor = new Button("Refresh");
-	Button buttonNoConfigSensor = new Button("Voir les capteurs non configurés");
-	Button buttonYesConfigSensor = new Button("Voir les capteurs déjà configurés");
-	Button buttonConfigSensor = new Button ("Configurer le capteur");
 	String configuration = "Configuration";
 	String toConfigure = "Configurer le capteur";
 	String deleteConfig = "Supprimer la configuration";
@@ -211,7 +203,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
-		infoSensorsPanel.add(buttonConfigSensor);
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
 		infoSensorsPanel.add(buttonYesConfigSensor);
@@ -223,7 +214,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				InputEvent.ALT_DOWN_MASK));
 		addingLocation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
 				InputEvent.ALT_DOWN_MASK));
-
 
 		comboSensors.addActionListener(this);
 		buttonDeleteSensor.addActionListener(this);
@@ -573,10 +563,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		if(e.getSource() == buttonConfigSensor) {
 			int indexSensor = comboSensors.getSelectedIndex();
-			if (indexSensor > 0) {
-				System.out.println(sensorsFoundList.get(indexSensor - 1).getId());
 
 			if (buttonConfigSensor.getText().equals(toConfigure)) {
+				System.out.println(idSensor);
+
 				try {
 					try {
 						new WindowConfig(getHost(), getPort()).initConfigSensor(idSensor);
@@ -588,12 +578,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 					e1.printStackTrace();
 				}
-			
 
 			} else if (buttonConfigSensor.getText().equals(deleteConfig)) {
 				boolean sure = new WindowConfirm().init("supprimer la configuration de ce capteur");
 
+				if (sure) {
+					FindById di = new FindById(host, port);
+					try {
 						sensorFound = di.findById(false, indexSensor);
+					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
@@ -604,6 +597,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 					sensorFound.setIpAddress(null);
 					sensorFound.setPort(null);
 					sensorFound.setIdLocation(0);
+
 					// The sensor is no configured
 					sensorFound.setConfigure(false);
 
@@ -685,6 +679,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 
 		}
 
+		if(e.getSource() == comboSensors) {
 			FindById di = new FindById(host, port);
 			int indexSensor = comboSensors.getSelectedIndex();
 			System.out.println("turlututu" + indexSensor);
@@ -694,6 +689,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				Sensor toto = new Sensor();
 				try {
 					toto = di.findById(false, idSensor);
+				} catch (JSONException | IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
 				if(toto.getConfigure()) {
