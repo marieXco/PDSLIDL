@@ -17,6 +17,12 @@ public class TypeSensor {
 	private int nightSensitivity;
 	private int daySensitivity;
 	
+	public TypeSensor(int id, String typeSensor, int night, int day) {
+		this.id = id; 
+		this.type= typeSensor; 
+		this.daySensitivity = day;
+		this.nightSensitivity = night;
+	}
 	/**
 	 * @return the id
 	 */

@@ -135,6 +135,21 @@ public class RequestHandler implements Runnable {
 
 						toSend = sensorFoundByConfig.toString();
 						break;
+						
+					case "FINDBYTYPE": 
+						List<Sensor> sensorListType = sensorDao.findByType(parameters.getString("type"));
+						JSONArray sensorFoundByType = new JSONArray(sensorListType);
+						toSend = sensorFoundByType.toString();
+						break;
+						
+					case "FINDBYSTATE":
+						List<Sensor> sensorListState = sensorDao.findByState(parameters.getBoolean("state"));
+						
+						JSONArray sensorFoundByState = new JSONArray(sensorListState);
+
+						toSend = sensorFoundByState.toString();
+						break;
+				 
 					default:
 						toSend = "Unkwown command for the Sensors table !";
 						break;
@@ -424,9 +439,14 @@ public class RequestHandler implements Runnable {
 						
 						toSend = typeSensor.toJSON().toString();
 						break;
+					case "FINDBYID":
+						TypeSensor sensorFound = typeSensorDao.find(parameters.getInt("id"));
+						toSend = sensorFound.toJSON().toString();
+						break;
 					default:
 						toSend = "Unkwown command for the TypeSensor table !";
 						break;
+						
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
