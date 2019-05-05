@@ -94,10 +94,14 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 	String configuration = "Configuration";
 	String toConfigure = "Configurer le capteur";
 	String deleteConfig = "Supprimer la configuration";
+	
+	String OnOff = "ON/OFF";
+	String on = "ON";
+	String off ="OFF";
 
 	JButton buttonDeleteSensor = new JButton("Supprimer le capteur");
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
-	JButton buttonUpdateSensorState = new JButton("ON/OFF");
+	JButton buttonUpdateSensorState = new JButton(OnOff);
 	JButton buttonRefreshSensor = new JButton("Refresh");
 	JButton buttonNoConfigSensor = new JButton("Voir les capteurs non configurés");
 	JButton buttonYesConfigSensor = new JButton("Voir les capteurs déjà configurés");
@@ -450,7 +454,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 			int indexSensor = comboSensors.getSelectedIndex();
 
 			Sensor sensorUpdateState = sensorsFoundList.get(indexSensor - 1);
-			if (sensorUpdateState.getState() == true) {
+			if (sensorUpdateState.getState()) {
 				sensorUpdateState.setState(false);
 			} else {
 				sensorUpdateState.setState(true);
@@ -697,8 +701,14 @@ public class MainWindow extends Thread implements ActionListener, Runnable {
 				} else {
 					buttonConfigSensor.setText(toConfigure);
 				}
+				if(toto.getState()) {
+					buttonUpdateSensorState.setText(off);
+				} else {
+					buttonUpdateSensorState.setText(on);
+				}
 			} else {
 				buttonConfigSensor.setText(configuration);
+				buttonUpdateSensorState.setText(onOff);
 			}
 		}
 
