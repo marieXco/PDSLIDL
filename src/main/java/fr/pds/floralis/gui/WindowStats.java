@@ -175,10 +175,27 @@ import fr.pds.floralis.server.dao.DAO;
 
 			}
 			if(e.getSource() == countOffSensor) {
-				
+				FindSensorByState allloc = new FindSensorByState(host, port);
+				try {
+					sensorFoundList = allloc.findByState(false, false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countOff = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs éteint : " + countOff);	
 			}
 			
 			if(e.getSource() == countOnSensor) {
+				FindSensorByState allloc = new FindSensorByState(host, port);
+				try {
+					sensorFoundList = allloc.findByState(false, true);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countOn = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs allumés : " + countOn);
 				
 			}
 			
@@ -259,19 +276,4 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		}
 
-
-		
-		//TODO: adding action performed method
-		
-		
-		//TODO: How am I supposed to be connected with de bdd ??
-		
-		//TODO: draw graphic (optional)
-		
-		//TODO: init methode to send a request.
-		
-		//TODO: method who print results
-
-		//TODO: DAO for all indicators
-		//TODO : modify the request handlers for filters and indicators
-}
+	}
