@@ -48,7 +48,7 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorTableModel;
 
-public class MainWindow extends Thread implements ActionListener, Runnable, ItemListener {
+public class MainWindow extends Thread implements ActionListener, Runnable {
 	private String host;
 	private int port;
 
@@ -93,11 +93,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable, Item
 	 */
 	String configuration = "Configuration";
 	String toConfigure = "Configurer le capteur";
-	String deleteConfig = "Supprimer la configuration du capteur";
+	String deleteConfig = "Supprimer la configuration";
 
 	JButton buttonDeleteSensor = new JButton("Supprimer le capteur");
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
-	JButton buttonUpdateSensorState = new JButton("Allumer/Eteindre");
+	JButton buttonUpdateSensorState = new JButton("ON/OFF");
 	JButton buttonRefreshSensor = new JButton("Refresh");
 	JButton buttonNoConfigSensor = new JButton("Voir les capteurs non configurés");
 	JButton buttonYesConfigSensor = new JButton("Voir les capteurs déjà configurés");
@@ -210,7 +210,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable, Item
 		addingLocation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
 				InputEvent.ALT_DOWN_MASK));
 
-		comboSensors.addItemListener(this);
+		comboSensors.addActionListener(this);
 		buttonDeleteSensor.addActionListener(this);
 		buttonUpdateSensor.addActionListener(this);
 		buttonUpdateSensorState.addActionListener(this);
@@ -273,7 +273,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable, Item
 		}
 
 
-		locationPanel.add(buttonRefreshLocation);
+		locationPanel.add(buttonRefreshLocation, BorderLayout.CENTER);
 		locationPanel.add(locationList);
 		sensorsPanel.add(infoSensorsPanel);	
 		sensorsPanel.add(new JScrollPane(paneSensors));
@@ -655,22 +655,21 @@ public class MainWindow extends Thread implements ActionListener, Runnable, Item
 			}
 
 		}
-	}
-
-	public void itemStateChanged(ItemEvent e) {
+		
 		if(e.getSource() == comboSensors) {
 			FindById di = new FindById(host, port);
 			int indexSensor = comboSensors.getSelectedIndex();
+			int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
+			Sensor toto = new Sensor();
 			if(indexSensor > 0) {
 				try {
-					sensorFound = di.findById(false, indexSensor);
+					toto = di.findById(false, idSensor);
 				} catch (JSONException | IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
-				if(sensorFound.getConfigure()) {
+				if(toto.getConfigure()) {
 					buttonConfigSensor.setText(deleteConfig);
-				}
-				else {
+				} else {
 					buttonConfigSensor.setText(toConfigure);
 				}
 			} else {
@@ -678,6 +677,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable, Item
 			}
 		}
 	}
+
 
 	// Méthode appelée par le frame.start du main
 	public void run() {

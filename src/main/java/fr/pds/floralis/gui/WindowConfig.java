@@ -163,7 +163,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
-		infos.setText("");
+		infos.setText("Configuration d'un capteur");
 		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		infos.setOpaque(false);
 		infos.setEditable(false);
