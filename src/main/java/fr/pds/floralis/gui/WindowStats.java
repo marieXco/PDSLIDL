@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import fr.pds.floralis.commons.bean.entity.Alert;
 import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Patient;
 import fr.pds.floralis.commons.bean.entity.Room;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.server.dao.DAO;
@@ -58,19 +59,21 @@ import fr.pds.floralis.server.dao.DAO;
 		Button countAllSensor = new Button("Nombre de capteurs");
 		Button countOffSensor = new Button("Nombre de capteurs éteint");
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
-		Button countNoLocationSensor = new Button("Nombres de capteurs non placés");
+		Button countNoConfigSensor = new Button("Nombres de capteurs non configurés");
 		Button countAlert = new Button("Nombre d'alerte");
 		Button countSmokeSensor = new Button("Nombre de capteurs de fumée");
 		Button countLightSensor = new Button("Nombre de capteurs de lumière");
 		Button countGasSensor = new Button("Nombre de capteurs de gaz");
 		Button countMoveSensor = new Button("Nombre de capteurs de mouvement");
 		Button countTempSensor = new Button("Nombre de capteurs température ");
+		Button countAllPatient = new Button("Nombre de patients");
 		
 		
 		// Indicators values
 		List<Location> roomFoundList; 
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
+		List<Patient> patientFoundList;
 		
 		
 		
@@ -82,7 +85,7 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countAllSensor);
 			requestPanel.add(countRoom);
 			requestPanel.add(countOffSensor);
-			requestPanel.add(countNoLocationSensor);
+			requestPanel.add(countNoConfigSensor);
 			requestPanel.add(countOnSensor);
 			requestPanel.add(countAlert);
 			requestPanel.add(countSmokeSensor);
@@ -90,6 +93,7 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countGasSensor);
 			requestPanel.add(countMoveSensor);
 			requestPanel.add(countTempSensor);
+			requestPanel.add(countAllPatient);
 			
 
 			container.add(BorderLayout.WEST, requestPanel); 
@@ -100,13 +104,14 @@ import fr.pds.floralis.server.dao.DAO;
 			countAllSensor.addActionListener(this);
 			countOffSensor.addActionListener(this);
 			countOnSensor.addActionListener(this);
-			countNoLocationSensor.addActionListener(this);
+			countNoConfigSensor.addActionListener(this);
 			countAlert.addActionListener(this);
 			countSmokeSensor.addActionListener(this);
 			countLightSensor.addActionListener(this);
 			countGasSensor.addActionListener(this);
 			countMoveSensor.addActionListener(this);
 			countTempSensor.addActionListener(this);
+			countAllPatient.addActionListener(this);
 			
 			
 			/*countSmokeSensor.setVisible(false);
@@ -199,8 +204,16 @@ import fr.pds.floralis.server.dao.DAO;
 				
 			}
 			
-			if(e.getSource() == countNoLocationSensor) {
-				
+			if(e.getSource() == countNoConfigSensor) {
+				FindSensorByConfig allloc = new FindSensorByConfig(host, port);
+				try {
+					sensorFoundList = allloc.findByConfig(false, false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countNoConfig = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs non configurés : " + countNoConfig);	
 			}
 			
 			if(e.getSource() == countSmokeSensor) {
@@ -271,6 +284,18 @@ import fr.pds.floralis.server.dao.DAO;
 				int countTemperature = sensorFoundList.size(); 	
 				System.out.println("Nombre de Capteurs de température : " + countTemperature);
 				
+			}
+			
+			if (e.getSource() == countAllPatient) {
+				FindAllPatient allloc = new FindAllPatient(host, port);
+				try {
+					patientFoundList = allloc.findAll(false);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countpatient = patientFoundList.size(); 	
+				System.out.println("Nombre de patients : " + countpatient);
 			}
 
 			
