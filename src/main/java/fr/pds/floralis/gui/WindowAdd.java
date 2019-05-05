@@ -49,7 +49,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 	private int port;
 
 	private int LG = 950;
-	private int HT = 180;
+	private int HT = 120;
 	
 	// Creation of panels
 	JPanel container = new JPanel();

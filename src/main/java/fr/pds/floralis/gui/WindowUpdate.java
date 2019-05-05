@@ -44,7 +44,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1700387838741895744L;
 
 	private int LG = 700;
-	private int HT = 120;
+	private int HT = 100;
 
 	// Creation of panels
 	JPanel container = new JPanel();
@@ -60,31 +60,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 	JTextField macAddress = new JTextField(10);
 	JLabel macAddressLabel = new JLabel("Adresse Mac :");
-
-	JTextField dateInstallation = new JTextField(10);
-	JLabel dateInstallationLabel = new JLabel("Date d'installation :");
-
-	JComboBox<Object> daysComboBox = new JComboBox<Object>();
-
-	String[] daysTab = new String[32];
-
-	JComboBox<Object> monthComboBox = new JComboBox<Object>();
-
-	String[] monthsTab = new String[13];
-
-	JComboBox<Object> yearComboBox = new JComboBox<Object>();
-
-	String[] yearsTab = new String[12];
-	
-	JComboBox<Object> location = new JComboBox<Object>();
-
-	JTextField min = new JTextField(5);
-	JLabel minLabel = new JLabel("Seuil Min :");
-	
-	JTextField max = new JTextField(5);
-	JLabel maxLabel = new JLabel("Seuil Max :");
-
-	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	
 	// Parameters for patient/personnel
 	JTextField identifiant = new JTextField(10);
@@ -127,7 +102,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 	Location[] locationsFoundTab = null;
 
-	
+	Sensor sensorFound;
 
 	int sensorFoundLocationId;
 	
@@ -159,11 +134,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 		buttonUpdateSensor.addActionListener(this);
 
-		daysTab[0] = "Jour";
-
-		monthsTab[0] = "Mois";
-
-		yearsTab[0] = "Annee";
 
 		// Beginning of sensor Find by id
 		// Recovery of the sensor associate at the id in parameter
@@ -183,47 +153,9 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		sensorFoundJson.put("sensorFoundJson", retourSensorFindById);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		Sensor sensorFound =  objectMapper.readValue(
-				sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
+		sensorFound =  objectMapper.readValue(sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
 		// End sensor Find By Id
 
-		// Beginning of location Find All
-		// To see WindowWorker lines 269
-		FindAllLocation fl = new FindAllLocation(host, port);
-		locationsFoundList = fl.findAll(false);
-
-		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
-		locationsComboBox[0] = "--Localisation--";
-
-		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
-			int tabIndex = listIndex + 1;
-			locationsComboBox[tabIndex] = locationsFoundList.get(listIndex).getBuildingId() + " - " + locationsFoundList.get(listIndex).getRoomId() + " - " + locationsFoundList.get(listIndex).getFloorId();
-		}
-		// End location Find all
-		
-		// Ajouter des choses dans la comboBox
-		location = new JComboBox<Object>(locationsComboBox);
-
-		for (int dayIndex = 1; dayIndex < daysTab.length; dayIndex++) {
-			String daysMax = (dayIndex) + "";
-			daysTab[dayIndex] = daysMax;
-		}
-
-		for (int monthIndex = 1; monthIndex < monthsTab.length; monthIndex++) {
-			String monthMax = (monthIndex) + "";
-			monthsTab[monthIndex] = monthMax;
-		}
-
-		for (int yearIndex = 1; yearIndex < yearsTab.length; yearIndex++) {
-			String yearMax = (yearIndex + 2018) + "";
-			yearsTab[yearIndex] = yearMax;
-		}
-
-		daysComboBox = new JComboBox<Object>(daysTab);
-
-		monthComboBox = new JComboBox<Object>(monthsTab);
-
-		yearComboBox = new JComboBox<Object>(yearsTab);
 
 		container.setPreferredSize(new Dimension(LG + 200, HT));
 
@@ -231,27 +163,10 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		mainInfosPanel.add(brand);
 		mainInfosPanel.add(macAddressLabel);
 		mainInfosPanel.add(macAddress);
-		mainInfosPanel.add(location);
-
-		otherInfosPanel.add(dateInstallationLabel);
-		otherInfosPanel.add(daysComboBox);
-		otherInfosPanel.add(monthComboBox);
-		otherInfosPanel.add(yearComboBox);
-
-		otherInfosPanel.add(minLabel);
-		otherInfosPanel.add(min);
-		
-		otherInfosPanel.add(maxLabel);
-		otherInfosPanel.add(max);
 
 		// Adding of window parameters informations of found sensor
 		brand.setText(sensorFound.getBrand());
 		macAddress.setText(sensorFound.getMacAddress().trim());
-		daysComboBox.setSelectedIndex(sensorFound.getInstallation().getDate());
-		monthComboBox.setSelectedIndex(sensorFound.getInstallation().getMonth() + 1);
-		yearComboBox.setSelectedIndex(sensorFound.getInstallation().getYear() - 118);
-		min.setText(sensorFound.getMin());
-		max.setText(sensorFound.getMax());
 
 		sensorFoundLocationId = sensorFound.getIdLocation();
 
@@ -280,72 +195,17 @@ public class WindowUpdate extends JFrame implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonUpdateSensor) {
-			// To see WindowAdd line 459
-/*			try {
-				Integer.parseInt(identifiant.getText());
-			} catch (java.lang.NumberFormatException ex) {
-				infos.setText("L'identifiant ne peut contenir que des chiffres");
-			}*/
-			try {
-				Integer.parseInt(min.getText());
-				Integer.parseInt(max.getText());
-			} catch (java.lang.NumberFormatException ex) {
-				infos.setText("Les seuils ne peuvent contenir que des chiffres");
-			}
 			
-			// Verification that the sill contains just number
-			try {
-				Integer.parseInt(min.getText());
-				Integer.parseInt(max.getText());
-			} catch (java.lang.NumberFormatException ex) {
-				infos.setText("Les seuils ne peuvent contenir que des chiffres");
-			}
-			
-			if (brand.getText().isEmpty() || macAddress.getText().isEmpty()
-					|| min.getText().isEmpty() || max.getText().isEmpty() ) {
+			if (brand.getText().isEmpty() || macAddress.getText().isEmpty()) {
 				infos.setText("Un ou plusieurs champs sont manquants");
-			} 
-			
-			else if (location.getSelectedIndex() <= 0 ) {
-				infos.setText("Veuillez selectionner une localisation valable");
-			}
-			
-			// If min > max
-			else if (Integer.parseInt(min.getText()) > Integer.parseInt(max.getText())) {
-				infos.setText("La valeur minimum doit être inferieure à la valeur maximum");
-			}
-			else {
+			} else {
 				// Beginning of sensor Update
-				Sensor sensorUpdate = new Sensor();
-				sensorUpdate.setBrand(brand.getText().trim());
-				sensorUpdate.setMacAddress(macAddress.getText().trim());
-				sensorUpdate.setMin(min.getText().trim());
-				sensorUpdate.setMax(max.getText().trim());
-				sensorUpdate.setIdLocation(locationsFoundList.get(location.getSelectedIndex()-1).getId());
-
-				sensorUpdate.setId(getId());
-				// For the moment, not alert, no breakdown
-				sensorUpdate.setAlert(false);
-				sensorUpdate.setBreakdown(false);
-				// This button switch the state of the sensor selected in the comboBox
-				sensorUpdate.setState(false);
-				sensorUpdate.setConfigure(false);
-				sensorUpdate.setIpAddress(null);
-				sensorUpdate.setPort(null);
-
-				int dayInstallation = daysComboBox.getSelectedIndex();
-				int monthInstallation = monthComboBox.getSelectedIndex() - 1;
-				int yearInstallation = Integer.parseInt(yearsTab[yearComboBox.getSelectedIndex()]);
-
-				@SuppressWarnings("deprecation")
-				Date dateInstallation = new Date(yearInstallation - 1900,
-						monthInstallation, dayInstallation);
-
-				sensorUpdate.setInstallation(dateInstallation);
+				sensorFound.setBrand(brand.getText().trim());
+				sensorFound.setMacAddress(macAddress.getText().trim());
 
 				JSONObject sensorUpdateJson = new JSONObject();
-				sensorUpdateJson.put("id", sensorUpdate.getId());
-				sensorUpdateJson.put("sensorToUpdate", sensorUpdate.toJSON());
+				sensorUpdateJson.put("id", sensorFound.getId());
+				sensorUpdateJson.put("sensorToUpdate", sensorFound.toJSON());
 				
 				Request thirdRequest = new Request();
 				thirdRequest.setType("UPDATE");
@@ -355,12 +215,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 				ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 				ccSensorUpdate.run();
 				// End sensorUpdate 
-
-				// Beginning of old Location Update
-				// TODO : locationUpdate --> taking of the sensorId on the old location
-				// Adding the sensorId on the new Location
-				// End old location Update
-
 
 				this.setVisible(false);
 			}

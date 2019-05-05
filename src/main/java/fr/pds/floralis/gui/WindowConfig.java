@@ -2,6 +2,7 @@ package fr.pds.floralis.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
@@ -22,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -49,7 +51,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 	 */
 	private static final long serialVersionUID = -8097747904160110502L;
 	private int LG = 700;
-	private int HT = 120;
+	private int HT = 130;
 
 	JTextPane infos = new JTextPane();
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
@@ -76,7 +78,8 @@ public class WindowConfig extends JFrame implements ActionListener {
 	
 	JButton stateOn = new JButton("ON");
 	JButton stateOff = new JButton("OFF");
-	ButtonGroup state = new ButtonGroup();
+	ButtonGroup stateOnOff = new ButtonGroup();
+	Boolean state = true;
 
 	Button buttonConfigSensor = new Button("Configurer");
 
@@ -160,7 +163,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
-		infos.setText("");
+		infos.setText("Configuration d'un capteur");
 		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		infos.setOpaque(false);
 		infos.setEditable(false);
@@ -171,7 +174,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		stateOff.addActionListener(this);
 		
 
-		container.setPreferredSize(new Dimension(LG + 200, HT + 15));
+		container.setPreferredSize(new Dimension(LG + 200, HT + 25));
 
 		this.setTitle("Floralis - Configuration du capteur " + sensorFound.getId());
 		this.setContentPane(container);
@@ -224,10 +227,20 @@ public class WindowConfig extends JFrame implements ActionListener {
 		location = new JComboBox<Object>(locationsComboBox);
 		//End Location
 
-		state.add(stateOn);
-		state.add(stateOff);
-		stateOn.isSelected();
+		//by default : state on
+		// Managing state
+		stateOnOff.setSelected(stateOn.getModel(), true);
+		stateOn.setBackground(new Color(43,81,224));
+		stateOff.setBackground(new Color(201,226,245));
 
+		
+		
+		
+		// End state
+
+		stateOnOff.add(stateOn);
+		stateOnOff.add(stateOff);
+		
 		mainInfosPanel.add(dateInstallationLabel);
 		mainInfosPanel.add(day);
 		mainInfosPanel.add(month);
@@ -279,6 +292,10 @@ public class WindowConfig extends JFrame implements ActionListener {
 			else if(addressIp.getText().isEmpty() || portSensor.getText().isEmpty()) {
 				infos.setText("Vous devez renseigner l'adresse IP et le port du capteur");
 			}
+			
+			else if(portSensor.getText().length()>4) {
+				infos.setText("Le port doit être constitué de 4 chiffres");
+			}
 
 			// If date = 0 : any selected location
 			else if (day.getSelectedIndex() <= 0 || month.getSelectedIndex() <= 0 || year.getSelectedIndex() <= 0) {
@@ -296,9 +313,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 			}
 
 
-			// End Sensor Find By Id
-
-			else {
+			else { 
 				Sensor sensorConfig = new Sensor();
 				sensorConfig.setBrand(sensorFound.getBrand());
 				sensorConfig.setMacAddress(sensorFound.getMacAddress());
@@ -309,7 +324,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 				sensorConfig.setMin(min.getText().trim());
 				sensorConfig.setMax(max.getText().trim());
 				
-				sensorConfig.setState(true);
+				sensorConfig.setState(stateOnOff.isSelected(stateOn.getModel()));
 				sensorConfig.setIpAddress(addressIp.getText().trim());
 				sensorConfig.setPort(portSensor.getText().trim());
 				sensorConfig.setIdLocation(locationsFoundList.get(location.getSelectedIndex()-1).getId());
@@ -357,6 +372,21 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 
 		}
+		
+		// manage state
+		else if(e.getSource() == stateOn) {
+			stateOnOff.setSelected(stateOn.getModel(), true);
+			stateOn.setBackground(new Color(43,81,224));
+			stateOff.setBackground(new Color(201,226,245));
+			
+		}
+		
+		else if(e.getSource() == stateOff) {
+			stateOnOff.setSelected(stateOff.getModel(), true);
+			stateOff.setBackground(new Color(43,81,224));
+			stateOn.setBackground(new Color(201,226,245));
+		}
+		
 	}
 	
 	
