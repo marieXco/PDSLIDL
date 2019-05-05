@@ -23,6 +23,11 @@ public class TypeSensor {
 		this.daySensitivity = day;
 		this.nightSensitivity = night;
 	}
+	
+	public TypeSensor() {
+
+	}
+	
 	/**
 	 * @return the id
 	 */

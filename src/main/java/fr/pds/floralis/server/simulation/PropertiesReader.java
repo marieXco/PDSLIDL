@@ -67,33 +67,35 @@ public class PropertiesReader {
 
 					if (map.containsKey(numberOfSensors + ".id")){ 
 						id = map.get(numberOfSensors + ".id");
-						map.remove(numberOfSensors + ".id");							
-					}
+						map.remove(numberOfSensors + ".id");	
+						list.put("id", id);
+						
+						numberOfValues = 2;
 
-					list.put("id", id);
+						while(numberOfValues > index) {
+							if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
+								value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
+								duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
+								map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
+								map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
+								list.put(duration, value);
 
-					numberOfValues = 2;
-
-					while(numberOfValues > index) {
-						if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
-							value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
-							duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
-							list.put(duration, value);
-							
+							}
+							numberOfValues--;
 						}
-						numberOfValues--;
+						
+						testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
+						entryList[numberOfSensors - 1] = testList;
+						numberOfSensors--;
+						System.out.println(list.toString());
+						list.clear();
 					}
-
-					testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
-					entryList[numberOfSensors - 1] = testList;
-					numberOfSensors--;
-					System.out.println(list.toString());
-					list.clear();
-
-				}
 				
+					else {
+						numberOfSensors--;
+					}
+				}
+
 				map.clear();
 
 			}

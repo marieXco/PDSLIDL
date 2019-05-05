@@ -5,6 +5,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -65,10 +66,17 @@ public class Simulation {
 
 		try {
 			Integer.parseInt((propertiesList.get(0)).getValue());
-		} catch (Exception e) {
-			sensorLogger.warning("The id is not a number");
+		}
+		catch (java.lang.IndexOutOfBoundsException e) {
+			sensorLogger.warning("The second sensor doesn't send messages;\n Exit");
 			Thread.currentThread().stop();
 		}
+		catch (java.lang.NumberFormatException e) {
+			sensorLogger.warning("The sensor id is not of integer type;\n Exit");
+			Thread.currentThread().stop();
+		}
+
+
 
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
 
@@ -300,11 +308,11 @@ public class Simulation {
 			if (!sensorUsed.getState() && !sensorUsed.getConfigure()) {
 				sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off and does't have any warning limits, but we get messages;\nExit");
 			}
-			
+
 			else if (!sensorUsed.getState()) {
 				sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages;\nExit");
 			}
-			
+
 			else if (!sensorUsed.getConfigure()) {
 				sensorLogger.warning("The sensor with the id "+ sensorUsed.getId() +" does't have any warning limits;\nExit");
 			}
@@ -313,6 +321,7 @@ public class Simulation {
 		sensorLogger.info("Messages ended for this sensor");
 
 		refreshHandle[sensorIndex].cancel(false);
+		Thread.currentThread().stop();
 	}
 
 
@@ -423,15 +432,23 @@ public class Simulation {
 		}
 
 		PropertiesReader properties = new PropertiesReader();
+
 		ArrayList<Entry<String, String>>[] propertiesList = properties.getPropValues();
 
 		HashMap<String, Integer> sensorsCache = new HashMap<String, Integer>();
 		Simulation simu = new Simulation(sensorsCache);
 
-		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[1].toString());
+		try {
+			propertiesList[0].toString();
+		} catch (java.lang.NullPointerException e) {
+			System.out.println("The config.properties file is empty;\n Exiting the simulation");
+			System.exit(0);
+		}
 
-		final CyclicBarrier gate = new CyclicBarrier(3);
+
+		System.out.println(propertiesList[0].toString());
+
+		final CyclicBarrier gate = new CyclicBarrier(6);
 
 		Thread t1 = new Thread(){
 			public void run(){
@@ -459,13 +476,77 @@ public class Simulation {
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
+					catch (java.lang.NullPointerException e) {
+						System.out.println("The second sensor is empty;\nNo simulation for this sensor");
+					}
 
 				}
 			};
+			Thread t3 = new Thread(){
+				public void run(){
+					try {
+						gate.await();
+					} catch (InterruptedException | BrokenBarrierException e) {
+						e.printStackTrace();
+					}
+					try {
+						simu.simulationTest(propertiesList[2], logger2, 2);
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+					catch (java.lang.NullPointerException e) {
+						System.out.println("The thrid sensor is empty;\nNo simulation for this sensor");
+					}
 
+				}
+			};
+			Thread t4 = new Thread(){
+				public void run(){
+					try {
+						gate.await();
+					} catch (InterruptedException | BrokenBarrierException e) {
+						e.printStackTrace();
+					}
+					try {
+						simu.simulationTest(propertiesList[3], logger2, 3);
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+					catch (java.lang.NullPointerException e) {
+						System.out.println("The forth sensor is empty;\nNo simulation for this sensor");
+					}
+
+				}
+			};
+			
+			Thread t5 = new Thread(){
+				public void run(){
+					try {
+						gate.await();
+					} catch (InterruptedException | BrokenBarrierException e) {
+						e.printStackTrace();
+					}
+					try {
+						simu.simulationTest(propertiesList[4], logger2, 4);
+					} catch (IOException | InterruptedException e) {
+						e.printStackTrace();
+					}
+					catch (java.lang.NullPointerException e) {
+						System.out.println("The fifth sensor is empty;\nNo simulation for this sensor");
+					}
+					catch (java.lang.ArrayIndexOutOfBoundsException e) {
+						System.out.println("The fifth sensor is empty;\nNo simulation for this sensor");
+					}
+
+				}
+			};
+			
 
 			t1.start();
 			t2.start();
+			t3.start();
+			t4.start();
+			t5.start();
 
 			gate.await();
 
