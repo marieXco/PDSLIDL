@@ -7,6 +7,7 @@
 	import java.awt.HeadlessException;
 	import java.awt.event.*;
 	import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -55,18 +56,23 @@ import fr.pds.floralis.server.dao.DAO;
 		
 
 		// Creation of all parameters necessary 
+		JComboBox indicators = new JComboBox();
+		JLabel label = new JLabel("Indicateurs :");
+		
+		
 		Button countRoom = new Button("Nombre de pièce");
 		Button countAllSensor = new Button("Nombre de capteurs");
 		Button countOffSensor = new Button("Nombre de capteurs éteint");
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
 		Button countNoConfigSensor = new Button("Nombres de capteurs non configurés");
 		Button countAlert = new Button("Nombre d'alerte");
-		Button countSmokeSensor = new Button("Nombre de capteurs de fumée");
+		 //countSmokeSensor = new Button("Nombre de capteurs de fumée");
 		Button countLightSensor = new Button("Nombre de capteurs de lumière");
 		Button countGasSensor = new Button("Nombre de capteurs de gaz");
 		Button countMoveSensor = new Button("Nombre de capteurs de mouvement");
 		Button countTempSensor = new Button("Nombre de capteurs température ");
-		Button countAllPatient = new Button("Nombre de patients");
+		Button countAllPatient = new Button("Nombre de patients"); 
+		Button countAlertByMonth = new Button("Nombre d'alerte par mois");
 		
 		
 		// Indicators values
@@ -83,7 +89,7 @@ import fr.pds.floralis.server.dao.DAO;
 			
 			//adding button to JPanel
 			requestPanel.add(countAllSensor);
-			requestPanel.add(countRoom);
+			/*requestPanel.add(countRoom);
 			requestPanel.add(countOffSensor);
 			requestPanel.add(countNoConfigSensor);
 			requestPanel.add(countOnSensor);
@@ -93,7 +99,13 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countGasSensor);
 			requestPanel.add(countMoveSensor);
 			requestPanel.add(countTempSensor);
-			requestPanel.add(countAllPatient);
+			requestPanel.add(countAllPatient); */
+			requestPanel.add(countAlertByMonth);
+			//requestPanel.add(countPresenceSensor);
+			
+			indicators.addItem("Nombre d'alerte");
+			requestPanel.add(indicators);
+			indicators.addActionListener(this);
 			
 
 			container.add(BorderLayout.WEST, requestPanel); 
@@ -106,12 +118,13 @@ import fr.pds.floralis.server.dao.DAO;
 			countOnSensor.addActionListener(this);
 			countNoConfigSensor.addActionListener(this);
 			countAlert.addActionListener(this);
-			countSmokeSensor.addActionListener(this);
+			//countSmokeSensor.addActionListener(this);
 			countLightSensor.addActionListener(this);
 			countGasSensor.addActionListener(this);
 			countMoveSensor.addActionListener(this);
 			countTempSensor.addActionListener(this);
 			countAllPatient.addActionListener(this);
+			countAlertByMonth.addActionListener(this);
 			
 			
 			/*countSmokeSensor.setVisible(false);
@@ -216,7 +229,7 @@ import fr.pds.floralis.server.dao.DAO;
 				System.out.println("Nombre de Capteurs non configurés : " + countNoConfig);	
 			}
 			
-			if(e.getSource() == countSmokeSensor) {
+			/*if(e.getSource() == countSmokeSensor) {
 				String smoke = 	"FIRE"; 
 				FindSensorByType allloc = new FindSensorByType(host, port);
 				try {
@@ -227,7 +240,7 @@ import fr.pds.floralis.server.dao.DAO;
 				}
 				int countSmoke = sensorFoundList.size(); 	
 				System.out.println("Nombre de Capteurs de fumée : " + countSmoke);
-			}
+			}*/
 	
 			
 			if(e.getSource() == countLightSensor) {
@@ -245,7 +258,7 @@ import fr.pds.floralis.server.dao.DAO;
 			}
 			
 			if(e.getSource() == countGasSensor) {
-				String light = 	"GAS"; 
+				String light = 	"GASLEAK"; 
 				FindSensorByType allloc = new FindSensorByType(host, port);
 				try {
 					sensorFoundList = allloc.findByType(false, light);
@@ -296,6 +309,19 @@ import fr.pds.floralis.server.dao.DAO;
 				}
 				int countpatient = patientFoundList.size(); 	
 				System.out.println("Nombre de patients : " + countpatient);
+			}
+			
+			if (e.getSource() == countAlertByMonth) {
+				FindAlertByYear faby = new FindAlertByYear(host, port);
+				Date date = new Date();
+				try {
+					alertFoundList = faby.findByYear(false, date);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countAlertYear = alertFoundList.size(); 	
+				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
 			}
 
 			
