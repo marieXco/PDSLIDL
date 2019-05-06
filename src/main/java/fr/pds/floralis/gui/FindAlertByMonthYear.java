@@ -3,7 +3,6 @@ package fr.pds.floralis.gui;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -18,18 +17,18 @@ import fr.pds.floralis.commons.bean.entity.Alert;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class FindAlertByYear {
+public class FindAlertByMonthYear {
 	private static ObjectMapper objectMapper;
 	private static String host;
 	private static int port;
 
-	public FindAlertByYear(String host, int port) {
+	public FindAlertByMonthYear(String host, int port) {
 		super();
 		this.host = host;
 		this.port = port;
 	}
 
-	@SuppressWarnings("deprecation")
+	
 	public static List<Alert> findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
@@ -47,7 +46,7 @@ public class FindAlertByYear {
 		alertList = Arrays.asList(alertFoundTab);
 		
 		for (Alert alert :alertList) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM");
 	        String ladate = sdf.format(date);
 	        String alertDate = sdf.format(alert.getDate());
 	        System.out.println(date);
@@ -55,7 +54,7 @@ public class FindAlertByYear {
 
 			if(alertDate.equals(ladate)) {
 				alertList.remove(alert);
-			}
+			}	
 		}
 		
 		if(refresh) { 
@@ -68,3 +67,4 @@ public class FindAlertByYear {
 	
 
 }
+

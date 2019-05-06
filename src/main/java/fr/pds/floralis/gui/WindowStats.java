@@ -63,6 +63,7 @@ import fr.pds.floralis.server.dao.DAO;
 		Button countRoom = new Button("Nombre de pièce");
 		Button countAllSensor = new Button("Nombre de capteurs");
 		Button countOffSensor = new Button("Nombre de capteurs éteint");
+		Button countBreakdownSensor = new Button("Nombre de capteurs en panne");
 		Button countOnSensor = new Button("Nombre de capteurs allumés");
 		Button countNoConfigSensor = new Button("Nombres de capteurs non configurés");
 		Button countAlert = new Button("Nombre d'alerte");
@@ -101,6 +102,7 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countTempSensor);
 			requestPanel.add(countAllPatient); */
 			requestPanel.add(countAlertByMonth);
+			requestPanel.add( countBreakdownSensor);
 			//requestPanel.add(countPresenceSensor);
 			
 			indicators.addItem("Nombre d'alerte");
@@ -125,6 +127,7 @@ import fr.pds.floralis.server.dao.DAO;
 			countTempSensor.addActionListener(this);
 			countAllPatient.addActionListener(this);
 			countAlertByMonth.addActionListener(this);
+			countBreakdownSensor.addActionListener(this);
 			
 			
 			/*countSmokeSensor.setVisible(false);
@@ -322,6 +325,18 @@ import fr.pds.floralis.server.dao.DAO;
 				}
 				int countAlertYear = alertFoundList.size(); 	
 				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
+			}
+			
+			if(e.getSource() == countBreakdownSensor) {
+				FindSensorByBreakdown fsbb = new FindSensorByBreakdown(host, port);
+				try {
+					sensorFoundList = fsbb.findByBreakdown(false, true);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countBreakdown = sensorFoundList.size(); 	
+				System.out.println("Nombre de Capteurs en panne : " + countBreakdown);	
 			}
 
 			
