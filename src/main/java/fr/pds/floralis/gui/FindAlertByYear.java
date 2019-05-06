@@ -48,14 +48,15 @@ public class FindAlertByYear {
 		
 		for (Alert alert :alertList) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-	        String ladate = sdf.format(date);
-	        String alertDate = sdf.format(alert.getDate());
+	        sdf.format(date);
+	        sdf.format(alert.getDate());
 	        System.out.println(date);
 	        System.out.println(alert);
 
-			if(alertDate.equals(ladate)) {
+			if(alert.equals(date)) {
 				alertList.remove(alert);
 			}
+			
 		}
 		
 		if(refresh) { 

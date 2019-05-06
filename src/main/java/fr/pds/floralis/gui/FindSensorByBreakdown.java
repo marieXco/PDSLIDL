@@ -31,13 +31,13 @@ public class FindSensorByBreakdown {
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsBreakdownList;
 		
-		JSONObject sensorBreakdown = new JSONObject();
-		sensorBreakdown.put("breakdown", breakdown);
+		JSONObject sensorsBreakdown = new JSONObject();
+		sensorsBreakdown.put("breakdown", breakdown);
 		
 		Request request = new Request();
 		request.setType("FINDBYBREAKDOWN");
 		request.setEntity("SENSOR");
-		request.setFields(sensorBreakdown);
+		request.setFields(sensorsBreakdown);
 		
 		ConnectionClient ccSensorFindByBreakdown= new ConnectionClient(host, port, request.toJSON().toString());
 		ccSensorFindByBreakdown.run();

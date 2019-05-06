@@ -29,7 +29,7 @@ public class FindAlertByMonthYear {
 	}
 
 	
-	public static List<Alert> findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Alert> findByMonthYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -47,19 +47,19 @@ public class FindAlertByMonthYear {
 		
 		for (Alert alert :alertList) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM");
-	        String ladate = sdf.format(date);
-	        String alertDate = sdf.format(alert.getDate());
+	        sdf.format(date);
+	        sdf.format(alert.getDate());
 	        System.out.println(date);
 	        System.out.println(alert);
 
-			if(alertDate.equals(ladate)) {
+			if(alert.equals(date)) {
 				alertList.remove(alert);
-			}	
+			}
 		}
 		
 		if(refresh) { 
 			Thread.sleep(6000);
-			findByYear(true, date);
+			findByMonthYear(true, date);
 		}
 		
 		return alertList;

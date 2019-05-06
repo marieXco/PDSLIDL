@@ -74,6 +74,7 @@ import fr.pds.floralis.server.dao.DAO;
 		Button countTempSensor = new Button("Nombre de capteurs température ");
 		Button countAllPatient = new Button("Nombre de patients"); 
 		Button countAlertByMonth = new Button("Nombre d'alerte par mois");
+		Button countAlertByYear = new Button("Nombre d'alerte par an");
 		
 		
 		// Indicators values
@@ -90,9 +91,10 @@ import fr.pds.floralis.server.dao.DAO;
 			
 			//adding button to JPanel
 			requestPanel.add(countAllSensor);
-			/*requestPanel.add(countRoom);
+			requestPanel.add(countRoom);
 			requestPanel.add(countOffSensor);
 			requestPanel.add(countNoConfigSensor);
+			/*
 			requestPanel.add(countOnSensor);
 			requestPanel.add(countAlert);
 			requestPanel.add(countSmokeSensor);
@@ -103,6 +105,7 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countAllPatient); */
 			requestPanel.add(countAlertByMonth);
 			requestPanel.add( countBreakdownSensor);
+			requestPanel.add(countAlertByYear)
 			//requestPanel.add(countPresenceSensor);
 			
 			indicators.addItem("Nombre d'alerte");
@@ -128,6 +131,8 @@ import fr.pds.floralis.server.dao.DAO;
 			countAllPatient.addActionListener(this);
 			countAlertByMonth.addActionListener(this);
 			countBreakdownSensor.addActionListener(this);
+			countAlertByYear.addActionListener(this);
+			
 			
 			
 			/*countSmokeSensor.setVisible(false);
@@ -315,6 +320,19 @@ import fr.pds.floralis.server.dao.DAO;
 			}
 			
 			if (e.getSource() == countAlertByMonth) {
+				FindAlertByMonthYear faby = new FindAlertByMonthYear(host, port);
+				Date date = new Date();
+				try {
+					alertFoundList = faby.findByMonthYear(false, date);
+				} catch (JSONException | IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				int countAlertMonthYear = alertFoundList.size(); 	
+				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);	
+			}
+			
+			if (e.getSource() == countAlertByYear) {
 				FindAlertByYear faby = new FindAlertByYear(host, port);
 				Date date = new Date();
 				try {
