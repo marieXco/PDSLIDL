@@ -69,7 +69,8 @@ public class SensorTableModel extends AbstractTableModel {
 		if(userObject.getState()){
 			on = "Allumé";
 		} else {
-			on = "Eteint";
+			if(userObject.getConfigure()) on = "Eteint";
+			else on = "";
 		}
 
 		String state = "";
