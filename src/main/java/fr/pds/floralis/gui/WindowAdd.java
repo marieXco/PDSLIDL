@@ -16,6 +16,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,9 +42,11 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class WindowAdd extends JFrame implements ActionListener {
+public class WindowAdd extends Thread implements ActionListener {
 	// watch WindowConfirm for serialVersionUID
 	private static final long serialVersionUID = -5982857209357189773L;
+	
+	JDialog window = new JDialog();
 
 	private String host;
 	private int port;
@@ -133,7 +136,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 	Floor[] floorsFoundTab;
 
 	ObjectMapper objectMapper = new ObjectMapper();
-
+	
+	/**
+	 * Object to notify the end of the JFrame
+	 */
+	public final Object valueWaitAdd = new Object();
 
 	public WindowAdd(String host, int port) throws HeadlessException {
 		super();
@@ -196,12 +203,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 		container.add(infos);
 		container.add(buttonAddSensor);
 
-		this.setTitle("Floralis - Ajout d'un capteur");
-		this.setContentPane(container);
-		pack();
-		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setVisible(true);
+		window.setTitle("Floralis - Ajout d'un capteur");
+		window.setContentPane(container);
+		window.pack();
+		window.setLocationRelativeTo(null);
+		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		window.setVisible(true);
+
 	}
 
 	//TODO method for the Pop-up to add a Patient
@@ -325,12 +333,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 		container.add(infos);
 		container.add(buttonAddLocation);
 
-		this.setTitle("Floralis - Ajout d'une localisation");
-		this.setContentPane(container);
-		pack();
-		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setVisible(true);
+		window.setTitle("Floralis - Ajout d'une localisation");
+		window.setContentPane(container);
+		window.pack();
+		window.setLocationRelativeTo(null);
+		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		window.setVisible(true);
+		
 	}
 
 	// Listen of action on the button to add a personnel, a patient, a location or a sensor
@@ -416,7 +425,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 							
 							ConnectionClient ccLocationCreate = new ConnectionClient(host, port, secondRequest.toJSON().toString());
 							ccLocationCreate.run();
-							this.setVisible(false);
+							window.setVisible(false);
 						} catch (JSONException e1) {
 							e1.printStackTrace();
 						}
@@ -506,6 +515,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toJSON().toString());
 						ccSensorCreate.run();
 						// End sensor Create
+
 						
 						// TODO : problème : arraylist ne se mets pas à jours
 						
@@ -514,7 +524,13 @@ public class WindowAdd extends JFrame implements ActionListener {
 						// When you add sensor, you attribute a location to this sensor
 						// So, it have to add the new sensors at the 'sensor id table' of this location
 						// TODO : modifier l'ancienne localisation 
-						this.setVisible(false);
+						window.setVisible(false);
+						
+						synchronized (valueWaitAdd) {
+							window.setVisible(false);
+							valueWaitAdd.notify();
+						}
+						
 					}
 
 				} catch (JSONException | IOException e1) {
@@ -524,9 +540,14 @@ public class WindowAdd extends JFrame implements ActionListener {
 		}
 	}
 
-
 	public void run() {
-		initAddPatient();
+		initAddPatient(); 
+		try {
+			initAddSensor();
+		} catch (JSONException | IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public String getHost() {

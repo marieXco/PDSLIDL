@@ -150,6 +150,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	int last = 1;
 
+	/**
+	 * for period refresh
+	 */
+	int countMessage = 0;
+	int countSensor = 0;
+		
 	/** 
 	 * Constructor, takes the host and port from the main
 	 * @param host
@@ -348,13 +354,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				new WindowAdd(getHost(), getPort()).initAddSensor();
-			} catch (JSONException | IOException e1) {
+				WindowAdd add = new WindowAdd(getHost(), getPort());
+				synchronized(add.valueWaitAdd) {
+					add.start();
+					//add.valueWaitAdd.wait();
+				}
+				System.out.println("ahahahahah ça marche putain");
+			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}	
@@ -379,7 +387,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			try {
 				new WindowStats(getHost(), getPort()).initIndicators();
 			} catch (JsonParseException e1) {
-
 				e1.printStackTrace();
 			} catch (JsonMappingException e1) {
 				e1.printStackTrace();
@@ -753,7 +760,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 	}
 
-	int count = 0;
 	public void refreshAllSensors() {
 		try {
 			FindAllSensor fs = new FindAllSensor(host, port);
@@ -780,6 +786,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		} catch (JSONException | IOException | InterruptedException e2) {
 			e2.printStackTrace();
 		}
+		System.out.println(" Refresh -- Sensors - count : " + countSensor);
 	}
 
 	public void refreshYesConfigSensors() {
@@ -808,6 +815,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		} catch (JSONException | IOException | InterruptedException e2) {
 			e2.printStackTrace();
 		}
+		System.out.println(" Refresh -- Sensors Yes config - count : " + countSensor);
 	}
 
 	public void refreshNoConfigSensors() {
@@ -836,18 +844,19 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		} catch (JSONException | IOException | InterruptedException e2) {
 			e2.printStackTrace();
 		}
+		System.out.println(" Refresh -- Sensors No config - count : " + countSensor);
 	}
 
 	public void refreshMessage() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
 		Runnable task1 = () -> {
-			count++;
-			System.out.println(" Message -- Running...task1 - count : " + count);
+			countMessage++;
+			System.out.println(" Refresh -- Message - count : " + countMessage);
 			message.setText(text);
 		};
 
-		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 60, SECONDS);
+		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
 
 
 		ses.schedule(new Runnable() {
@@ -857,6 +866,25 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}, 360, SECONDS
 				);
 
+	}
+	
+	public void refreshSensors() {
+		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+
+		Runnable task1 = () -> {
+			countSensor++;
+			refresh(last);
+		};
+
+		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
+
+
+		ses.schedule(new Runnable() {
+			public void run() { 
+				scheduledFuture.cancel(true); 
+			}
+		}, 360, SECONDS 
+				);
 	}
 
 	public void refresh(int last) {
@@ -870,6 +898,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		try {
 			init();
 			refreshMessage();
+			refreshSensors();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (JsonParseException e) {
