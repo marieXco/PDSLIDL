@@ -28,9 +28,6 @@ public class TypeSensor {
 		this.nightSensitivity = night;
 	}
 	
-	public TypeSensor() {
-
-	}
 	
 	/**
 	 * @return the id
