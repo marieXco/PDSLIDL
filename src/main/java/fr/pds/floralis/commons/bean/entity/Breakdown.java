@@ -2,6 +2,8 @@ package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
 
+import org.json.JSONObject;
+
 import fr.pds.floralis.commons.bean.entity.type.TypeBreakdown;
 
 /**
@@ -74,6 +76,17 @@ public class Breakdown {
 	public String toString() {
 		return "Breakdown [id=" + id + ", type=" + type + ", sensor=" + sensor + ", start=" + start + ", end=" + end
 				+ "]";
+	}
+
+	public JSONObject toJSON() {
+		JSONObject breakdownToJson = new JSONObject();
+		breakdownToJson.put("id", id);
+		breakdownToJson.put("type", type);
+		breakdownToJson.put("end", end);
+		breakdownToJson.put("sensor", sensor);
+		breakdownToJson.put("start", start);
+		
+		return breakdownToJson;
 	}
 	
 

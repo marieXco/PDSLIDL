@@ -105,8 +105,7 @@ import fr.pds.floralis.server.dao.DAO;
 			requestPanel.add(countAllPatient); */
 			requestPanel.add(countAlertByMonth);
 			requestPanel.add( countBreakdownSensor);
-			requestPanel.add(countAlertByYear)
-			//requestPanel.add(countPresenceSensor);
+			requestPanel.add(countAlertByYear);
 			
 			indicators.addItem("Nombre d'alerte");
 			requestPanel.add(indicators);

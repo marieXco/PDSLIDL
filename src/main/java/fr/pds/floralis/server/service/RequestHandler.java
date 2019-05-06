@@ -454,6 +454,53 @@ public class RequestHandler implements Runnable {
 					}
 					DataSource.backConnection(jdbc, connection);
 					break;
+					
+				case "HISTORY_BREAKDOWN": 
+					BreakdownDao breakdownDao = new BreakdownDao(connection);
+
+					switch (command.toUpperCase()) {
+					case "FINDALL":
+						List<Breakdown> breakdownList = breakdownDao.findAll();
+
+						JSONArray breakdownListToJson = new JSONArray(breakdownList);
+
+						toSend = breakdownListToJson.toString();
+						break;
+
+					case "FINDBYID":
+						Breakdown breakdownFound = breakdownDao.find(parameters.getInt("id"));
+						toSend = breakdownFound.toJSON().toString();
+						break;
+
+					case "CREATE":
+						Breakdown breakdownToCreate = objectMapper.readValue(parameters.toString(), Breakdown.class);
+						
+						Boolean breakdownCreation = breakdownDao.create(breakdownToCreate);
+
+						toSend = breakdownCreation.toString();
+						break;
+
+					case "DELETE":
+						Boolean breakdownDeleting = breakdownDao.delete(parameters.getInt("id"));
+
+						toSend = breakdownDeleting.toString();
+						break;
+
+					case "UPDATE":
+						Breakdown breakdownToUpdate= objectMapper.readValue(parameters.get("breakdownToUpdate").toString(), Breakdown.class);
+						
+						Boolean breakdownUpdating = breakdownDao.update(parameters.getInt("id"), breakdownToUpdate);
+
+						toSend = breakdownUpdating.toString();
+						break;
+
+					default:
+						toSend = "Unkwown command for the Breakdown table !";
+						break;
+					}
+					DataSource.backConnection(jdbc, connection);
+					break;
+
 
 				default:
 					toSend = "Unkwown table !";
