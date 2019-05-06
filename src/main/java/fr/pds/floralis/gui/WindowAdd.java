@@ -137,10 +137,6 @@ public class WindowAdd extends Thread implements ActionListener {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 	
-	/**
-	 * Object to notify the end of the JFrame
-	 */
-	public final Object valueWaitAdd = new Object();
 
 	public WindowAdd(String host, int port) throws HeadlessException {
 		super();
@@ -209,6 +205,7 @@ public class WindowAdd extends Thread implements ActionListener {
 		window.setLocationRelativeTo(null);
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setVisible(true);
+		window.setModal(true);
 
 	}
 
@@ -439,7 +436,8 @@ public class WindowAdd extends Thread implements ActionListener {
 		if (e.getSource() == buttonAddSensor) {
 			// Verification that the id contains just number
 			try {
-				Integer.parseInt(identifiant.getText());
+				int idChoose = Integer.parseInt(identifiant.getText());
+				if(idChoose <= 0) infos.setText("L'identifiant doit être posifif");
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("L'identifiant ne peut contenir que des chiffres");
 			}
@@ -525,11 +523,6 @@ public class WindowAdd extends Thread implements ActionListener {
 						// So, it have to add the new sensors at the 'sensor id table' of this location
 						// TODO : modifier l'ancienne localisation 
 						window.setVisible(false);
-						
-						synchronized (valueWaitAdd) {
-							window.setVisible(false);
-							valueWaitAdd.notify();
-						}
 						
 					}
 

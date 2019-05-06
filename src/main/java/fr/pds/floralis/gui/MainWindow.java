@@ -354,11 +354,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				WindowAdd add = new WindowAdd(getHost(), getPort());
-				synchronized(add.valueWaitAdd) {
-					add.start();
-					//add.valueWaitAdd.wait();
-				}
+				new WindowAdd(getHost(), getPort()).run();
 				System.out.println("ahahahahah ça marche putain");
 			} catch (JSONException e1) {
 				e1.printStackTrace();
