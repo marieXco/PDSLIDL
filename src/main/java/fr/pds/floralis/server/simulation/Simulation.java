@@ -81,7 +81,7 @@ public class Simulation {
 		 */
 		refreshSensorInfos(propertiesId, sensorIndex);
 
-		Thread.sleep(4000);
+		Thread.sleep(7000);
 		sensorUsed = sensorFound[sensorIndex];
 
 		/**
@@ -163,8 +163,7 @@ public class Simulation {
 
 				String type;
 				if (sensorUsed.getType().toUpperCase().equals("LIGHT")
-						|| sensorUsed.getType().toUpperCase().equals("PRESENCE")
-						|| sensorUsed.getType().toUpperCase().equals("PASSAGE")) {
+						|| sensorUsed.getType().toUpperCase().equals("PRESENCE")) {
 					type = "BOOLEAN";
 				} else {
 					type = "VALUE";
@@ -419,33 +418,33 @@ public class Simulation {
 		Logger logger = Logger.getLogger("Logger");
 		Logger logger1 = Logger.getLogger("Logger1");
 		Logger logger2 = Logger.getLogger("Logger2");
-		// Logger logger3 = Logger.getLogger("Logger3");
-		// Logger logger4 = Logger.getLogger("Logger4");
-		// Logger logger5 = Logger.getLogger("Logger5");
+		Logger logger3 = Logger.getLogger("Logger3");
+		Logger logger4 = Logger.getLogger("Logger4");
+		Logger logger5 = Logger.getLogger("Logger5");
 
 		try {
 			FileHandler fh = new FileHandler("%hmainLogger.log");
 			FileHandler fh1 = new FileHandler("%hsimulationLogger1.log");
 			FileHandler fh2 = new FileHandler("%hsimulationLogger2.log");
-			// FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
-			// FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
-			// FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
+			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
+			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
+			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
 
 			logger.addHandler(fh);
 			logger1.addHandler(fh1);
 			logger2.addHandler(fh2);
-			// logger3.addHandler(fh3);
-			// logger4.addHandler(fh4);
-			// logger5.addHandler(fh5);
+			logger3.addHandler(fh3);
+			logger4.addHandler(fh4);
+			logger5.addHandler(fh5);
 
 			SimpleFormatter formatter = new SimpleFormatter();
 
 			fh.setFormatter(formatter);
 			fh1.setFormatter(formatter);
 			fh2.setFormatter(formatter);
-			// fh3.setFormatter(formatter);
-			// fh4.setFormatter(formatter);
-			// fh5.setFormatter(formatter);
+			fh3.setFormatter(formatter);
+			fh4.setFormatter(formatter);
+			fh5.setFormatter(formatter);
 
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -468,6 +467,11 @@ public class Simulation {
 		}
 
 		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[1].toString());
+		System.out.println(propertiesList[2].toString());
+		System.out.println(propertiesList[3].toString());
+		System.out.println(propertiesList[4].toString());
+		
 
 		final CyclicBarrier gate = new CyclicBarrier(6);
 
@@ -511,7 +515,7 @@ public class Simulation {
 					e.printStackTrace();
 				}
 				try {
-					simu.simulationTest(propertiesList[2], logger2, 2);
+					simu.simulationTest(propertiesList[2], logger3, 2);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
@@ -528,10 +532,10 @@ public class Simulation {
 					e.printStackTrace();
 				}
 				try {
-					simu.simulationTest(propertiesList[3], logger2, 3);
+					simu.simulationTest(propertiesList[3], logger4, 3);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
-				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
+				} catch (java.lang.NullPointerException e1) {
 					logger.warning("The forth sensor is empty;\nNo simulation for this sensor");
 				}
 
@@ -546,7 +550,7 @@ public class Simulation {
 					e.printStackTrace();
 				}
 				try {
-					simu.simulationTest(propertiesList[4], logger2, 4);
+					simu.simulationTest(propertiesList[4], logger5, 4);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
