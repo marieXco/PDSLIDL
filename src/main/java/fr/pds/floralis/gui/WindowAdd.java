@@ -3,6 +3,7 @@ package fr.pds.floralis.gui;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,14 +43,11 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class WindowAdd extends Thread implements ActionListener {
+public class WindowAdd extends JDialog implements ActionListener {
 	// watch WindowConfirm for serialVersionUID
 	private static final long serialVersionUID = -5982857209357189773L;
 	
 	JDialog window = new JDialog();
-
-	private String host;
-	private int port;
 
 	private int LG = 950;
 	private int HT = 120;
@@ -137,12 +135,25 @@ public class WindowAdd extends Thread implements ActionListener {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 	
-
-	public WindowAdd(String host, int port) throws HeadlessException {
-		super();
-		this.host = host;
-		this.port = port;
+	//TODO delete
+	int port = 1234;
+	String host = "1921685353";
+	
+	private JFrame toto;
+	
+	
+	public WindowAdd(JFrame parent) {
+		super(parent);
+		this.toto = parent;
 	}
+	
+	public void createUI() {
+        window.setLocationRelativeTo(toto);
+        window.setTitle("Dialog created by extending JDialog class.");
+        window.setSize(new Dimension(400, 100));
+        window.setModal(true);
+        window.setVisible(true);
+    }
 	
 	// TODO method for the Pop-up to add a Personnel
 	public void initAddPersonnel() {
@@ -165,7 +176,7 @@ public class WindowAdd extends Thread implements ActionListener {
 		buttonAddSensor.addActionListener(this);
 		
 		//Beginning typeSensor
-		FindAllTypeSensor tf = new FindAllTypeSensor(host, port);
+		FindAllTypeSensor tf = new FindAllTypeSensor(host,port);
 		typeSensorsFoundList = tf.findAll(false);
 
 		String[] typeSensorComboBox = new String[typeSensorsFoundList.size() + 1];
@@ -206,6 +217,7 @@ public class WindowAdd extends Thread implements ActionListener {
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setVisible(true);
 		window.setModal(true);
+		
 
 	}
 
@@ -543,20 +555,5 @@ public class WindowAdd extends Thread implements ActionListener {
 		}
 	}
 
-	public String getHost() {
-		return host;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
 
 }

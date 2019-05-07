@@ -19,6 +19,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import fr.pds.floralis.commons.bean.entity.Alert;
 import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
@@ -151,11 +153,21 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	int last = 1;
 
 	/**
+	 * 
+	 */
+	int countNewAlert;
+	
+	/**
 	 * for period refresh
 	 */
 	int countMessage = 0;
 	int countSensor = 0;
-		
+	
+	/**
+	 * Number of alert at the initialization of window
+	 */
+	int countAlert = 0;
+
 	/** 
 	 * Constructor, takes the host and port from the main
 	 * @param host
@@ -354,19 +366,21 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				new WindowAdd(getHost(), getPort()).run();
+				WindowAdd toto = new WindowAdd(window);
+				toto.run();
 				System.out.println("ahahahahah ça marche putain");
 			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			}	
+			}
+
 		}
 
 		if (e.getSource() == addingLocation) {
 			try {
-				new WindowAdd(getHost(), getPort()).initAddLocation();
+				new WindowAdd(window).initAddLocation();
 			} catch (JsonParseException e1) {
 
 				e1.printStackTrace();
@@ -497,6 +511,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 			} else {
 				message.setText("Vous devez sélectionner un capteur");
+				message.setForeground(Color.BLACK);
 			}	
 		}
 
@@ -548,6 +563,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					ccSensorDelete.run();
 
 					message.setText("Le capteur " + idSensorDelete + " a été supprimé avec succès");
+					message.setForeground(Color.BLACK);
 					refresh(last);
 
 					// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
@@ -556,6 +572,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				}
 			} else {
 				message.setText("Vous devez selectionner l'identifiant du capteur à Supprimer");
+				message.setForeground(Color.BLACK);
 			}
 
 		}
@@ -589,6 +606,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				}
 			} else {
 				message.setText("Vous devez selectionner l'identifiant du capteur à Modifier");
+				message.setForeground(Color.BLACK);
 			}
 
 			refresh(last);
@@ -656,6 +674,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 			} else {
 				message.setText("Vous devez selectionner un capteur !");
+				message.setForeground(Color.BLACK);
 			}
 
 			refresh(last);
@@ -842,14 +861,43 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 		System.out.println(" Refresh -- Sensors No config - count : " + countSensor);
 	}
+	
 
-	public void refreshMessage() {
+	public void refreshAlert() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
 		Runnable task1 = () -> {
 			countMessage++;
-			System.out.println(" Refresh -- Message - count : " + countMessage);
-			message.setText(text);
+			System.out.println(" Refresh -- Alert - count : " + countMessage);
+			FindAllSensor fs = new FindAllSensor(host, port);
+			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
+			try {
+				sensorsFoundList = fs.findAll(false);
+			} catch (JSONException | IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			countNewAlert = 0;
+			for(Sensor s : sensorsFoundList) {
+				if(s.getAlert()) countNewAlert++;
+			}
+			
+			if(countNewAlert == 0) countAlert = 0;
+			
+			if(countAlert < countNewAlert) {
+				refresh(last);
+				System.out.println("Nombre de capteur en alert initialement " + countAlert);
+				System.out.println("Nombre de capteur en alert maintenant " + countNewAlert);
+				if(countMessage > 1) new WindowAlert().init();
+				countAlert = countNewAlert;
+			} 
+			
+			if(countNewAlert > 0) {
+				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
+				message.setForeground(Color.RED);
+			}
+			
+			
 		};
 
 		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
@@ -861,9 +909,37 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			}
 		}, 360, SECONDS
 				);
-
 	}
-	
+
+//	public void refreshMessage() {
+//		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+//
+//		Runnable task1 = () -> {
+//			countMessage++;
+//			System.out.println(" Refresh -- Message - count : " + countMessage);
+//			if(countAlert > 0) {
+//				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
+//				message.setForeground(Color.RED);
+//			}
+//			else {
+//				message.setText(text);
+//				message.setForeground(Color.BLACK);
+//			}
+//			
+//		};
+//
+//		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
+//
+//
+//		ses.schedule(new Runnable() {
+//			public void run() { 
+//				scheduledFuture.cancel(true); 
+//			}
+//		}, 360, SECONDS
+//				);
+//
+//	}
+
 	public void refreshSensors() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -882,18 +958,28 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}, 360, SECONDS 
 				);
 	}
+	
 
 	public void refresh(int last) {
 		if(last == 1) refreshAllSensors();
 		if(last == 2) refreshYesConfigSensors();
 		if(last == 3) refreshNoConfigSensors();
+		if(countNewAlert > 0) {
+			message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
+			message.setForeground(Color.RED);
+		}
+		else {
+			message.setText(text);
+			message.setForeground(Color.BLACK);
+		}
 	}
 
 	// Méthode appelée par le frame.start du main
 	public void run() {
 		try {
 			init();
-			refreshMessage();
+//			refreshMessage();
+			refreshAlert();
 			refreshSensors();
 		} catch (SQLException e) {
 			e.printStackTrace();
