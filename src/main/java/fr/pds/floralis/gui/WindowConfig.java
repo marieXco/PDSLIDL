@@ -308,8 +308,8 @@ public class WindowConfig extends JFrame implements ActionListener {
 			}
 
 			// If min > max
-			else if (Integer.parseInt(min.getText()) > Integer.parseInt(max.getText())) {
-				infos.setText("La valeur minimum doit être inferieure à la valeur maximum");
+			else if (Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
+				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
 
