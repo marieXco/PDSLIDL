@@ -171,6 +171,6 @@ public class AlertDao implements DAO<Alert> {
 		return alertList;
 	}
 	
-
-
+	
+	
 }

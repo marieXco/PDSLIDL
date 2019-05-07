@@ -51,10 +51,10 @@ public class FindSensorByBreakdownMonth {
 	        sdf.format(date);
 	        sdf.format(sensor.getDate());
 	        System.out.println(date);
-	        System.out.println(alert);
+	        System.out.println(sensor);
 
-			if(alert.equals(date)) {
-				alertList.remove(alert);
+			if(sensor.equals(date)) {
+				sensorList.remove(sensor);
 			}
 		}
 		
@@ -63,7 +63,7 @@ public class FindSensorByBreakdownMonth {
 			findByMonthYear(true, date);
 		}
 		
-		return alertList;
+		return sensorList;
 	} */
 	
 
