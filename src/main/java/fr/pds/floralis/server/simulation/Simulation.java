@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Alert;
+import fr.pds.floralis.commons.bean.entity.Breakdown;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
@@ -117,7 +118,7 @@ public class Simulation {
 			try {
 				propertiesList.get(0).getValue();
 			} catch (IndexOutOfBoundsException e) {
-				int breakdownTrigger = 10;
+				int breakdownTrigger = 60;
 				int waitingToConfirmBreakdown = 1;
 
 				while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
@@ -142,16 +143,26 @@ public class Simulation {
 					ConnectionClient ccr = new ConnectionClient(thirdRequest.toJSON().toString());
 					ccr.run();
 					
-					JSONObject newBreakdown = new JSONObject();
-					newBreakdown.put("id", sensorUsed.getId());
-					newBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
+					Calendar dateNow = Calendar.getInstance();
+					Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
+							dateNow.get(Calendar.DAY_OF_MONTH));
+
+					Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
+							dateNow.get(Calendar.MINUTE) - 1, dateNow.get(Calendar.SECOND));
+							
+					Breakdown historyBreakdown = new Breakdown();
+					historyBreakdown.setId(1);
+					historyBreakdown.setSensor(sensorUsed.getId());
+					historyBreakdown.setDate(today);
+					historyBreakdown.setStart(beginningOfAlert);
+					JSONObject newBreakdown = new JSONObject(historyBreakdown);
 
 					Request sixthRequest = new Request();
-					sixthRequest.setType("UPDATE");
+					sixthRequest.setType("CREATE");
 					sixthRequest.setEntity("HISTORY_BREAKDOWN");
 					sixthRequest.setFields(newBreakdown);
 					ConnectionClient cc2 = new ConnectionClient(sixthRequest.toJSON().toString());
-					
+					cc2.run();
 				}
 			}
 

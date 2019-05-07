@@ -14,7 +14,6 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Breakdown;
-import fr.pds.floralis.commons.bean.entity.Location;
 
 public class BreakdownDao implements DAO<Breakdown> {
 	Connection connect = null;
@@ -127,7 +126,7 @@ public class BreakdownDao implements DAO<Breakdown> {
 		List<Integer> emptyList = new ArrayList<Integer>();
 		emptyList.add(0);
 		emptyList.add(0);
-		Breakdown breakdown = new Breakdown(0, null,0, null, null );
+		Breakdown breakdown = new Breakdown();
 
 		try {
 			connect.setAutoCommit(false);
@@ -156,7 +155,7 @@ public class BreakdownDao implements DAO<Breakdown> {
 	public List<Breakdown> findAll() {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Breakdown> breakdownList = new ArrayList<Breakdown>();
-		Breakdown breakdown = new Breakdown(0, null,0, null, null );
+		Breakdown breakdown = new Breakdown();
 
 		try {
 			connect.setAutoCommit(false);
