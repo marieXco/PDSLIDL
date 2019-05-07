@@ -13,7 +13,7 @@ import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
 public class TimeServer {
 
 	private int port = 2412;
-	private String host = "127.0.0.1";
+	private String host = "192.168.20.18";
 	private ServerSocket server = null;
 	private boolean isRunning = true;
 

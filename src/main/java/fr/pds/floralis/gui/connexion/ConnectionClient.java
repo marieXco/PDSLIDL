@@ -30,7 +30,19 @@ public class ConnectionClient implements Runnable{
 		name += ++count;
 		this.request = request;
 		try {
-			connexion = new Socket(host, port);
+			connexion = new Socket("192.168.20.18", 2412);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ConnectionClient(String request){
+		name += ++count;
+		this.request = request;
+		try {
+			connexion = new Socket("192.168.20.18", 2412);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
