@@ -96,7 +96,7 @@ public class Simulation {
 		forthRequest.setEntity("TYPESENSOR");
 		forthRequest.setFields(requestSensitivities);
 
-		ConnectionClient ccRequestSensitivities = new ConnectionClient("192.168.20.18", 2412,
+		ConnectionClient ccRequestSensitivities = new ConnectionClient(
 				forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
 
@@ -139,8 +139,19 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient(thirdRequest.toJSON().toString());
 					ccr.run();
+					
+					JSONObject newBreakdown = new JSONObject();
+					newBreakdown.put("id", sensorUsed.getId());
+					newBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
+
+					Request sixthRequest = new Request();
+					sixthRequest.setType("UPDATE");
+					sixthRequest.setEntity("HISTORY_BREAKDOWN");
+					sixthRequest.setFields(newBreakdown);
+					ConnectionClient cc2 = new ConnectionClient(sixthRequest.toJSON().toString());
+					
 				}
 			}
 
@@ -158,7 +169,7 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient(thirdRequest.toJSON().toString());
 					ccr.run();
 				}
 
@@ -233,7 +244,7 @@ public class Simulation {
 							secondRequest.setEntity("SENSOR");
 							secondRequest.setFields(newStateOnAlert);
 
-							ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412,
+							ConnectionClient ccr = new ConnectionClient(
 									secondRequest.toJSON().toString());
 							ccr.run();
 						}
@@ -267,7 +278,7 @@ public class Simulation {
 						fifthRequest.setEntity("HISTORY_ALERTS");
 						fifthRequest.setFields(alerte.toJSON());
 
-						ConnectionClient ccSensorInAlert = new ConnectionClient("127.0.0.1", 2412,
+						ConnectionClient ccSensorInAlert = new ConnectionClient(
 								fifthRequest.toJSON().toString());
 						ccSensorInAlert.run();
 						alertCreated = true;
@@ -300,7 +311,7 @@ public class Simulation {
 							thridRequest.setEntity("SENSOR");
 							thridRequest.setFields(newStateNoAlert);
 
-							ConnectionClient ccUpdateSensor = new ConnectionClient("127.0.0.1", 2412,
+							ConnectionClient ccUpdateSensor = new ConnectionClient(
 									thridRequest.toJSON().toString());
 							ccUpdateSensor.run();
 
@@ -359,7 +370,7 @@ public class Simulation {
 				request.setEntity("SENSOR");
 				request.setFields(sensorJsonId);
 
-				ConnectionClient cc = new ConnectionClient("198.168.20.18", 2412, request.toJSON().toString());
+				ConnectionClient cc = new ConnectionClient(request.toJSON().toString());
 				cc.run();
 
 				String response = cc.getResponse();
