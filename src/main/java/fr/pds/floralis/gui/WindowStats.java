@@ -177,6 +177,7 @@ import fr.pds.floralis.server.dao.DAO;
 				}
 				int countSensor = sensorFoundList.size(); 	
 				System.out.println("Nombre de capteurs : " + countSensor);
+				
 				/*countSmokeSensor.setVisible(true);
 				countLightSensor.setVisible(true);
 				countGasSensor.setVisible(true);
