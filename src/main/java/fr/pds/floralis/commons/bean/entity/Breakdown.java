@@ -122,8 +122,5 @@ public class Breakdown {
 	public String toString() {
 		return "Breakdown [id=" + id + ", sensor=" + sensor + ", start=" + start + ", end=" + end + ", date=" + date
 				+ "]";
-	}
-
-	
-	
+	}	
 }
