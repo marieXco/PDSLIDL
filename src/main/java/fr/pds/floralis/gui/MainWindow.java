@@ -110,9 +110,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
 	JButton buttonUpdateSensorState = new JButton(onOff);
 	JButton buttonRefreshSensor = new JButton("Refresh");
-	JButton buttonNoConfigSensor = new JButton("Voir les capteurs non configurés");
-	JButton buttonYesConfigSensor = new JButton("Voir les capteurs déjà configurés");
+	JButton buttonNoConfigSensor = new JButton("Capteurs non configurés");
+	JButton buttonYesConfigSensor = new JButton("Capteurs déjà configurés");
 	JButton buttonConfigSensor = new JButton (configuration);
+	JButton buttonUpdateConfig = new JButton ("Modifier les seuils");
 
 	/**
 	 * JMenubar and its componants
@@ -147,13 +148,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 * 3 for no configured
 	 */
 	int last = 1;
-	
+
 	/**
 	 * for a refresh periodically
 	 */
 	int countMessage = 0;
 	int countSensor = 0;
-	
+
 	/**
 	 * Number of alert at the initialization of window
 	 * Number of alert at the refresh
@@ -208,7 +209,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		sensorsTable.setEnabled(false);
 
 		JScrollPane paneSensors = new JScrollPane(sensorsTable);
-		
+
 		String[] sensorsComboBox = new String[sensorModel.getRowCount() + 1];
 		sensorsComboBox[0] = "-- Identifiant du capteur --";
 
@@ -227,6 +228,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonYesConfigSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
+		infoSensorsPanel.add(buttonUpdateConfig);
 		infoSensorsPanel.add(buttonConfigSensor);
 
 
@@ -247,6 +249,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		buttonRefreshLocation.addActionListener(this);
 		buttonNoConfigSensor.addActionListener(this);
 		buttonYesConfigSensor.addActionListener(this);
+		buttonUpdateConfig.addActionListener(this);
 		stats.addActionListener(this);
 
 
@@ -343,7 +346,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 
 	}
-	
+
 	// To display all sensors in the table
 	public void allSensors() {
 		try {
@@ -373,7 +376,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 		System.out.println(" Refresh -- Sensors - count : " + countSensor);
 	}
-	
+
 	// To display just configured sensors in the table
 	public void yesConfigSensors() {
 		try {
@@ -533,72 +536,59 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == buttonUpdateSensorState) {
 			int indexSensor = comboSensors.getSelectedIndex();
-
+			String stateChange;
 			if(indexSensor > 0) {
 				Sensor sensorUpdateState = sensorsFoundList.get(indexSensor - 1);
-				if (sensorUpdateState.getState()) {
-					sensorUpdateState.setState(false);
+				if(sensorUpdateState.getState()) stateChange = "Eteind";
+				else stateChange = "Allumé";
+				if(sensorUpdateState.getConfigure()) {
+					if(!sensorUpdateState.getAlert()) {
+						if (sensorUpdateState.getState()) {
+							sensorUpdateState.setState(false);
+						} else {
+							sensorUpdateState.setState(true);
+						}
+
+						JSONObject sensorUpdateStateJson = new JSONObject();
+						sensorUpdateStateJson.put("id", sensorUpdateState.getId());
+						sensorUpdateStateJson.put("sensorToUpdate", sensorUpdateState.toJSON());
+
+						Request request = new Request();		
+						request.setType("UPDATE");
+						request.setEntity("SENSOR");
+						request.setFields(sensorUpdateStateJson);
+
+						ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toJSON().toString());
+						ccSensorUpdateState.run();
+						refresh(last);
+
+					} else {
+						message.setText("Le capteur " + sensorUpdateState.getId() + " est en alerte, il ne peut pas être " + stateChange);
+						message.setForeground(Color.BLACK);
+					}
 				} else {
-					sensorUpdateState.setState(true);
+					message.setText("Le capteur " + sensorUpdateState.getId() + " n'est pas configuré, il ne peut pas être " + stateChange);
+					message.setForeground(Color.BLACK);
 				}
-
-				JSONObject sensorUpdateStateJson = new JSONObject();
-				sensorUpdateStateJson.put("id", sensorUpdateState.getId());
-				sensorUpdateStateJson.put("sensorToUpdate", sensorUpdateState.toJSON());
-
-				Request request = new Request();		
-				request.setType("UPDATE");
-				request.setEntity("SENSOR");
-				request.setFields(sensorUpdateStateJson);
-
-				ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toJSON().toString());
-				ccSensorUpdateState.run();
-				refresh(last);
-
 			} else {
 				message.setText("Vous devez sélectionner un capteur");
 				message.setForeground(Color.BLACK);
-			}	
+			}
+
 		}
 
 
 		if (e.getSource() == buttonDeleteSensor) {
-			// Récupère l'index de la ComboBox
 			int indexSensor = comboSensors.getSelectedIndex();
 
-			// Si il est à 0, c'est qu'aucun vrai ID n'a été selectionné car index [0] = --id du capteur--
 			if (indexSensor > 0) {
-				// on récupère l'id du capteur contenu à l'index de la checkbox
-				// - 1
-				// Index checkbox : 3 est équivalant à l'index 2 du tableau des
-				// capteurs
-				int idSensorDelete = sensorsFoundList.get(indexSensor - 1).getId();
-
-				// On créer un object de JSON
+				Sensor SensorDelete = sensorsFoundList.get(indexSensor - 1);
+				if(!SensorDelete.getAlert()) {
 				JSONObject objSensorDelete = new JSONObject();
+				objSensorDelete.put("id", SensorDelete.getId());
 
-				// On ajout dans cet object une clé "id" dont la valeur est
-				// idSensor
-				// { "id" : idSensor valeur } ;
-				objSensorDelete.put("id", idSensorDelete);
+				boolean sure = new WindowConfirm().init("supprimer ce capteur");
 
-				// On lance une fênetre de confirmation qui renvoie 'true' si on
-				// clique sur oui
-				// 'false' pour le reste
-				boolean sure = new WindowConfirm()
-						.init("supprimer ce capteur");
-
-				//int idLocationUpdate = sensorsFoundList.get(indexSensor - 1).getIdLocation();
-
-				//JSONObject sensorFoundDelete = new JSONObject();
-
-				// On ajout dans cet object une clé "id" dont la valeur est
-				// idSensor
-				// { "id" : idSensor valeur } ;
-				//sensorFoundDelete.put("id", idLocationUpdate);
-
-				// Si sure est à true alors on lance la supression en insérant
-				// l'object JSON contenant l'id
 				if (sure) {
 					Request request = new Request();		
 					request.setType("DELETE");
@@ -608,13 +598,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
 					ccSensorDelete.run();
 
-					message.setText("Le capteur " + idSensorDelete + " a été supprimé avec succès");
+					message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
 					message.setForeground(Color.BLACK);
 					refresh(last);
 
 					// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 					// supprimer dans cette localisation l'occurence du capteur supprimé
-
+				} else {
+					message.setText("Le capteur " + SensorDelete.getId() + " est en alerte vous ne pouvez pas le supprimer");
+					message.setForeground(Color.BLACK);
+				}
 				}
 			} else {
 				message.setText("Vous devez selectionner l'identifiant du capteur à Supprimer");
@@ -624,61 +617,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 
 		if (e.getSource() == buttonUpdateSensor) {
-			// Récupère l'index de la ComboBox
 			int indexSensor = comboSensors.getSelectedIndex();
 
-			// Si il est à 0, c'est qu'aucun vrai ID n'a été selectionné car
-			// index [0] = --id du capteur--
 			if (indexSensor > 0) {
-
-				// on récupère l'id du capteur contenu à l'index de la checkbox
-				// - 1
-				// Index checkbox : 3 est équivalant à l'index 2 du tableau des
-				// capteurs
-				System.out.println(sensorsFoundList.get(indexSensor - 1).getId());
-
-				int idSensorUpdate = sensorsFoundList.get(indexSensor - 1).getId();
-
-				try {
-					try {
-						new WindowUpdate(getHost(), getPort()).initUpdateSensor(idSensorUpdate);
-					} catch (HeadlessException | JSONException | InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				} catch (IOException e1) {
-
-					e1.printStackTrace();
-				}
-			} else {
-				message.setText("Vous devez selectionner l'identifiant du capteur à Modifier");
-				message.setForeground(Color.BLACK);
-			}
-
-			refresh(last);
-		}
-
-
-		if(e.getSource() == buttonConfigSensor) {
-			int indexSensor = comboSensors.getSelectedIndex();
-
-			if(indexSensor > 0) {
-				int idSensorFound = sensorsFoundList.get(indexSensor - 1).getId();
-				Sensor sensorFound = new Sensor();
-				FindById co = new FindById(host, port);
-				try {
-					sensorFound = co.findById(false, idSensorFound);
-				} catch (JSONException | IOException | InterruptedException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				}
-
-				if (!sensorFound.getConfigure()) {
-					System.out.println(sensorFound.getId());
-
+				Sensor sensorUpdate = sensorsFoundList.get(indexSensor - 1);
+				if(!sensorUpdate.getAlert()) {
 					try {
 						try {
-							new WindowConfig(getHost(), getPort()).initConfigSensor(sensorFound.getId());
+							new WindowUpdate(getHost(), getPort()).initUpdateSensor(sensorUpdate.getId());
+							refresh(last);
 						} catch (HeadlessException | JSONException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -687,43 +634,79 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						e1.printStackTrace();
 					}
-
-				} else if (sensorFound.getConfigure()) {
-					boolean sure = new WindowConfirm().init("supprimer la configuration du capteur " + sensorFound.getId() );
-
-					if (sure) {
-						sensorFound.setMin(null);
-						sensorFound.setMax(null);
-
-						sensorFound.setState(false);
-						sensorFound.setIpAddress(null);
-						sensorFound.setPort(null);
-						sensorFound.setIdLocation(0);
-						sensorFound.setInstallation(null);
-
-						// The sensor is no configured
-						sensorFound.setConfigure(false);
-
-						JSONObject sensorDeleteConfigJson = new JSONObject();
-						sensorDeleteConfigJson.put("id", sensorFound.getId());
-						sensorDeleteConfigJson.put("sensorToUpdate", sensorFound.toJSON());
-
-						Request thirdRequest = new Request();
-						thirdRequest.setType("UPDATE");
-						thirdRequest.setEntity("SENSOR");
-						thirdRequest.setFields(sensorDeleteConfigJson);
-
-						ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
-						ccSensorUpdate.run();
-					}
+				} else {
+					message.setText("Le capteur " + sensorUpdate.getId() + " est en alerte, vous ne pouvez pas le modifier" );
+					message.setForeground(Color.BLACK);
 				}
+			} else {
+				message.setText("Vous devez selectionner l'identifiant du capteur à Modifier");
+				message.setForeground(Color.BLACK);
+			}
+		}
 
+		if(e.getSource() == buttonUpdateConfig) {
+
+		}
+
+
+		if(e.getSource() == buttonConfigSensor) {
+			int indexSensor = comboSensors.getSelectedIndex();
+
+			if(indexSensor > 0) {
+				Sensor sensorFoundConfig = sensorsFoundList.get(indexSensor - 1);
+				if (!sensorFoundConfig.getAlert()) {
+					if(!sensorFoundConfig.getConfigure()) {
+						try {
+							try {
+								new WindowConfig(getHost(), getPort()).initConfigSensor(sensorFoundConfig.getId());
+							} catch (HeadlessException | JSONException | InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						} catch (IOException e1) {
+
+							e1.printStackTrace();
+						}
+
+					} else {
+						boolean sure = new WindowConfirm().init("supprimer la configuration du capteur " + sensorFoundConfig.getId() );
+						if (sure) {
+							sensorFoundConfig.setMin(null);
+							sensorFoundConfig.setMax(null);
+
+							sensorFoundConfig.setState(false);
+							sensorFoundConfig.setIpAddress(null);
+							sensorFoundConfig.setPort(null);
+							sensorFoundConfig.setIdLocation(0);
+							sensorFoundConfig.setInstallation(null);
+
+							// The sensor is no configured
+							sensorFoundConfig.setConfigure(false);
+
+							JSONObject sensorDeleteConfigJson = new JSONObject();
+							sensorDeleteConfigJson.put("id", sensorFoundConfig.getId());
+							sensorDeleteConfigJson.put("sensorToUpdate", sensorFoundConfig.toJSON());
+
+							Request thirdRequest = new Request();
+							thirdRequest.setType("UPDATE");
+							thirdRequest.setEntity("SENSOR");
+							thirdRequest.setFields(sensorDeleteConfigJson);
+
+							ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
+							ccSensorUpdate.run();
+
+							refresh(last);
+						}
+					} 
+				}
+				else {
+					message.setText("Le capteur " + sensorFoundConfig.getId() + " est en alerte, vous ne pouvez pas le configurer");
+					message.setForeground(Color.BLACK);
+				}
 			} else {
 				message.setText("Vous devez selectionner un capteur !");
 				message.setForeground(Color.BLACK);
 			}
-
-			refresh(last);
 		}
 
 
@@ -745,17 +728,17 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			//if a sensor is selected
 			if(indexSensor > 0) {
 				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
-				Sensor toto = new Sensor();
+				Sensor sensorSelected = new Sensor();
 				try {
-					toto = di.findById(false, idSensor);
+					sensorSelected = di.findById(false, idSensor);
 				} catch (JSONException | IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
 				//if the selected sensor is configured
-				if(toto.getConfigure()) {
+				if(sensorSelected.getConfigure() && !sensorSelected.getAlert()) {
 					buttonConfigSensor.setText(deleteConfig);
 					// if the selected sensor is turned on
-					if(toto.getState()) {
+					if(sensorSelected.getState()) {
 						buttonUpdateSensorState.setText(off);
 					} else {
 						buttonUpdateSensorState.setText(on);
@@ -771,10 +754,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 	}
 
-	
-	
-	
-
+	//If there are a new alert, the gui is refresh
 	public void refreshAlert() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -793,9 +773,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			for(Sensor s : sensorsFoundList) {
 				if(s.getAlert()) countNewAlert++;
 			}
-			
+
 			if(countNewAlert == 0) countAlert = 0;
-			
+
 			if(countAlert < countNewAlert) {
 				refresh(last);
 				System.out.println("Nombre de capteur en alert initialement " + countAlert);
@@ -803,13 +783,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				if(countMessage > 1) new WindowAlert().init();
 				countAlert = countNewAlert;
 			} 
-			
+
 			if(countNewAlert > 0) {
 				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
 				message.setForeground(Color.RED);
 			}
-			
-			
+
+
 		};
 
 		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
@@ -823,6 +803,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				);
 	}
 
+	//All the 30 seconds the gui is refresh
 	public void refreshSensors() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -841,14 +822,24 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}, 360, SECONDS 
 				);
 	}
-	
 
+	// if the last selected button is all sensor, all sensor are refresh
+	// if the last selected button is Yes Config sensor, configured sensor are refresh
+	// if the last selected button is No Cnfig sensor, no configured sensor are refresh
 	public void refresh(int last) {
-		if(last == 1) allSensors();
-		if(last == 2) yesConfigSensors();
-		if(last == 3) noConfigSensors();
+		switch (last) {
+		case 1 : 
+			allSensors();
+			break;
+		case 2 : 
+			yesConfigSensors();
+			break;
+		case 3 : 
+			noConfigSensors();
+			break;
+		}
 		if(countNewAlert > 0) {
-			message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
+			message.setText("Vous avez " + countNewAlert + " capteur(s) en alerte");
 			message.setForeground(Color.RED);
 		}
 		else {
@@ -857,11 +848,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 	}
 
-	// Méthode appelée par le frame.start du main
+
 	public void run() {
 		try {
 			init();
-//			refreshMessage();
 			refreshAlert();
 			refreshSensors();
 		} catch (SQLException e) {
