@@ -18,7 +18,7 @@ import java.util.Properties;
 public class PropertiesReader {
 	String result = "";
 	InputStream inputStream;
-	ArrayList<Entry<String, String>>[] entryList = (ArrayList<Entry<String, String>>[])new ArrayList[4];
+	ArrayList<Entry<String, String>>[] entryList;
 
 	// FIXME : deux valeurs ne peuvent avoir le même temps --> ajouter la value contenue dans
 	// value.iter.duration puis faire un substring de l'autre côté
@@ -59,41 +59,44 @@ public class PropertiesReader {
 			String duration = "";
 			int index = 0;
 			int numberOfValues = 2;
-			int numberOfSensors = 2;
+			int numberOfSensors = Integer.parseInt(map.get("numberOfSensors"));
+			entryList = (ArrayList<Entry<String, String>>[])new ArrayList[numberOfSensors];
 			ArrayList<Map.Entry<String, String>> testList = null;
 
 			while (!(map.isEmpty())) {
-				while(numberOfSensors > index) {
+				while(numberOfSensors > 0) {
 
 					if (map.containsKey(numberOfSensors + ".id")){ 
 						id = map.get(numberOfSensors + ".id");
-						map.remove(numberOfSensors + ".id");							
-					}
+						map.remove(numberOfSensors + ".id");	
+						list.put("id", id);
+						
+						numberOfValues = Integer.parseInt(map.get(numberOfSensors + ".numberOfValues"));
 
-					list.put("id", id);
+						while(numberOfValues > 0) {
+							if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
+								value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
+								duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
+								map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
+								map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
+								list.put(duration, value);
 
-					numberOfValues = 2;
-
-					while(numberOfValues > index) {
-						if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
-							value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
-							duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
-							map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
-							list.put(duration, value);
-							
+							}
+							numberOfValues--;
 						}
-						numberOfValues--;
+						
+						testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
+						entryList[numberOfSensors - 1] = testList;
+						numberOfSensors--;
+						System.out.println(list.toString());
+						list.clear();
 					}
-
-					testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
-					entryList[numberOfSensors - 1] = testList;
-					numberOfSensors--;
-					System.out.println(list.toString());
-					list.clear();
-
-				}
 				
+					else {
+						numberOfSensors--;
+					}
+				}
+
 				map.clear();
 
 			}
@@ -103,7 +106,6 @@ public class PropertiesReader {
 		} finally {
 			inputStream.close();
 		}
-
 		return entryList;
 	}
 }

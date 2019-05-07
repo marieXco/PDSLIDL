@@ -36,32 +36,44 @@ public class Simulation {
 
 	static ObjectMapper objectMapper = new ObjectMapper();
 
-	private final ScheduledExecutorService scheduler =
-			Executors.newScheduledThreadPool(1);
-	private Sensor sensorFound [] = new Sensor[5];
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private Sensor sensorFound[] = new Sensor[5];
 	HashMap<String, Integer> sensorsCache;
 	private String periodOfDay = "";
+	ScheduledFuture<?> refreshHandle[] = new ScheduledFuture<?>[5];
 
 	public Simulation(HashMap<String, Integer> sensorsCache) {
 		this.sensorsCache = sensorsCache;
 	}
 
-
 	@SuppressWarnings("deprecation")
-	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex) throws IOException, InterruptedException {
+	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex)
+			throws IOException, InterruptedException {
 		Sensor sensorUsed;
 
 		/**
-		 * Taking care of the warning levels depending of the period of day 
-		 * From 09:00:00 to 19:59:00 --> Daytime
+		 * Taking care of the warning levels depending of the period of day From
+		 * 09:00:00 to 19:59:00 --> Daytime
 		 */
 		refreshPeriodOfDay();
 
-
 		/**
-		 * With the id from the properties, we find the id and we remove it from our values
+		 * With the id from the properties, we find the id and we remove it from our
+		 * values
 		 */
+
+		try {
+			Integer.parseInt((propertiesList.get(0)).getValue());
+		} catch (java.lang.IndexOutOfBoundsException e) {
+			sensorLogger.warning("The second sensor doesn't send messages;\n Exit");
+			Thread.currentThread().stop();
+		} catch (java.lang.NumberFormatException e) {
+			sensorLogger.warning("The sensor id is not of integer type;\n Exit");
+			Thread.currentThread().stop();
+		}
+
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
+		System.out.println(propertiesId);
 
 		propertiesList.remove(0);
 
@@ -70,9 +82,9 @@ public class Simulation {
 		 */
 		refreshSensorInfos(propertiesId, sensorIndex);
 
-		Thread.sleep(4000);
+		Thread.sleep(8000);
 		sensorUsed = sensorFound[sensorIndex];
-		
+
 		/**
 		 * We request the sensor sensitivity thanks to the type of the sensor
 		 */
@@ -84,7 +96,8 @@ public class Simulation {
 		forthRequest.setEntity("TYPESENSOR");
 		forthRequest.setFields(requestSensitivities);
 
-		ConnectionClient ccRequestSensitivities = new ConnectionClient("127.0.0.1", 2412, forthRequest.toJSON().toString());
+		ConnectionClient ccRequestSensitivities = new ConnectionClient("192.168.20.18", 2412,
+				forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
 
 		String response = ccRequestSensitivities.getResponse();
@@ -92,7 +105,7 @@ public class Simulation {
 
 		int sensitivity = 0;
 		if (periodOfDay.equals("DAYTIME")) {
-			sensitivity = typeFound.getDaySensitivity();				
+			sensitivity = typeFound.getDaySensitivity();
 			sensorLogger.info("We're in daytime : sensitivity of daytime --> " + sensitivity + " seconds");
 		} else {
 			sensitivity = typeFound.getNightSensitivity();
@@ -100,7 +113,7 @@ public class Simulation {
 		}
 		// End of requestSensitivities
 
-		if(sensorUsed.getState()) {
+		if (sensorUsed.getState() && sensorUsed.getConfigure()) {
 			try {
 				propertiesList.get(0).getValue();
 			} catch (IndexOutOfBoundsException e) {
@@ -108,12 +121,14 @@ public class Simulation {
 				int waitingToConfirmBreakdown = 1;
 
 				while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
-					sensorLogger.warning("The sensor with the id "+ sensorUsed.getId() +" is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown + " seconds");
+					sensorLogger.warning("The sensor with the id " + sensorUsed.getId()
+							+ " is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown
+							+ " seconds");
 					Thread.sleep(1000);
 					waitingToConfirmBreakdown++;
 				}
 
-				if(sensorUsed.getBreakdown() == false) {
+				if (sensorUsed.getBreakdown() == false) {
 					JSONObject newStateOnBreakdown = new JSONObject();
 					sensorUsed.setBreakdown(true);
 					newStateOnBreakdown.put("id", sensorUsed.getId());
@@ -124,15 +139,15 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
 					ccr.run();
 				}
 			}
 
-			while(!propertiesList.isEmpty() && sensorUsed.getState()) {
-				sensorLogger.info("Sensor with the id "+ sensorUsed.getId() + " is on and we get messages");
+			while (!propertiesList.isEmpty() && sensorUsed.getState()) {
+				sensorLogger.info("Sensor with the id " + sensorUsed.getId() + " is on and we get messages");
 
-				if(sensorUsed.getBreakdown() == true) {
+				if (sensorUsed.getBreakdown() == true) {
 					JSONObject newStateOnBreakdown = new JSONObject();
 					sensorUsed.setBreakdown(false);
 					newStateOnBreakdown.put("id", sensorUsed.getId());
@@ -143,29 +158,51 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
 					ccr.run();
 				}
 
-				int messageDuration = Integer.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getKey());
-				int messageValue = Integer.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
+				String type;
+				if (sensorUsed.getType().toUpperCase().equals("LIGHT")
+						|| sensorUsed.getType().toUpperCase().equals("PRESENCE")) {
+					type = "BOOLEAN";
+				} else {
+					type = "VALUE";
+				}
+
+				int messageDuration = Integer
+						.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getKey());
+				int messageValue = Integer
+						.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 				int realTimeValue = 1;
 				Boolean alertCreated = false;
 
-				if(Integer.parseInt(sensorUsed.getMax()) < messageValue || Integer.parseInt(sensorUsed.getMin()) > messageValue) {
-					alertCreated = false;
-					while(realTimeValue <= messageDuration && (Integer.parseInt(sensorUsed.getMax()) < messageValue || Integer.parseInt(sensorUsed.getMin()) > messageValue) && sensorUsed.getState()) {
+				if (type.equals("BOOLEAN")) {
+					if (messageValue == 1) {
+						messageValue = messageDuration;
+					} else {
+						messageValue = Integer.parseInt(sensorUsed.getMax()) - 1;
+					}
+				} else {
+					
+				}
 
-						while(realTimeValue < sensitivity) {
-							if(sensorsCache.containsKey("POSSIBLEALERT" + sensorUsed.getId())) {
+				if (Integer.parseInt(sensorUsed.getMax()) < messageValue
+						|| Integer.parseInt(sensorUsed.getMin()) > messageValue) {
+					alertCreated = false;
+					while (realTimeValue <= messageDuration && (Integer.parseInt(sensorUsed.getMax()) < messageValue
+							|| Integer.parseInt(sensorUsed.getMin()) > messageValue) && sensorUsed.getState()) {
+
+						while (realTimeValue < sensitivity) {
+							if (sensorsCache.containsKey("POSSIBLEALERT" + sensorUsed.getId())) {
 								sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
 							}
 
 							sensorsCache.put("POSSIBLEALERT" + sensorUsed.getId(), realTimeValue);
 
-							if(realTimeValue % 5 == 0 || realTimeValue == 1) {
-								sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()  + " for " + 
-										realTimeValue + " seconds with the value " + messageValue);
+							if (realTimeValue % 5 == 0 || realTimeValue == 1) {
+								sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()
+										+ " for " + realTimeValue + " seconds with the value " + messageValue);
 							}
 
 							Thread.sleep(1000);
@@ -174,21 +211,18 @@ public class Simulation {
 
 						sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
 
-
-
-						if(sensorsCache.containsKey("ALERT" + sensorUsed.getId())) {
+						if (sensorsCache.containsKey("ALERT" + sensorUsed.getId())) {
 							sensorsCache.remove("ALERT" + sensorUsed.getId());
 						}
 
 						sensorsCache.put("ALERT" + sensorUsed.getId(), realTimeValue);
 
-						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-							sensorLogger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()  + " for " + 
-									realTimeValue + " seconds with the value " + messageValue);
+						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
+							sensorLogger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()
+									+ " for " + realTimeValue + " seconds with the value " + messageValue);
 						}
 
-
-						if(sensorUsed.getAlert() == false) {
+						if (sensorUsed.getAlert() == false) {
 							JSONObject newStateOnAlert = new JSONObject();
 							sensorUsed.setAlert(true);
 							newStateOnAlert.put("id", sensorUsed.getId());
@@ -199,7 +233,8 @@ public class Simulation {
 							secondRequest.setEntity("SENSOR");
 							secondRequest.setFields(newStateOnAlert);
 
-							ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, secondRequest.toJSON().toString());
+							ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412,
+									secondRequest.toJSON().toString());
 							ccr.run();
 						}
 
@@ -208,28 +243,32 @@ public class Simulation {
 
 					}
 
-					if(alertCreated == false) {
+					if (alertCreated == false) {
 						Calendar dateNow = Calendar.getInstance();
-						Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH), dateNow.get(Calendar.DAY_OF_MONTH));
-						Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND) - 1);
+						Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
+								dateNow.get(Calendar.DAY_OF_MONTH));
+						Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
+								dateNow.get(Calendar.SECOND) - 1);
 
-						Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
+						Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
+								dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
 
-						if(messageDuration > 60) {
+						if (messageDuration > 60) {
 							beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
 							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
 						} else {
 							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
 						}
 
-						Alert alerte = new Alert(2, sensorUsed.getId(),beginningOfAlert, endOfAlert , today);
+						Alert alerte = new Alert(2, sensorUsed.getId(), beginningOfAlert, endOfAlert, today);
 
 						Request fifthRequest = new Request();
 						fifthRequest.setType("CREATE");
 						fifthRequest.setEntity("HISTORY_ALERTS");
 						fifthRequest.setFields(alerte.toJSON());
 
-						ConnectionClient ccSensorInAlert = new ConnectionClient("127.0.0.1", 2412, fifthRequest.toJSON().toString());
+						ConnectionClient ccSensorInAlert = new ConnectionClient("127.0.0.1", 2412,
+								fifthRequest.toJSON().toString());
 						ccSensorInAlert.run();
 						alertCreated = true;
 					}
@@ -238,20 +277,19 @@ public class Simulation {
 
 				else {
 
-					if(sensorsCache.containsKey("NOALERT" + sensorUsed.getId())) {
+					if (sensorsCache.containsKey("NOALERT" + sensorUsed.getId())) {
 						sensorsCache.remove("NOALERT" + sensorUsed.getId());
 					}
 
-					while(realTimeValue <= messageDuration && sensorUsed.getState()) {
-
+					while (realTimeValue <= messageDuration && sensorUsed.getState()) {
 
 						sensorsCache.put("NOALERT" + sensorUsed.getId(), realTimeValue);
-						if(realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
-							sensorLogger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + 
-									realTimeValue + " seconds with the value " + messageValue);
+						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
+							sensorLogger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + realTimeValue
+									+ " seconds with the value " + messageValue);
 						}
 
-						if(sensorUsed.getAlert()) {
+						if (sensorUsed.getAlert()) {
 							JSONObject newStateNoAlert = new JSONObject();
 							sensorUsed.setAlert(false);
 							newStateNoAlert.put("id", sensorUsed.getId());
@@ -262,8 +300,8 @@ public class Simulation {
 							thridRequest.setEntity("SENSOR");
 							thridRequest.setFields(newStateNoAlert);
 
-
-							ConnectionClient ccUpdateSensor = new ConnectionClient("127.0.0.1", 2412, thridRequest.toJSON().toString());
+							ConnectionClient ccUpdateSensor = new ConnectionClient("127.0.0.1", 2412,
+									thridRequest.toJSON().toString());
 							ccUpdateSensor.run();
 
 						}
@@ -275,33 +313,44 @@ public class Simulation {
 
 				}
 
-				if(!propertiesList.isEmpty() && sensorUsed.getState()) {
+				if (!propertiesList.isEmpty() && sensorUsed.getState()) {
 					propertiesList.remove(propertiesList.size() - 1);
-				} 
-
-				if(!propertiesList.isEmpty() && !sensorUsed.getState()) {
-					sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
 				}
 
+				if (!propertiesList.isEmpty() && !sensorUsed.getState()) {
+					sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
+				}
 
 			}
 
 		} else {
-			sensorLogger.warning("Sensor with the id "+ sensorUsed.getId() + " is off, but we get messages");
+			if (!sensorUsed.getState() && !sensorUsed.getConfigure()) {
+				sensorLogger.warning("Sensor with the id " + sensorUsed.getId()
+						+ " is off and does't have any warning limits, but we get messages;\nExit");
+			}
+
+			else if (!sensorUsed.getState()) {
+				sensorLogger
+						.warning("Sensor with the id " + sensorUsed.getId() + " is off, but we get messages;\nExit");
+			}
+
+			else if (!sensorUsed.getConfigure()) {
+				sensorLogger.warning(
+						"The sensor with the id " + sensorUsed.getId() + " does't have any warning limits;\nExit");
+			}
 		}
 
 		sensorLogger.info("Messages ended for this sensor");
 
-		System.out.println("Cache at the end of the simulation : " + sensorsCache.toString());
-
+		refreshHandle[sensorIndex].cancel(false);
+		Thread.currentThread().stop();
 	}
-
 
 	public Sensor refreshSensorInfos(int sensorId, int sensorIndex) {
 		Sensor sensorToChange = new Sensor();
 		final Runnable refresh = new Runnable() {
 
-			public void run() { 
+			public void run() {
 				JSONObject sensorJsonId = new JSONObject();
 				sensorJsonId.put("id", sensorId);
 
@@ -310,7 +359,7 @@ public class Simulation {
 				request.setEntity("SENSOR");
 				request.setFields(sensorJsonId);
 
-				ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
+				ConnectionClient cc = new ConnectionClient("198.168.20.18", 2412, request.toJSON().toString());
 				cc.run();
 
 				String response = cc.getResponse();
@@ -323,15 +372,7 @@ public class Simulation {
 			}
 		};
 
-		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 1 , 3, SECONDS);
-
-		scheduler.schedule(
-				new Runnable() {
-					public void run() { 
-						refreshHandle.cancel(true); 
-					}
-				}, 360, SECONDS
-				);
+		refreshHandle[sensorIndex] = scheduler.scheduleAtFixedRate(refresh, 1, 3, SECONDS);
 
 		return sensorToChange;
 	}
@@ -339,19 +380,19 @@ public class Simulation {
 	public String refreshPeriodOfDay() {
 		final Runnable refresh = new Runnable() {
 
-			public void run() { 
-				Calendar night = new GregorianCalendar();	
+			public void run() {
+				Calendar night = new GregorianCalendar();
 				night.set(Calendar.HOUR_OF_DAY, 20);
 				night.set(Calendar.MINUTE, 00);
 				night.set(Calendar.SECOND, 00);
 
-				Calendar day = new GregorianCalendar();	
+				Calendar day = new GregorianCalendar();
 				day.set(Calendar.HOUR_OF_DAY, 8);
 				day.set(Calendar.MINUTE, 59);
 				day.set(Calendar.SECOND, 59);
 
 				Calendar now = Calendar.getInstance();
-				if(now.before(night) && now.after(day)) {
+				if (now.before(night) && now.after(day)) {
 					periodOfDay = "DAYTIME";
 				} else {
 					periodOfDay = "NIGHTTIME";
@@ -360,50 +401,51 @@ public class Simulation {
 
 		};
 
-		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 0 , 30, SECONDS);
+		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 0, 30, SECONDS);
 
-		scheduler.schedule(
-				new Runnable() {
-					public void run() { 
-						refreshHandle.cancel(true); 
-					}
-				}, 360, SECONDS
-				);
+		scheduler.schedule(new Runnable() {
+			public void run() {
+				refreshHandle.cancel(true);
+			}
+		}, 360, SECONDS);
 
 		return periodOfDay;
 	}
 
+	public static void main(String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException,
+			InterruptedException, BrokenBarrierException {
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%6$s%n");
 
-	public static void main (String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException, BrokenBarrierException {
+		Logger logger = Logger.getLogger("Logger");
 		Logger logger1 = Logger.getLogger("Logger1");
 		Logger logger2 = Logger.getLogger("Logger2");
-//		Logger logger3 = Logger.getLogger("Logger3");
-//		Logger logger4 = Logger.getLogger("Logger4");
-//		Logger logger5 = Logger.getLogger("Logger5");
-
-		System.setProperty("java.util.logging.SimpleFormatter.format", 
-				"%1$tF %1$tT %4$s %5$s%6$s%n");
+		Logger logger3 = Logger.getLogger("Logger3");
+		Logger logger4 = Logger.getLogger("Logger4");
+		Logger logger5 = Logger.getLogger("Logger5");
 
 		try {
-			FileHandler fh1=new FileHandler("%hsimulationLogger1.log");
-			FileHandler fh2=new FileHandler("%hsimulationLogger2.log");
-			//			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
-			//			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
-			//			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
+			FileHandler fh = new FileHandler("%hmainLogger.log");
+			FileHandler fh1 = new FileHandler("%hsimulationLogger1.log");
+			FileHandler fh2 = new FileHandler("%hsimulationLogger2.log");
+			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
+			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
+			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
 
+			logger.addHandler(fh);
 			logger1.addHandler(fh1);
 			logger2.addHandler(fh2);
-			//			logger3.addHandler(fh3);
-			//			logger4.addHandler(fh4);
-			//			logger5.addHandler(fh5);
+			logger3.addHandler(fh3);
+			logger4.addHandler(fh4);
+			logger5.addHandler(fh5);
 
-			SimpleFormatter formatter = new SimpleFormatter();  
+			SimpleFormatter formatter = new SimpleFormatter();
 
+			fh.setFormatter(formatter);
 			fh1.setFormatter(formatter);
 			fh2.setFormatter(formatter);
-			//			fh3.setFormatter(formatter);
-			//			fh4.setFormatter(formatter);
-			//			fh5.setFormatter(formatter);
+			fh3.setFormatter(formatter);
+			fh4.setFormatter(formatter);
+			fh5.setFormatter(formatter);
 
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -412,18 +454,30 @@ public class Simulation {
 		}
 
 		PropertiesReader properties = new PropertiesReader();
+
 		ArrayList<Entry<String, String>>[] propertiesList = properties.getPropValues();
 
 		HashMap<String, Integer> sensorsCache = new HashMap<String, Integer>();
 		Simulation simu = new Simulation(sensorsCache);
 
+		try {
+			propertiesList[0].toString();
+		} catch (java.lang.NullPointerException e) {
+			logger.warning("The config.properties file is empty;\n Exiting the simulation");
+			System.exit(0);
+		}
+
 		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[1].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
+		
 
-		final CyclicBarrier gate = new CyclicBarrier(3);
+		final CyclicBarrier gate = new CyclicBarrier(1);
 
-		Thread t1 = new Thread(){
-			public void run(){
+		Thread t1 = new Thread() {
+			public void run() {
 				try {
 					gate.await();
 				} catch (InterruptedException | BrokenBarrierException e) {
@@ -434,27 +488,86 @@ public class Simulation {
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
 				}
-			}};
+			}
+		};
 
-			Thread t2 = new Thread(){
-				public void run(){
-					try {
-						gate.await();
-					} catch (InterruptedException | BrokenBarrierException e) {
-						e.printStackTrace();
-					}
-					try {
-						simu.simulationTest(propertiesList[1], logger2, 1);
-					} catch (IOException | InterruptedException e) {
-						e.printStackTrace();
-					}
-				}};
+		Thread t2 = new Thread() {
+			public void run() {
+				try {
+					gate.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					e.printStackTrace();
+				}
+				try {
+					simu.simulationTest(propertiesList[1], logger2, 1);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
+					logger.warning("The second sensor is empty;\nNo simulation for this sensor");
+				}
 
-				t1.start();
-				t2.start();
+			}
+		};
+		Thread t3 = new Thread() {
+			public void run() {
+				try {
+					gate.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					e.printStackTrace();
+				}
+				try {
+					simu.simulationTest(propertiesList[2], logger3, 2);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
+					logger.warning("The thrid sensor is empty;\nNo simulation for this sensor");
+				}
 
-				gate.await();
-				System.out.println("All thread started at the same time");
-				
+			}
+		};
+		Thread t4 = new Thread() {
+			public void run() {
+				try {
+					gate.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					e.printStackTrace();
+				}
+				try {
+					simu.simulationTest(propertiesList[3], logger4, 3);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				} catch (java.lang.NullPointerException  | java.lang.ArrayIndexOutOfBoundsException e1) {
+					logger.warning("The forth sensor is empty;\nNo simulation for this sensor");
+				}
+
+			}
+		};
+
+		Thread t5 = new Thread() {
+			public void run() {
+				try {
+					gate.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					e.printStackTrace();
+				}
+				try {
+					simu.simulationTest(propertiesList[4], logger5, 4);
+				} catch (IOException | InterruptedException e) {
+					e.printStackTrace();
+				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
+					logger.warning("The fifth sensor is empty;\nNo simulation for this sensor");
+				}
+			}
+		};
+
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+		t5.start();
+
+		gate.await();
+
+		logger.info("The simulation is started for all the sensors");
 	}
 }
