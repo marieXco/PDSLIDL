@@ -85,7 +85,7 @@ public class Simulation {
 		 * This sleep is made to wait for the findById from all the sensor We wait 2
 		 * seconds for each sensor
 		 */
-		Thread.sleep(propertiesLength * 2000);
+		Thread.sleep(propertiesLength * 3000);
 
 		/*
 		 * We request the sensor sensitivity thanks to the type of the sensor
