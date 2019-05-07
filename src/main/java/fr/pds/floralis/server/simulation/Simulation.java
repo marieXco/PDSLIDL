@@ -41,7 +41,7 @@ public class Simulation {
 	private Sensor sensorFound[] = new Sensor[5];
 	HashMap<String, Integer> sensorsCache;
 	private String periodOfDay = "";
-	ScheduledFuture<?> refreshHandle[] = new ScheduledFuture<?>[5];
+	static ScheduledFuture<?> refreshHandle[] = new ScheduledFuture<?>[5];
 
 	public Simulation(HashMap<String, Integer> sensorsCache) {
 		this.sensorsCache = sensorsCache;
@@ -50,7 +50,6 @@ public class Simulation {
 	@SuppressWarnings("deprecation")
 	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex)
 			throws IOException, InterruptedException {
-		Sensor sensorUsed;
 
 		/**
 		 * Taking care of the warning levels depending of the period of day From
@@ -67,14 +66,15 @@ public class Simulation {
 			Integer.parseInt((propertiesList.get(0)).getValue());
 		} catch (java.lang.IndexOutOfBoundsException e) {
 			sensorLogger.warning("The second sensor doesn't send messages;\n Exit");
+			refreshHandle[sensorIndex].cancel(false);
 			Thread.currentThread().stop();
 		} catch (java.lang.NumberFormatException e) {
 			sensorLogger.warning("The sensor id is not of integer type;\n Exit");
+			refreshHandle[sensorIndex].cancel(false);
 			Thread.currentThread().stop();
 		}
 
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
-		System.out.println(propertiesId);
 
 		propertiesList.remove(0);
 
@@ -84,21 +84,19 @@ public class Simulation {
 		refreshSensorInfos(propertiesId, sensorIndex);
 
 		Thread.sleep(8000);
-		sensorUsed = sensorFound[sensorIndex];
 
 		/**
 		 * We request the sensor sensitivity thanks to the type of the sensor
 		 */
 		JSONObject requestSensitivities = new JSONObject();
-		requestSensitivities.put("type", sensorUsed.getType().toUpperCase());
+		requestSensitivities.put("type", sensorFound[sensorIndex].getType().toUpperCase());
 
 		Request forthRequest = new Request();
 		forthRequest.setType("FINDSENSITIVITY");
 		forthRequest.setEntity("TYPESENSOR");
 		forthRequest.setFields(requestSensitivities);
 
-		ConnectionClient ccRequestSensitivities = new ConnectionClient(
-				forthRequest.toJSON().toString());
+		ConnectionClient ccRequestSensitivities = new ConnectionClient(forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
 
 		String response = ccRequestSensitivities.getResponse();
@@ -114,7 +112,7 @@ public class Simulation {
 		}
 		// End of requestSensitivities
 
-		if (sensorUsed.getState() && sensorUsed.getConfigure()) {
+		if (sensorFound[sensorIndex].getState() && sensorFound[sensorIndex].getConfigure()) {
 			try {
 				propertiesList.get(0).getValue();
 			} catch (IndexOutOfBoundsException e) {
@@ -122,18 +120,18 @@ public class Simulation {
 				int waitingToConfirmBreakdown = 1;
 
 				while (waitingToConfirmBreakdown <= breakdownTrigger && waitingToConfirmBreakdown % 5 == 0) {
-					sensorLogger.warning("The sensor with the id " + sensorUsed.getId()
-							+ " is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown
-							+ " seconds");
+					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
+					+ " is on but we get no messages, possible breakdown for " + waitingToConfirmBreakdown
+					+ " seconds");
 					Thread.sleep(1000);
 					waitingToConfirmBreakdown++;
 				}
 
-				if (sensorUsed.getBreakdown() == false) {
+				if (sensorFound[sensorIndex].getBreakdown() == false) {
 					JSONObject newStateOnBreakdown = new JSONObject();
-					sensorUsed.setBreakdown(true);
-					newStateOnBreakdown.put("id", sensorUsed.getId());
-					newStateOnBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
+					sensorFound[sensorIndex].setBreakdown(true);
+					newStateOnBreakdown.put("id", sensorFound[sensorIndex].getId());
+					newStateOnBreakdown.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
 					Request thirdRequest = new Request();
 					thirdRequest.setType("UPDATE");
@@ -142,17 +140,17 @@ public class Simulation {
 
 					ConnectionClient ccr = new ConnectionClient(thirdRequest.toJSON().toString());
 					ccr.run();
-					
+
 					Calendar dateNow = Calendar.getInstance();
 					Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
 							dateNow.get(Calendar.DAY_OF_MONTH));
 
 					Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
 							dateNow.get(Calendar.MINUTE) - 1, dateNow.get(Calendar.SECOND));
-							
+
 					Breakdown historyBreakdown = new Breakdown();
 					historyBreakdown.setId(1);
-					historyBreakdown.setSensor(sensorUsed.getId());
+					historyBreakdown.setSensor(sensorFound[sensorIndex].getId());
 					historyBreakdown.setDate(today);
 					historyBreakdown.setStart(beginningOfAlert);
 					JSONObject newBreakdown = new JSONObject(historyBreakdown);
@@ -166,14 +164,14 @@ public class Simulation {
 				}
 			}
 
-			while (!propertiesList.isEmpty() && sensorUsed.getState()) {
-				sensorLogger.info("Sensor with the id " + sensorUsed.getId() + " is on and we get messages");
+			while (!propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
+				sensorLogger.info("Sensor with the id " + sensorFound[sensorIndex].getId() + " is on and we get messages");
 
-				if (sensorUsed.getBreakdown() == true) {
+				if (sensorFound[sensorIndex].getBreakdown() == true) {
 					JSONObject newStateOnBreakdown = new JSONObject();
-					sensorUsed.setBreakdown(false);
-					newStateOnBreakdown.put("id", sensorUsed.getId());
-					newStateOnBreakdown.put("sensorToUpdate", sensorUsed.toJSON());
+					sensorFound[sensorIndex].setBreakdown(false);
+					newStateOnBreakdown.put("id", sensorFound[sensorIndex].getId());
+					newStateOnBreakdown.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
 					Request thirdRequest = new Request();
 					thirdRequest.setType("UPDATE");
@@ -185,9 +183,12 @@ public class Simulation {
 				}
 
 				String type;
-				if (sensorUsed.getType().toUpperCase().equals("LIGHT")
-						|| sensorUsed.getType().toUpperCase().equals("PRESENCE")) {
+
+				if (sensorFound[sensorIndex].getType().toUpperCase().equals("LIGHT")
+						|| sensorFound[sensorIndex].getType().toUpperCase().equals("PRESENCE")) {
 					type = "BOOLEAN";
+				} else if(sensorFound[sensorIndex].getType().toUpperCase().equals("FIRE")) {
+					type = "FIRE";
 				} else {
 					type = "VALUE";
 				}
@@ -199,166 +200,174 @@ public class Simulation {
 				int realTimeValue = 1;
 				Boolean alertCreated = false;
 
-				if (type.equals("BOOLEAN")) {
-					if (messageValue == 1) {
-						messageValue = messageDuration;
-					} else {
-						messageValue = Integer.parseInt(sensorUsed.getMax()) - 1;
-					}
-				} else {
-					
-				}
+				boolean request = Integer.parseInt(sensorFound[sensorIndex].getMax()) <= messageValue
+						|| Integer.parseInt(sensorFound[sensorIndex].getMin()) >= messageValue;
 
-				if (Integer.parseInt(sensorUsed.getMax()) < messageValue
-						|| Integer.parseInt(sensorUsed.getMin()) > messageValue) {
-					alertCreated = false;
-					while (realTimeValue <= messageDuration && (Integer.parseInt(sensorUsed.getMax()) < messageValue
-							|| Integer.parseInt(sensorUsed.getMin()) > messageValue) && sensorUsed.getState()) {
-
-						while (realTimeValue < sensitivity) {
-							if (sensorsCache.containsKey("POSSIBLEALERT" + sensorUsed.getId())) {
-								sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
+						if (type.equals("BOOLEAN") || type.equals("FIRE")) {
+							if (messageValue == 1) {
+								messageValue = messageDuration;
+							} else {
+								messageValue = Integer.parseInt(sensorFound[sensorIndex].getMax()) - 1;
 							}
+						} 
 
-							sensorsCache.put("POSSIBLEALERT" + sensorUsed.getId(), realTimeValue);
+						if (periodOfDay.equals("DAYTIME") && (type.equals("BOOLEAN"))) {
+							request = messageValue <= Integer.parseInt(sensorFound[sensorIndex].getMin());
+						}
 
-							if (realTimeValue % 5 == 0 || realTimeValue == 1) {
-								sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorUsed.getId()
+						if (periodOfDay.equals("NIGHTTIME") && (type.equals("BOOLEAN"))) {
+							request = messageValue <= Integer.parseInt(sensorFound[sensorIndex].getMax());
+						}
+
+						if (request) {
+							alertCreated = false;
+							while (realTimeValue <= messageDuration && (request) && sensorFound[sensorIndex].getState()) {
+
+								while (realTimeValue < sensitivity) {
+									if (sensorsCache.containsKey("POSSIBLEALERT" + sensorFound[sensorIndex].getId())) {
+										sensorsCache.remove("POSSIBLEALERT" + sensorFound[sensorIndex].getId());
+									}
+
+									sensorsCache.put("POSSIBLEALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
+
+									if (realTimeValue % 5 == 0 || realTimeValue == 1) {
+										sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : " + sensorFound[sensorIndex].getId()
 										+ " for " + realTimeValue + " seconds with the value " + messageValue);
+									}
+
+									Thread.sleep(1000);
+									realTimeValue++;
+								}
+
+								sensorsCache.remove("POSSIBLEALERT" + sensorFound[sensorIndex].getId());
+
+								if (sensorsCache.containsKey("ALERT" + sensorFound[sensorIndex].getId())) {
+									sensorsCache.remove("ALERT" + sensorFound[sensorIndex].getId());
+								}
+
+								sensorsCache.put("ALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
+
+								if (realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
+									sensorLogger.warning("Type alert : HIGHERMAX for the sensor : " + sensorFound[sensorIndex].getId()
+									+ " for " + realTimeValue + " seconds with the value " + messageValue);
+								}
+
+								if (sensorFound[sensorIndex].getAlert() == false) {
+									JSONObject newStateOnAlert = new JSONObject();
+									sensorFound[sensorIndex].setAlert(true);
+									newStateOnAlert.put("id", sensorFound[sensorIndex].getId());
+									newStateOnAlert.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
+
+									Request secondRequest = new Request();
+									secondRequest.setType("UPDATE");
+									secondRequest.setEntity("SENSOR");
+									secondRequest.setFields(newStateOnAlert);
+
+									ConnectionClient ccr = new ConnectionClient(secondRequest.toJSON().toString());
+									ccr.run();
+								}
+
+								realTimeValue++;
+								Thread.sleep(1000);
+
 							}
 
-							Thread.sleep(1000);
-							realTimeValue++;
-						}
+							if (alertCreated == false) {
+								Calendar dateNow = Calendar.getInstance();
+								Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
+										dateNow.get(Calendar.DAY_OF_MONTH));
+								Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
+										dateNow.get(Calendar.SECOND) - 1);
 
-						sensorsCache.remove("POSSIBLEALERT" + sensorUsed.getId());
+								Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
+										dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
 
-						if (sensorsCache.containsKey("ALERT" + sensorUsed.getId())) {
-							sensorsCache.remove("ALERT" + sensorUsed.getId());
-						}
+								if (messageDuration > 60) {
+									beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
+								} else {
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
+								}
 
-						sensorsCache.put("ALERT" + sensorUsed.getId(), realTimeValue);
+								Alert alerte = new Alert(2, sensorFound[sensorIndex].getId(), beginningOfAlert, endOfAlert, today);
 
-						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-							sensorLogger.warning("Type alert : HIGHERMAX for the sensor : " + sensorUsed.getId()
-									+ " for " + realTimeValue + " seconds with the value " + messageValue);
-						}
+								Request fifthRequest = new Request();
+								fifthRequest.setType("CREATE");
+								fifthRequest.setEntity("HISTORY_ALERTS");
+								fifthRequest.setFields(alerte.toJSON());
 
-						if (sensorUsed.getAlert() == false) {
-							JSONObject newStateOnAlert = new JSONObject();
-							sensorUsed.setAlert(true);
-							newStateOnAlert.put("id", sensorUsed.getId());
-							newStateOnAlert.put("sensorToUpdate", sensorUsed.toJSON());
-
-							Request secondRequest = new Request();
-							secondRequest.setType("UPDATE");
-							secondRequest.setEntity("SENSOR");
-							secondRequest.setFields(newStateOnAlert);
-
-							ConnectionClient ccr = new ConnectionClient(
-									secondRequest.toJSON().toString());
-							ccr.run();
-						}
-
-						realTimeValue++;
-						Thread.sleep(1000);
-
-					}
-
-					if (alertCreated == false) {
-						Calendar dateNow = Calendar.getInstance();
-						Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
-								dateNow.get(Calendar.DAY_OF_MONTH));
-						Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
-								dateNow.get(Calendar.SECOND) - 1);
-
-						Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
-								dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
-
-						if (messageDuration > 60) {
-							beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
-							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
-						} else {
-							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
-						}
-
-						Alert alerte = new Alert(2, sensorUsed.getId(), beginningOfAlert, endOfAlert, today);
-
-						Request fifthRequest = new Request();
-						fifthRequest.setType("CREATE");
-						fifthRequest.setEntity("HISTORY_ALERTS");
-						fifthRequest.setFields(alerte.toJSON());
-
-						ConnectionClient ccSensorInAlert = new ConnectionClient(
-								fifthRequest.toJSON().toString());
-						ccSensorInAlert.run();
-						alertCreated = true;
-					}
-
-				}
-
-				else {
-
-					if (sensorsCache.containsKey("NOALERT" + sensorUsed.getId())) {
-						sensorsCache.remove("NOALERT" + sensorUsed.getId());
-					}
-
-					while (realTimeValue <= messageDuration && sensorUsed.getState()) {
-
-						sensorsCache.put("NOALERT" + sensorUsed.getId(), realTimeValue);
-						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
-							sensorLogger.info("No alert for the sensor: " + sensorUsed.getId() + " for " + realTimeValue
-									+ " seconds with the value " + messageValue);
-						}
-
-						if (sensorUsed.getAlert()) {
-							JSONObject newStateNoAlert = new JSONObject();
-							sensorUsed.setAlert(false);
-							newStateNoAlert.put("id", sensorUsed.getId());
-							newStateNoAlert.put("sensorToUpdate", sensorUsed.toJSON());
-
-							Request thridRequest = new Request();
-							thridRequest.setType("UPDATE");
-							thridRequest.setEntity("SENSOR");
-							thridRequest.setFields(newStateNoAlert);
-
-							ConnectionClient ccUpdateSensor = new ConnectionClient(
-									thridRequest.toJSON().toString());
-							ccUpdateSensor.run();
+								ConnectionClient ccSensorInAlert = new ConnectionClient(fifthRequest.toJSON().toString());
+								ccSensorInAlert.run();
+								alertCreated = true;
+							}
 
 						}
 
-						realTimeValue++;
-						Thread.sleep(1000);
+						else {
 
-					}
+							if (sensorsCache.containsKey("NOALERT" + sensorFound[sensorIndex].getId())) {
+								sensorsCache.remove("NOALERT" + sensorFound[sensorIndex].getId());
+							}
 
-				}
+							while (realTimeValue <= messageDuration && sensorFound[sensorIndex].getState()) {
 
-				if (!propertiesList.isEmpty() && sensorUsed.getState()) {
-					propertiesList.remove(propertiesList.size() - 1);
-				}
+								sensorsCache.put("NOALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
+								if (realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
+									sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId() + " for " + realTimeValue
+											+ " seconds with the value " + messageValue);
+								}
 
-				if (!propertiesList.isEmpty() && !sensorUsed.getState()) {
-					sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
-				}
+								if (sensorFound[sensorIndex].getAlert()) {
+									JSONObject newStateNoAlert = new JSONObject();
+									sensorFound[sensorIndex].setAlert(false);
+									newStateNoAlert.put("id", sensorFound[sensorIndex].getId());
+									newStateNoAlert.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
+
+									Request thridRequest = new Request();
+									thridRequest.setType("UPDATE");
+									thridRequest.setEntity("SENSOR");
+									thridRequest.setFields(newStateNoAlert);
+
+									ConnectionClient ccUpdateSensor = new ConnectionClient(thridRequest.toJSON().toString());
+									ccUpdateSensor.run();
+
+								}
+
+								realTimeValue++;
+								Thread.sleep(1000);
+
+							}
+
+						}
+
+						if (!propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
+							propertiesList.remove(propertiesList.size() - 1);
+						}
+
+						if (!propertiesList.isEmpty() && !sensorFound[sensorIndex].getState()) {
+							sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
+							refreshHandle[sensorIndex].cancel(false);
+						}
 
 			}
 
 		} else {
-			if (!sensorUsed.getState() && !sensorUsed.getConfigure()) {
-				sensorLogger.warning("Sensor with the id " + sensorUsed.getId()
-						+ " is off and does't have any warning limits, but we get messages;\nExit");
+			if (!sensorFound[sensorIndex].getState() && !sensorFound[sensorIndex].getConfigure()) {
+				sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
+				+ " is off and does't have any warning limits, but we get messages;\nExit");
+				refreshHandle[sensorIndex].cancel(false);
 			}
 
-			else if (!sensorUsed.getState()) {
+			else if (!sensorFound[sensorIndex].getState()) {
 				sensorLogger
-						.warning("Sensor with the id " + sensorUsed.getId() + " is off, but we get messages;\nExit");
+				.warning("Sensor with the id " + sensorFound[sensorIndex].getId() + " is off, but we get messages;\nExit");
+				refreshHandle[sensorIndex].cancel(false);
 			}
 
-			else if (!sensorUsed.getConfigure()) {
+			else if (!sensorFound[sensorIndex].getConfigure()) {
 				sensorLogger.warning(
-						"The sensor with the id " + sensorUsed.getId() + " does't have any warning limits;\nExit");
+						"The sensor with the id " + sensorFound[sensorIndex].getId() + " does't have any warning limits;\nExit");
+				refreshHandle[sensorIndex].cancel(false);
 			}
 		}
 
@@ -435,7 +444,7 @@ public class Simulation {
 	}
 
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException,
-			InterruptedException, BrokenBarrierException {
+	InterruptedException, BrokenBarrierException {
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%6$s%n");
 
 		Logger logger = Logger.getLogger("Logger");
@@ -449,9 +458,9 @@ public class Simulation {
 			FileHandler fh = new FileHandler("%hmainLogger.log");
 			FileHandler fh1 = new FileHandler("%hsimulationLogger1.log");
 			FileHandler fh2 = new FileHandler("%hsimulationLogger2.log");
-			FileHandler fh3=new FileHandler("%hsimulationLogger3.log");
-			FileHandler fh4=new FileHandler("%hsimulationLogger4.log");
-			FileHandler fh5=new FileHandler("%hsimulationLogger5.log");
+			FileHandler fh3 = new FileHandler("%hsimulationLogger3.log");
+			FileHandler fh4 = new FileHandler("%hsimulationLogger4.log");
+			FileHandler fh5 = new FileHandler("%hsimulationLogger5.log");
 
 			logger.addHandler(fh);
 			logger1.addHandler(fh1);
@@ -490,13 +499,8 @@ public class Simulation {
 		}
 
 		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[0].toString());
-		
 
-		final CyclicBarrier gate = new CyclicBarrier(1);
+		final CyclicBarrier gate = new CyclicBarrier(6);
 
 		Thread t1 = new Thread() {
 			public void run() {
@@ -526,6 +530,7 @@ public class Simulation {
 					e.printStackTrace();
 				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
 					logger.warning("The second sensor is empty;\nNo simulation for this sensor");
+					refreshHandle[1].cancel(false);
 				}
 
 			}
@@ -543,6 +548,7 @@ public class Simulation {
 					e.printStackTrace();
 				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
 					logger.warning("The thrid sensor is empty;\nNo simulation for this sensor");
+					refreshHandle[2].cancel(false);
 				}
 
 			}
@@ -558,8 +564,9 @@ public class Simulation {
 					simu.simulationTest(propertiesList[3], logger4, 3);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
-				} catch (java.lang.NullPointerException  | java.lang.ArrayIndexOutOfBoundsException e1) {
+				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
 					logger.warning("The forth sensor is empty;\nNo simulation for this sensor");
+					refreshHandle[3].cancel(false);
 				}
 
 			}
@@ -578,6 +585,7 @@ public class Simulation {
 					e.printStackTrace();
 				} catch (java.lang.NullPointerException | java.lang.ArrayIndexOutOfBoundsException e1) {
 					logger.warning("The fifth sensor is empty;\nNo simulation for this sensor");
+					refreshHandle[4].cancel(false);
 				}
 			}
 		};
