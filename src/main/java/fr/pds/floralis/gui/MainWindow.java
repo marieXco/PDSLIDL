@@ -3,7 +3,6 @@ package fr.pds.floralis.gui;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
@@ -12,8 +11,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -24,7 +21,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -49,7 +45,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.pds.floralis.commons.bean.entity.Alert;
 import fr.pds.floralis.commons.bean.entity.Location;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
@@ -146,27 +141,25 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	/**
 	 * Last selected button
 	 * a flag need for refresh
+	 * Refresh is different if is for all sensors, configured or no configured sensors
 	 * 1 for all
 	 * 2 for configured
 	 * 3 for no configured
 	 */
 	int last = 1;
-
-	/**
-	 * 
-	 */
-	int countNewAlert;
 	
 	/**
-	 * for period refresh
+	 * for a refresh periodically
 	 */
 	int countMessage = 0;
 	int countSensor = 0;
 	
 	/**
 	 * Number of alert at the initialization of window
+	 * Number of alert at the refresh
 	 */
 	int countAlert = 0;
+	int countNewAlert;
 
 	/** 
 	 * Constructor, takes the host and port from the main
@@ -215,19 +208,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		sensorsTable.setEnabled(false);
 
 		JScrollPane paneSensors = new JScrollPane(sensorsTable);
-
-		// ComboBox d'identifiants pour les capteurs
-
-		// On créé un tableau de ce que contient le tableau de capteur
-		// getRowCount + 1 car getRowCount renvoie la taille de ce qui a dans le
-		// tableau (exemple 3,
-		// éuivalent à sensorsList.size()), sachant que l'indice du tableau 0
-		// est pris
-		// (--identifiant du capteur--), il faut que notre tableau
-		// ait une case en plus que le nombre d'éléments dans le tableau du
-		// capteur
-		// (index [0] + 1 index pour chaque élément --> tableau de taille 4 donc
-		// getRowCount() + 1)
+		
 		String[] sensorsComboBox = new String[sensorModel.getRowCount() + 1];
 		sensorsComboBox[0] = "-- Identifiant du capteur --";
 
@@ -362,6 +343,96 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 
 	}
+	
+	// To display all sensors in the table
+	public void allSensors() {
+		try {
+			FindAllSensor fs = new FindAllSensor(host, port);
+			sensorsFoundList = fs.findAll(false);
+
+			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
+
+			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+			sensorsComboBox[0]= "-- Identifiant du capteur --";
+
+			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+				int tabIndex = listIndex + 1;
+				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+			}
+
+			comboSensors.removeAllItems();
+
+			for (int i = 0; i < sensorsComboBox.length; i++) {
+				comboSensors.addItem(sensorsComboBox[i]);
+			}
+
+			sensorsTable.setModel(sensorModelRefresh);
+
+		} catch (JSONException | IOException | InterruptedException e2) {
+			e2.printStackTrace();
+		}
+		System.out.println(" Refresh -- Sensors - count : " + countSensor);
+	}
+	
+	// To display just configured sensors in the table
+	public void yesConfigSensors() {
+		try {
+			FindSensorByConfig fs = new FindSensorByConfig(host, port);
+			sensorsFoundList = fs.findByConfig(false, true);
+
+			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
+
+			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+			sensorsComboBox[0]= "-- Identifiant du capteur --";
+
+			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+				int tabIndex = listIndex + 1;
+				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+			}
+
+			comboSensors.removeAllItems();
+
+			for (int i = 0; i < sensorsComboBox.length; i++) {
+				comboSensors.addItem(sensorsComboBox[i]);
+			}
+
+			sensorsTable.setModel(sensorModelRefresh);
+
+		} catch (JSONException | IOException | InterruptedException e2) {
+			e2.printStackTrace();
+		}
+		System.out.println(" Refresh -- Sensors Yes config - count : " + countSensor);
+	}
+
+	// To display just no configured sensors in the table
+	public void noConfigSensors() {
+		try {
+			FindSensorByConfig fs = new FindSensorByConfig(host, port);
+			sensorsFoundList = fs.findByConfig(false, false);
+
+			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
+
+			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
+			sensorsComboBox[0]= "-- Identifiant du capteur --";
+
+			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
+				int tabIndex = listIndex + 1;
+				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
+			}
+
+			comboSensors.removeAllItems();
+
+			for (int i = 0; i < sensorsComboBox.length; i++) {
+				comboSensors.addItem(sensorsComboBox[i]);
+			}
+
+			sensorsTable.setModel(sensorModelRefresh);
+
+		} catch (JSONException | IOException | InterruptedException e2) {
+			e2.printStackTrace();
+		}
+		System.out.println(" Refresh -- Sensors No config - count : " + countSensor);
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
@@ -457,32 +528,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == buttonRefreshSensor) {
 			last = 1;
-			try {
-				FindAllSensor fs = new FindAllSensor(host, port);
-				sensorsFoundList = fs.findAll(false);
-
-				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-				sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-					int tabIndex = listIndex + 1;
-					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-				}
-
-				comboSensors.removeAllItems();
-
-				for (int i = 0; i < sensorsComboBox.length; i++) {
-					comboSensors.addItem(sensorsComboBox[i]);
-				}
-
-				sensorsTable.setModel(sensorModelRefresh);
-
-			} catch (JSONException | IOException | InterruptedException e2) {
-				e2.printStackTrace();
-			}
-
+			allSensors();
 		}
 
 		if (e.getSource() == buttonUpdateSensorState) {
@@ -683,63 +729,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == buttonNoConfigSensor) {
 			last = 3;
-			try {
-				FindSensorByConfig fs = new FindSensorByConfig(host, port);
-				sensorsFoundList = fs.findByConfig(false, false);
-
-				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-				sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-					int tabIndex = listIndex + 1;
-					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-				}
-
-				comboSensors.removeAllItems();
-
-				for (int i = 0; i < sensorsComboBox.length; i++) {
-					comboSensors.addItem(sensorsComboBox[i]);
-				}
-
-				sensorsTable.setModel(sensorModelRefresh);
-
-			} catch (JSONException | IOException | InterruptedException e2) {
-				e2.printStackTrace();
-			}
-
+			noConfigSensors();
 		}
 
 
 		if (e.getSource() == buttonYesConfigSensor) {
 			last = 2;
-			try {
-				FindSensorByConfig fs = new FindSensorByConfig(host, port);
-				sensorsFoundList = fs.findByConfig(false, true);
-
-				SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-				String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-				sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-				for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-					int tabIndex = listIndex + 1;
-					sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-				}
-
-				comboSensors.removeAllItems();
-
-				for (int i = 0; i < sensorsComboBox.length; i++) {
-					comboSensors.addItem(sensorsComboBox[i]);
-				}
-
-				sensorsTable.setModel(sensorModelRefresh);
-
-			} catch (JSONException | IOException | InterruptedException e2) {
-				e2.printStackTrace();
-			}
-
+			yesConfigSensors();
 		}
 
 		if(e.getSource() == comboSensors) {
@@ -775,92 +771,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 	}
 
-	public void refreshAllSensors() {
-		try {
-			FindAllSensor fs = new FindAllSensor(host, port);
-			sensorsFoundList = fs.findAll(false);
-
-			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-			sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-				int tabIndex = listIndex + 1;
-				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-			}
-
-			comboSensors.removeAllItems();
-
-			for (int i = 0; i < sensorsComboBox.length; i++) {
-				comboSensors.addItem(sensorsComboBox[i]);
-			}
-
-			sensorsTable.setModel(sensorModelRefresh);
-
-		} catch (JSONException | IOException | InterruptedException e2) {
-			e2.printStackTrace();
-		}
-		System.out.println(" Refresh -- Sensors - count : " + countSensor);
-	}
-
-	public void refreshYesConfigSensors() {
-		try {
-			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, true);
-
-			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-			sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-				int tabIndex = listIndex + 1;
-				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-			}
-
-			comboSensors.removeAllItems();
-
-			for (int i = 0; i < sensorsComboBox.length; i++) {
-				comboSensors.addItem(sensorsComboBox[i]);
-			}
-
-			sensorsTable.setModel(sensorModelRefresh);
-
-		} catch (JSONException | IOException | InterruptedException e2) {
-			e2.printStackTrace();
-		}
-		System.out.println(" Refresh -- Sensors Yes config - count : " + countSensor);
-	}
-
-	public void refreshNoConfigSensors() {
-		try {
-			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, false);
-
-			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
-
-			String[] sensorsComboBox = new String[sensorModelRefresh.getRowCount() + 1]; 
-			sensorsComboBox[0]= "-- Identifiant du capteur --";
-
-			for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
-				int tabIndex = listIndex + 1;
-				sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
-			}
-
-			comboSensors.removeAllItems();
-
-			for (int i = 0; i < sensorsComboBox.length; i++) {
-				comboSensors.addItem(sensorsComboBox[i]);
-			}
-
-			sensorsTable.setModel(sensorModelRefresh);
-
-		} catch (JSONException | IOException | InterruptedException e2) {
-			e2.printStackTrace();
-		}
-		System.out.println(" Refresh -- Sensors No config - count : " + countSensor);
-	}
+	
+	
 	
 
 	public void refreshAlert() {
@@ -911,35 +823,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				);
 	}
 
-//	public void refreshMessage() {
-//		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
-//
-//		Runnable task1 = () -> {
-//			countMessage++;
-//			System.out.println(" Refresh -- Message - count : " + countMessage);
-//			if(countAlert > 0) {
-//				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
-//				message.setForeground(Color.RED);
-//			}
-//			else {
-//				message.setText(text);
-//				message.setForeground(Color.BLACK);
-//			}
-//			
-//		};
-//
-//		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
-//
-//
-//		ses.schedule(new Runnable() {
-//			public void run() { 
-//				scheduledFuture.cancel(true); 
-//			}
-//		}, 360, SECONDS
-//				);
-//
-//	}
-
 	public void refreshSensors() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -961,9 +844,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	
 
 	public void refresh(int last) {
-		if(last == 1) refreshAllSensors();
-		if(last == 2) refreshYesConfigSensors();
-		if(last == 3) refreshNoConfigSensors();
+		if(last == 1) allSensors();
+		if(last == 2) yesConfigSensors();
+		if(last == 3) noConfigSensors();
 		if(countNewAlert > 0) {
 			message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
 			message.setForeground(Color.RED);
