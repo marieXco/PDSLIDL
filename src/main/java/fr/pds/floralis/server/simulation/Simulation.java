@@ -73,6 +73,7 @@ public class Simulation {
 		}
 
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
+		System.out.println(propertiesId);
 
 		propertiesList.remove(0);
 
@@ -81,7 +82,7 @@ public class Simulation {
 		 */
 		refreshSensorInfos(propertiesId, sensorIndex);
 
-		Thread.sleep(7000);
+		Thread.sleep(8000);
 		sensorUsed = sensorFound[sensorIndex];
 
 		/**
@@ -95,7 +96,7 @@ public class Simulation {
 		forthRequest.setEntity("TYPESENSOR");
 		forthRequest.setFields(requestSensitivities);
 
-		ConnectionClient ccRequestSensitivities = new ConnectionClient("127.0.0.1", 2412,
+		ConnectionClient ccRequestSensitivities = new ConnectionClient("192.168.20.18", 2412,
 				forthRequest.toJSON().toString());
 		ccRequestSensitivities.run();
 
@@ -138,7 +139,7 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
 					ccr.run();
 				}
 			}
@@ -157,7 +158,7 @@ public class Simulation {
 					thirdRequest.setEntity("SENSOR");
 					thirdRequest.setFields(newStateOnBreakdown);
 
-					ConnectionClient ccr = new ConnectionClient("127.0.0.1", 2412, thirdRequest.toJSON().toString());
+					ConnectionClient ccr = new ConnectionClient("198.168.20.18", 2412, thirdRequest.toJSON().toString());
 					ccr.run();
 				}
 
@@ -358,7 +359,7 @@ public class Simulation {
 				request.setEntity("SENSOR");
 				request.setFields(sensorJsonId);
 
-				ConnectionClient cc = new ConnectionClient("127.0.0.1", 2412, request.toJSON().toString());
+				ConnectionClient cc = new ConnectionClient("198.168.20.18", 2412, request.toJSON().toString());
 				cc.run();
 
 				String response = cc.getResponse();
@@ -467,13 +468,13 @@ public class Simulation {
 		}
 
 		System.out.println(propertiesList[0].toString());
-		System.out.println(propertiesList[1].toString());
-		System.out.println(propertiesList[2].toString());
-		System.out.println(propertiesList[3].toString());
-		System.out.println(propertiesList[4].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
+		System.out.println(propertiesList[0].toString());
 		
 
-		final CyclicBarrier gate = new CyclicBarrier(6);
+		final CyclicBarrier gate = new CyclicBarrier(1);
 
 		Thread t1 = new Thread() {
 			public void run() {
@@ -535,7 +536,7 @@ public class Simulation {
 					simu.simulationTest(propertiesList[3], logger4, 3);
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
-				} catch (java.lang.NullPointerException e1) {
+				} catch (java.lang.NullPointerException  | java.lang.ArrayIndexOutOfBoundsException e1) {
 					logger.warning("The forth sensor is empty;\nNo simulation for this sensor");
 				}
 
