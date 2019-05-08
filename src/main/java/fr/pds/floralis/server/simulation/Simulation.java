@@ -268,8 +268,8 @@ public class Simulation {
 					/*
 					 * This is the basic request : level Min < value < level Max
 					 */
-					boolean request = Integer.parseInt(sensorFound[sensorIndex].getMax()) <= messageValue
-							|| Integer.parseInt(sensorFound[sensorIndex].getMin()) >= messageValue;
+					boolean request = sensorFound[sensorIndex].getMax() <= messageValue
+							|| sensorFound[sensorIndex].getMin() >= messageValue;
 
 					/*
 					 * This type of sensors only send 1 or 0 as values If 1 is sent, it means that
@@ -280,7 +280,7 @@ public class Simulation {
 						if (messageValue == 1) {
 							messageValue = messageDuration;
 						} else {
-							messageValue = Integer.parseInt(sensorFound[sensorIndex].getMax()) - 1;
+							messageValue = sensorFound[sensorIndex].getMax() - 1;
 						}
 					}
 
@@ -288,11 +288,11 @@ public class Simulation {
 					 * See lines from 227 to 237
 					 */
 					if (periodOfDay.equals("DAYTIME") && (sensorType.equals("BOOLEAN"))) {
-						request = messageValue <= Integer.parseInt(sensorFound[sensorIndex].getMin());
+						request = messageValue >= sensorFound[sensorIndex].getMin();
 					}
 
 					if (periodOfDay.equals("NIGHTTIME") && (sensorType.equals("BOOLEAN"))) {
-						request = messageValue <= Integer.parseInt(sensorFound[sensorIndex].getMax());
+						request = messageValue >= sensorFound[sensorIndex].getMax();
 					}
 
 					/*
@@ -528,7 +528,6 @@ public class Simulation {
 		 * messages and we wait for it to reconnect / connect However, we'll loose the
 		 * last message sent
 		 */
-
 		if (!sensorFound[sensorIndex].getConfigure()) {
 			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 					+ " doesn't have any warning limits;\nExiting for this sensor");
@@ -645,8 +644,9 @@ public class Simulation {
 		/*
 		 * We create a number of logger that is equal to the number of sensors that is
 		 * stocked in the propertiesData One logger for one sensor
+		 * Plus a main logger
 		 */
-		Logger loggers[] = new Logger[propertiesData.length];
+		Logger loggers[] = new Logger[propertiesData.length + 1];
 		FileHandler fileHandlers[] = new FileHandler[propertiesData.length];
 		SimpleFormatter formatter = new SimpleFormatter();
 
@@ -654,7 +654,7 @@ public class Simulation {
 		 * We initialize the main Logger
 		 */
 		loggers[0] = Logger.getLogger("Logger");
-		fileHandlers[0] = new FileHandler("%mainLogger.log");
+		fileHandlers[0] = new FileHandler("%hmainLogger.log");
 		loggers[0].addHandler(fileHandlers[0]);
 		fileHandlers[0].setFormatter(formatter);
 
@@ -668,12 +668,12 @@ public class Simulation {
 			System.exit(0);
 		}
 
-		for (int i = 0; i < propertiesData.length; i++) {
+		for (int i = 0; i <= propertiesData.length; i++) {
 
 			/*
 			 * We initialize every sensor Logger
 			 */
-			if (i != 0) {
+			if ((i != 0) && (i != 5)) {
 				loggers[i] = Logger.getLogger("Logger" + i + "");
 				fileHandlers[i] = new FileHandler("%hsimulationLogger" + i + ".log");
 				loggers[i].addHandler(fileHandlers[i]);
@@ -695,14 +695,14 @@ public class Simulation {
 						e.printStackTrace();
 					}
 					try {
-						simulation.simulationTest(propertiesData[index], loggers[index], loggers[0], index);
+						simulation.simulationTest(propertiesData[index], loggers[index + 1], loggers[0], index);
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					} catch (java.lang.NullPointerException e1) {
 						loggers[index]
-								.warning("This sensor doesn't send messages;\nStoping the simulation for this sensor");
+								.warning("This sensor doesn't exist;\nStoping the simulation for this sensor");
 						loggers[0].warning("The sensor number " + (index + 1)
-								+ " doesn't send messages;\nStoping the simulation for this sensor");
+								+ " doesn't exist;\nStoping the simulation for this sensor");
 
 						refreshHandle[index].cancel(false);
 						threadState[index] = true;
