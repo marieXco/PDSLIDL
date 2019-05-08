@@ -60,11 +60,6 @@ import fr.pds.floralis.server.dao.DAO;
 		JPanel requestPanel = new JPanel();
 		JPanel resultPanel = new JPanel(); 
 		
-
-		// Creation of all parameters necessary 
-		JComboBox indicators = new JComboBox();
-		JLabel label = new JLabel("Indicateurs :");
-		
 		
 		Button countRoom = new Button("Nombre de pièce");
 		Button countAllSensor = new Button("Nombre de capteurs");
@@ -165,7 +160,6 @@ import fr.pds.floralis.server.dao.DAO;
 		    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		    this.setLocationRelativeTo(null);
 		    this.setSize(900, 600);
-		    container.setBackground(Color.white);
 		    //  combo.setPreferredSize(new Dimension(100, 20));
 		    
 		    
@@ -229,19 +223,30 @@ import fr.pds.floralis.server.dao.DAO;
 		    indicatorInfo.add(patientResult);
 		    indicatorInfo.setPreferredSize(new Dimension(1350, 150));
 		    indicatorInfo.setLayout(new GridLayout(1, 4));
-		    indicatorInfo.setBackground(Color.WHITE);
 		    
+		    
+		    // Panel to choice of sensor 
 		    JPanel requestPanel= new JPanel();
-		    JButton sensor = new JButton("Jcombo Box des capteurs");
-		    requestPanel.add(sensor);
+		    JPanel sensorPanel = new JPanel();
+			JComboBox sensorOption = new JComboBox();
+			sensorOption.addItem("Type de capteurs");
+			sensorOption.addItem("Etat des capteurs");
+			sensorOption.addItem("Panne des capteurs");
+			JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
+			sensorPanel.add(labelSensor);
+			sensorPanel.add(sensorOption); 
+			JButton sensorChoice = new JButton("Filtrer");
+			requestPanel.add(sensorPanel);
+		    
+		    //Panel choice of alert
 		    JButton alert = new JButton("Jcombo box des alertes");
 		    requestPanel.add(alert);
 		    //requestPanel.setPreferredSize(new Dimension(700, 200));
 		    requestPanel.setLayout(new GridLayout(2, 1));
 		    
 		    JPanel resultPanel= new JPanel();
-		   
-
+		   //TODO: ajouter des éléments dans la bdd pour les tests (patients, anciennes alertes) 
+		    //TODO: implémenter la comparaison sur les 12 mois, cette partie doit se trouver dans l'item listener des dates 
 		    Object[][] donnees = {
 		            {"Nombre d'alerte en 05/19", "12"},
 		            {"Nombre d'alerte en 04/19", "24"},
