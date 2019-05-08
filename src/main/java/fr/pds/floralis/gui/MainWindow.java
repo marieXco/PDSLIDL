@@ -161,6 +161,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	int countAlert = 0;
 	int countNewAlert;
+	
+	int countSensors = 0;
+	int countNewSensor;
+	
+	int countLocation = 0;
+	int countNewLocation;
+	
+	int countWarningLevel = 0;
+	int countNewWarningLevel;
+	
 
 	/** 
 	 * Constructor, takes the host and port from the main
@@ -440,9 +450,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				WindowAdd toto = new WindowAdd(window);
-				toto.run();
-				System.out.println("ahahahahah ça marche putain");
+				new WindowAdd(window).run();
 			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
@@ -600,7 +608,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
 						message.setForeground(Color.BLACK);
-						refresh(last);
+						//refresh
 
 						// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 						// supprimer dans cette localisation l'occurence du capteur supprimé
@@ -671,8 +679,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					} else {
 						boolean sure = new WindowConfirm().init("supprimer la configuration du capteur " + sensorFoundConfig.getId() );
 						if (sure) {
-							sensorFoundConfig.setMin(null);
-							sensorFoundConfig.setMax(null);
+							sensorFoundConfig.setMin(0);
+							sensorFoundConfig.setMax(0);
 
 							sensorFoundConfig.setState(false);
 							sensorFoundConfig.setIpAddress(null);
@@ -695,7 +703,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 							ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 							ccSensorUpdate.run();
 
-							refresh(last);
 						}
 					} 
 				}
@@ -755,12 +762,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	}
 
 	//If there are a new alert, the gui is refresh
-	public void refreshAlert() {
+	public void refreshNewElement() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
 		Runnable task1 = () -> {
 			countMessage++;
-			System.out.println(" Refresh -- Alert - count : " + countMessage);
+			System.out.println(" Refresh - count : " + countMessage);
 			FindAllSensor fs = new FindAllSensor(host, port);
 			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
 			try {
@@ -769,37 +776,76 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			//Sensors
+			countNewSensor = sensorsFoundList.size();
+			// if it is the first connection
+			if(countSensors == 0) countSensors = countNewSensor;
+			
+			// if there are new sensor or a sensor deleted, then countSensors is different than countNewSensor
+			if(countSensors != countNewSensor) {
+				refresh(last);
+				countSensors = countNewSensor;
+			} 
+			
+			// a new alert
 			countNewAlert = 0;
+			
+			// count the number of alert
 			for(Sensor s : sensorsFoundList) {
 				if(s.getAlert()) countNewAlert++;
 			}
-
+			
+			// if it is the first connection
 			if(countNewAlert == 0) countAlert = 0;
 
 			if(countAlert < countNewAlert) {
 				refresh(last);
-				System.out.println("Nombre de capteur en alert initialement " + countAlert);
-				System.out.println("Nombre de capteur en alert maintenant " + countNewAlert);
 				if(countMessage > 1) new WindowAlert().init();
 				countAlert = countNewAlert;
 			} 
 
+			// if there are new alert, then countAlert is upper than countNewSensor
 			if(countNewAlert > 0) {
 				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
 				message.setForeground(Color.RED);
 			}
+			
+			// a new configuration
+			countNewLocation = 0;
+			
+			// if there are a new configuration the sum of the id location is update
+			for(Sensor s : sensorsFoundList) {
+				countNewLocation+= s.getIdLocation();
+			} 
 
-
+			if(countLocation == 0) countLocation = countNewLocation;
+			if(countLocation != countNewLocation) {
+				refresh(last);
+				countLocation = countNewLocation;
+			} 
+			
+			// new warning level 
+			countNewWarningLevel = 0;
+			for(Sensor s : sensorsFoundList) {
+				countNewWarningLevel+= s.getMin() + s.getMax(); 
+			} 
+			if(countWarningLevel == 0) countWarningLevel = countNewWarningLevel;
+			if(countWarningLevel != countNewWarningLevel) {
+				refresh(last);
+				countWarningLevel = countNewWarningLevel;
+			} 
+			
 		};
 
-		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
+		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 1, SECONDS);
 
 
 		ses.schedule(new Runnable() {
 			public void run() { 
 				scheduledFuture.cancel(true); 
 			}
-		}, 360, SECONDS
+		}, 3600, SECONDS
 				);
 	}
 
@@ -852,7 +898,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void run() {
 		try {
 			init();
-			refreshAlert();
+			refreshNewElement();
 			refreshSensors();
 		} catch (SQLException e) {
 			e.printStackTrace();
