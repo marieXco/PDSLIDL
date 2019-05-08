@@ -129,7 +129,7 @@ public class Simulation {
 			}
 
 			/*
-			 * If the sensor doesn't has any messages, then it'll be put in breakdown after
+			 * If the sensor doesn't have any messages, then it'll be put in breakdown after
 			 * 2 minutes
 			 */
 
