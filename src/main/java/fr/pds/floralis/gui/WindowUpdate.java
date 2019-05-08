@@ -112,9 +112,8 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		this.port = port;
 	}
 
-	// TODO method to Update a patient
 	public void initUpdatePatient(int id) throws SQLException {
-
+		// TODO
 	}
 	
 	// method to update a sensor
@@ -156,7 +155,6 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		sensorFound =  objectMapper.readValue(sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
 		// End sensor Find By Id
 
-
 		container.setPreferredSize(new Dimension(LG + 200, HT));
 
 		mainInfosPanel.add(brandLabel);
@@ -177,14 +175,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		container.add(infos);
 		container.add(buttonUpdateSensor);
 
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosed(WindowEvent e) {
-				//DataSource.backConnection(jdb, connect);
-				System.out.println("Connexion fermée");
-			}
-		});
-
-		this.setTitle("Floralis - Modification d'un capteur");
+		this.setTitle("Floralis - Modification des seuils d'un capteur");
 		this.setContentPane(container);
 		pack();
 		this.setLocationRelativeTo(null);
@@ -221,7 +212,7 @@ public class WindowUpdate extends JFrame implements ActionListener {
 		}
 
 		if (e.getSource() == buttonUpdatePatient) {
-
+			// TODO 
 		}
 	}
 

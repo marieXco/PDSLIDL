@@ -109,7 +109,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	JButton buttonDeleteSensor = new JButton("Supprimer le capteur");
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
 	JButton buttonUpdateSensorState = new JButton(onOff);
-	JButton buttonRefreshSensor = new JButton("Refresh");
+	JButton buttonRefreshSensor = new JButton("Capteurs");
 	JButton buttonNoConfigSensor = new JButton("Capteurs non configurés");
 	JButton buttonYesConfigSensor = new JButton("Capteurs déjà configurés");
 	JButton buttonConfigSensor = new JButton (configuration);
@@ -234,12 +234,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
+		infoSensorsPanel.add(buttonUpdateConfig);
+		infoSensorsPanel.add(buttonConfigSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonYesConfigSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
-		infoSensorsPanel.add(buttonUpdateConfig);
-		infoSensorsPanel.add(buttonConfigSensor);
 
 
 		// Mise en place des raccourcis
@@ -490,14 +490,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 
 		if (e.getSource() == buttonRefreshLocation) {
-			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
+
 			FindAllLocation fl = new FindAllLocation(host, port);
 			List<Location> locationsFoundList;
 
 			try {
 				locationsFoundList = fl.findAll(false);
 
-				// On retire tout ce qui est contenu dans le panneau locationList
 				locationList.removeAll();
 				locationList.revalidate();
 				locationList.repaint(); 
@@ -528,9 +527,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				e1.printStackTrace();
 			}
 
-
-
-			// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
 			locationPanel.removeAll();
 			locationPanel.add(buttonRefreshLocation);
 			locationPanel.add(locationList);
