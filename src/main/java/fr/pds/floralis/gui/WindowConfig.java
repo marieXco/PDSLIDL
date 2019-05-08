@@ -61,7 +61,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 	JPanel containerSouth = new JPanel();
 	JPanel otherInfosPanel = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
-	JPanel thresholdsPanel = new JPanel();
+	JPanel warningLevelPanel = new JPanel();
 	JPanel locationPanel = new JPanel();
 	JPanel statePanel = new JPanel();
 
@@ -93,7 +93,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 	JComboBox<Object> year = new JComboBox<Object>();
 
-	String[] years = new String[12];
+	String[] years = new String[6];
 	
 	
 	/**
@@ -237,7 +237,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		}
 
 		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
-			String yearMax = (yearIndex + 2018) + "";
+			String yearMax = (yearIndex + 2014) + "";
 			years[yearIndex] = yearMax;
 		}
 
@@ -300,7 +300,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		
 		containerNorth.setLayout(new BoxLayout(containerNorth, BoxLayout.Y_AXIS));
 		containerNorth.add(BorderLayout.NORTH, mainInfosPanel);
-		containerNorth.add(BorderLayout.NORTH, thresholdsPanel);
+		containerNorth.add(BorderLayout.NORTH, warningLevelPanel);
 		containerNorth.add(BorderLayout.NORTH, otherInfosPanel);
 		
 		containerSouth.add(locationPanel);
@@ -312,33 +312,33 @@ public class WindowConfig extends JFrame implements ActionListener {
 		
 		switch (sensorFound.getType()) {
 		case "TEMPERATURE" :
-			thresholdsPanel.add(minLabel);
-			thresholdsPanel.add(min);
-			thresholdsPanel.add(minTempUnit);
-			thresholdsPanel.add(maxLabel);
-			thresholdsPanel.add(max);
-			thresholdsPanel.add(maxTempUnit);
+			warningLevelPanel.add(minLabel);
+			warningLevelPanel.add(min);
+			warningLevelPanel.add(minTempUnit);
+			warningLevelPanel.add(maxLabel);
+			warningLevelPanel.add(max);
+			warningLevelPanel.add(maxTempUnit);
 			break;
 		case "PRESENCE":
-			thresholdsPanel.add(dayLabel);
-			thresholdsPanel.add(duringDay);
-			thresholdsPanel.add(dayTimeUnit);
-			thresholdsPanel.add(nightLabel);
-			thresholdsPanel.add(duringNight);
-			thresholdsPanel.add(nightTimeUnit);
+			warningLevelPanel.add(dayLabel);
+			warningLevelPanel.add(duringDay);
+			warningLevelPanel.add(dayTimeUnit);
+			warningLevelPanel.add(nightLabel);
+			warningLevelPanel.add(duringNight);
+			warningLevelPanel.add(nightTimeUnit);
 			break;
 		case "LIGHT":
-			thresholdsPanel.add(dayLabel);
-			thresholdsPanel.add(duringDay);
-			thresholdsPanel.add(dayTimeUnit);
-			thresholdsPanel.add(nightLabel);
-			thresholdsPanel.add(duringNight);
-			thresholdsPanel.add(nightTimeUnit);
+			warningLevelPanel.add(dayLabel);
+			warningLevelPanel.add(duringDay);
+			warningLevelPanel.add(dayTimeUnit);
+			warningLevelPanel.add(nightLabel);
+			warningLevelPanel.add(duringNight);
+			warningLevelPanel.add(nightTimeUnit);
 			break;
 		case "GASLEAK":
-			thresholdsPanel.add(gasLabel);
-			thresholdsPanel.add(gas);
-			thresholdsPanel.add(gasUnit);
+			warningLevelPanel.add(gasLabel);
+			warningLevelPanel.add(gas);
+			warningLevelPanel.add(gasUnit);
 			break;
 		}
 		
@@ -348,8 +348,15 @@ public class WindowConfig extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == buttonConfigSensor) {
 			try {
-				Integer.parseInt(min.getText());
-				Integer.parseInt(max.getText());
+				if(sensorFound.getType().equals("TEMPERATURE")) {
+					Integer.parseInt(min.getText());
+					Integer.parseInt(max.getText());
+				} else if(sensorFound.getType().equals("LIGHT") || sensorFound.getType().equals("PRESENCE")) {
+					Integer.parseInt(duringDay.getText());
+					Integer.parseInt(duringNight.getText());
+				} else if(sensorFound.getType().equals("GASLEAK")) {
+					Integer.parseInt(gas.getText());
+				}
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("Les seuils ne peuvent contenir que des chiffres");
 			}
@@ -388,7 +395,8 @@ public class WindowConfig extends JFrame implements ActionListener {
 			}
 
 			// If min > max
-			else if (sensorFound.getType().equals("TEMPERATRUE") && Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
+			else if (sensorFound.getType().equals("TEMPERATURE") && 
+					(Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText()))) {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
