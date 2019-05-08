@@ -20,9 +20,6 @@ public class PropertiesReader {
 	InputStream inputStream;
 	ArrayList<Entry<String, String>>[] entryList;
 
-	// FIXME : deux valeurs ne peuvent avoir le même temps --> ajouter la value contenue dans
-	// value.iter.duration puis faire un substring de l'autre côté
-
 	public ArrayList<Entry<String, String>>[] getPropValues() throws IOException {
 
 		try {
@@ -37,13 +34,11 @@ public class PropertiesReader {
 				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
 			}
 
-
 			/**
 			 * We get the id property and the type property
 			 */
 
 			String id = "";
-			String type = "";
 
 			Map<String, String> map = new HashMap<String, String>();
 			Map<String, String> list = new LinkedHashMap<String, String>();
@@ -51,47 +46,47 @@ public class PropertiesReader {
 			/**
 			 * We put all our key-values pairs in a Map
 			 */
-			for (String key : prop.stringPropertyNames()) {	
+			for (String key : prop.stringPropertyNames()) {
 				map.put(key, prop.getProperty(key));
 			}
 
 			String value = "";
 			String duration = "";
-			int index = 0;
 			int numberOfValues = 2;
 			int numberOfSensors = Integer.parseInt(map.get("numberOfSensors"));
-			entryList = (ArrayList<Entry<String, String>>[])new ArrayList[numberOfSensors];
+			entryList = (ArrayList<Entry<String, String>>[]) new ArrayList[numberOfSensors];
 			ArrayList<Map.Entry<String, String>> testList = null;
 
 			while (!(map.isEmpty())) {
-				while(numberOfSensors > 0) {
+				while (numberOfSensors > 0) {
 
-					if (map.containsKey(numberOfSensors + ".id")){ 
+					if (map.containsKey(numberOfSensors + ".id")) {
 						id = map.get(numberOfSensors + ".id");
-						map.remove(numberOfSensors + ".id");	
+						map.remove(numberOfSensors + ".id");
 						list.put("id", id);
-						
+
 						numberOfValues = Integer.parseInt(map.get(numberOfSensors + ".numberOfValues"));
 
-						while(numberOfValues > 0) {
-							if(map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value") && map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
+						while (numberOfValues > 0) {
+							if (map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value")
+									&& map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
 								value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
 								duration = map.get(numberOfSensors + ".iter." + numberOfValues + ".duration");
-								map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");	
+								map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");
 								map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
 								list.put(duration, value);
 
 							}
 							numberOfValues--;
 						}
-						
+
 						testList = new ArrayList<Map.Entry<String, String>>(list.entrySet());
 						entryList[numberOfSensors - 1] = testList;
 						numberOfSensors--;
 						System.out.println(list.toString());
 						list.clear();
 					}
-				
+
 					else {
 						numberOfSensors--;
 					}
@@ -106,6 +101,7 @@ public class PropertiesReader {
 		} finally {
 			inputStream.close();
 		}
+
 		return entryList;
 	}
 }

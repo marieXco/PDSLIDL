@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -31,7 +33,6 @@ import fr.pds.floralis.commons.bean.entity.Breakdown;
 import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
-import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class Simulation {
 
@@ -43,18 +44,21 @@ public class Simulation {
 	private String periodOfDay = "";
 	static ScheduledFuture<?> refreshHandle[];
 	private int propertiesLength;
+	private static Boolean[] threadState;
 
 	public Simulation(HashMap<String, Integer> sensorsCache, int propertiesLength) {
 		this.sensorsCache = sensorsCache;
 		this.propertiesLength = propertiesLength;
 		this.sensorFound = new Sensor[propertiesLength];
 		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength];
+		Simulation.threadState = new Boolean[propertiesLength];
 	}
 
 	@SuppressWarnings("deprecation")
 	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex)
 			throws IOException, InterruptedException {
 
+		threadState[sensorIndex] = false;
 		/*
 		 * Taking care of the warning levels depending of the period of day From
 		 * 09:00:00 to 19:59:00 --> Daytime
@@ -98,7 +102,8 @@ public class Simulation {
 		requestSensitivityByType.setEntity("TYPESENSOR");
 		requestSensitivityByType.setFields(requestSensitivityByTypeJson);
 
-		ConnectionClient ccRequestSensitivity = new ConnectionClient(requestSensitivityByType.toJSON().toString());
+		ConnectionSimulation ccRequestSensitivity = new ConnectionSimulation(
+				requestSensitivityByType.toJSON().toString());
 		ccRequestSensitivity.run();
 
 		String responseRequestSensitivity = ccRequestSensitivity.getResponse();
@@ -106,21 +111,22 @@ public class Simulation {
 		// End of requestSensitivities
 
 		/*
-		 * The sensor sensitivity depends on the period of the day
-		 */
-		int sensorSensitivity = 0;
-		if (periodOfDay.equals("DAYTIME")) {
-			sensorSensitivity = typeFound.getDaySensitivity();
-			sensorLogger.info("We're in daytime : sensitivity of daytime --> " + sensorSensitivity + " seconds");
-		} else {
-			sensorSensitivity = typeFound.getNightSensitivity();
-			sensorLogger.info("We're in nighttime : sensitivity of nighttime --> " + sensorSensitivity + " seconds");
-		}
-
-		/*
 		 * The sensor is on and configured (has warning levels)
 		 */
 		if (sensorFound[sensorIndex].getState() && sensorFound[sensorIndex].getConfigure()) {
+
+			/*
+			 * The sensor sensitivity depends on the period of the day
+			 */
+			int sensorSensitivity = 0;
+			if (periodOfDay.equals("DAYTIME")) {
+				sensorSensitivity = typeFound.getDaySensitivity();
+				sensorLogger.info("We're in daytime : sensitivity of daytime --> " + sensorSensitivity + " seconds");
+			} else {
+				sensorSensitivity = typeFound.getNightSensitivity();
+				sensorLogger
+						.info("We're in nighttime : sensitivity of nighttime --> " + sensorSensitivity + " seconds");
+			}
 
 			/*
 			 * If the sensor doesn't has any messages, then it'll be put in breakdown after
@@ -159,7 +165,8 @@ public class Simulation {
 					switchToBreakdown.setEntity("SENSOR");
 					switchToBreakdown.setFields(switchToBreakdownJson);
 
-					ConnectionClient ccSwitchToBreakdown = new ConnectionClient(switchToBreakdown.toJSON().toString());
+					ConnectionSimulation ccSwitchToBreakdown = new ConnectionSimulation(
+							switchToBreakdown.toJSON().toString());
 					ccSwitchToBreakdown.run();
 
 					/*
@@ -188,7 +195,7 @@ public class Simulation {
 					JSONObject breakdownForHistoryJson = new JSONObject(breakdownForHistory);
 					breakdownForHistoryRequest.setFields(breakdownForHistoryJson);
 
-					ConnectionClient ccBreakdownForHistory = new ConnectionClient(
+					ConnectionSimulation ccBreakdownForHistory = new ConnectionSimulation(
 							breakdownForHistoryRequest.toJSON().toString());
 					ccBreakdownForHistory.run();
 				}
@@ -219,7 +226,7 @@ public class Simulation {
 						switchToNoBreakdown.setEntity("SENSOR");
 						switchToNoBreakdown.setFields(switchToNoBreakdownJson);
 
-						ConnectionClient ccSwitchToNoBreakdown = new ConnectionClient(
+						ConnectionSimulation ccSwitchToNoBreakdown = new ConnectionSimulation(
 								switchToNoBreakdown.toJSON().toString());
 						ccSwitchToNoBreakdown.run();
 					}
@@ -375,7 +382,7 @@ public class Simulation {
 								switchToAlertRequest.setEntity("SENSOR");
 								switchToAlertRequest.setFields(switchToAlertJson);
 
-								ConnectionClient ccSwitchToAlert = new ConnectionClient(
+								ConnectionSimulation ccSwitchToAlert = new ConnectionSimulation(
 										switchToAlertRequest.toJSON().toString());
 								ccSwitchToAlert.run();
 							}
@@ -419,7 +426,7 @@ public class Simulation {
 							alertForHistoryRequest.setEntity("HISTORY_ALERTS");
 							alertForHistoryRequest.setFields(alertForHistory.toJSON());
 
-							ConnectionClient ccAlertForHistory = new ConnectionClient(
+							ConnectionSimulation ccAlertForHistory = new ConnectionSimulation(
 									alertForHistoryRequest.toJSON().toString());
 							ccAlertForHistory.run();
 
@@ -474,7 +481,7 @@ public class Simulation {
 								switchToNoAlertRequest.setEntity("SENSOR");
 								switchToNoAlertRequest.setFields(switchToNoAlertJson);
 
-								ConnectionClient ccSwitchToNoAlert = new ConnectionClient(
+								ConnectionSimulation ccSwitchToNoAlert = new ConnectionSimulation(
 										switchToNoAlertRequest.toJSON().toString());
 								ccSwitchToNoAlert.run();
 
@@ -488,15 +495,10 @@ public class Simulation {
 					}
 
 				}
-				
+
 			}
 		}
-		
-		if (!sensorFound[sensorIndex].getState()) {
-			sensorLogger.warning("The sensor is now off but we get messages;\nWaiting");
-			propertiesList.remove(propertiesList.size() - 1);
-		}
-		
+
 		/*
 		 * If the sensor is on and that we still have messsages, we go to the next
 		 * message
@@ -505,10 +507,20 @@ public class Simulation {
 			sensorLogger.info("The sensor is still on, we go to the next message");
 			propertiesList.remove(propertiesList.size() - 1);
 		}
-		
-		if (!propertiesList.isEmpty() && !sensorFound[sensorIndex].getState()) {
-			sensorLogger.warning("The sensor is now off but we get messages;\nWaiting");
-			propertiesList.remove(propertiesList.size() - 1);
+
+		if (!sensorFound[sensorIndex].getState()) {
+			if (sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
+				sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
+						+ " is off but we get messages;\nWaiting");
+				propertiesList.remove(propertiesList.size() - 1);
+			}
+
+			else if (!sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
+				sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
+						+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
+				refreshHandle[sensorIndex].cancel(false);
+				threadState[sensorIndex] = true;
+			}
 		}
 
 		/*
@@ -516,31 +528,26 @@ public class Simulation {
 		 * messages and we wait for it to reconnect / connect However, we'll loose the
 		 * last message sent
 		 */
-		if (propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
-			sensorLogger.warning("The sensor is now on but we get no messages;\nPossible Breakdown");
-			propertiesList.remove(propertiesList.size() - 1);
-		}
-
-		if (!sensorFound[sensorIndex].getState() && !sensorFound[sensorIndex].getConfigure()) {
-			sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
-					+ " is off and does't have any warning limits, but we get messages;\nExit");
-			refreshHandle[sensorIndex].cancel(false);
-			Thread.currentThread().stop();
-		}
 
 		if (!sensorFound[sensorIndex].getConfigure()) {
 			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
-					+ " doesn't have any warning limits;\nExit");
+					+ " doesn't have any warning limits;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
-			Thread.currentThread().stop();
+			threadState[sensorIndex] = true;
 		}
 
 		else if (propertiesList.isEmpty()) {
-			sensorLogger.info("Messages ended for this sensor");
+			sensorLogger.info("Messages ended for this sensor;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
 		}
 
-		Thread.currentThread().stop();
+		threadState[sensorIndex] = true;
+
+		List<Boolean> threadStateList = Arrays.asList(threadState);
+		if (!threadStateList.contains(false)) {
+			sensorLogger.info("Sensor cache at the end of the simulation :\n" + sensorsCache.toString());
+			System.exit(0);
+		}
 	}
 
 	public Sensor refreshSensorInfos(int sensorId, int sensorIndex) {
@@ -556,7 +563,7 @@ public class Simulation {
 				request.setEntity("SENSOR");
 				request.setFields(sensorJsonId);
 
-				ConnectionClient cc = new ConnectionClient(request.toJSON().toString());
+				ConnectionSimulation cc = new ConnectionSimulation(request.toJSON().toString());
 				cc.run();
 
 				String response = cc.getResponse();
@@ -622,12 +629,11 @@ public class Simulation {
 		 */
 		PropertiesReader propertiesFile = new PropertiesReader();
 		ArrayList<Entry<String, String>>[] propertiesData = propertiesFile.getPropValues();
-		
+
 		/*
-		 * The cache and the cyclic barrier is created
-		 * The Cyclic Barrier will make every thread start at the same time,
-		 * the simulation will start at the same ime for every sensor that is into
-		 * the config.properties file
+		 * The cache and the cyclic barrier is created The Cyclic Barrier will make
+		 * every thread start at the same time, the simulation will start at the same
+		 * ime for every sensor that is into the config.properties file
 		 */
 		HashMap<String, Integer> cache = new HashMap<String, Integer>();
 		final CyclicBarrier cyclicGate = new CyclicBarrier(propertiesData.length + 1);
@@ -635,9 +641,8 @@ public class Simulation {
 		Simulation simulation = new Simulation(cache, propertiesData.length);
 
 		/*
-		 * We create a number of logger that is equal to the number of sensors
-		 * that is stocked in the propertiesData
-		 * One logger for one sensor
+		 * We create a number of logger that is equal to the number of sensors that is
+		 * stocked in the propertiesData One logger for one sensor
 		 */
 		Logger loggers[] = new Logger[propertiesData.length];
 		FileHandler fileHandlers[] = new FileHandler[propertiesData.length];
@@ -662,7 +667,7 @@ public class Simulation {
 		}
 
 		for (int i = 0; i < propertiesData.length; i++) {
-			
+
 			/*
 			 * We initialize every sensor Logger
 			 */
@@ -672,13 +677,11 @@ public class Simulation {
 				loggers[i].addHandler(fileHandlers[i]);
 				fileHandlers[i].setFormatter(formatter);
 			}
-			
+
 			/*
-			 * We create a thread for every sensor stocked in the
-			 * config.properties file
-			 * Each thread will start at the same time thanks to the syclic barrier
-			 * We put the sensors messages (propertiesData[index]), 
-			 * one logger (loggers[index]) and
+			 * We create a thread for every sensor stocked in the config.properties file
+			 * Each thread will start at the same time thanks to the syclic barrier We put
+			 * the sensors messages (propertiesData[index]), one logger (loggers[index]) and
 			 * an int (index) that will be usefull for the refreshSensorInfos()
 			 */
 			int index = i;
@@ -695,17 +698,20 @@ public class Simulation {
 						e.printStackTrace();
 					} catch (java.lang.NullPointerException e1) {
 						loggers[index]
-								.warning("This sensor doesn't send messages;\n Stoping the simulation for this sensor");
-						loggers[0]
-								.warning("The sensor number "+ index +"doesn't send messages;\n Stoping the simulation for this sensor");
+								.warning("This sensor doesn't send messages;\nStoping the simulation for this sensor");
+						loggers[0].warning("The sensor number " + (index + 1)
+								+ " doesn't send messages;\nStoping the simulation for this sensor");
+
+						refreshHandle[index].cancel(false);
+						threadState[index] = true;
 					}
 				}
 			}.start();
+
 		}
 
 		/*
-		 * This will make every thred wait until they are
-		 * here to start
+		 * This will make every thred wait until they are here to start
 		 */
 		cyclicGate.await();
 		loggers[0].info("The simulation is started for all the sensors");
