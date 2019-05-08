@@ -1,6 +1,9 @@
 package fr.pds.floralis.commons.bean.entity;
 
 import java.sql.Date;
+import java.sql.Time;
+
+import org.json.JSONObject;
 
 import fr.pds.floralis.commons.bean.entity.type.TypeBreakdown;
 
@@ -17,17 +20,17 @@ public class Breakdown {
 	private int id;
 	private TypeBreakdown type;
 	private int sensor;
-	private Date start;
-	private Date end;
+	private Time start;
+	private Date date;
 
-	public Breakdown(int id, TypeBreakdown type, int sensor, Date start,
-			Date end) {
+	public Breakdown(int id, TypeBreakdown type, int sensor, Time start,
+			Date date) {
 		super();
 		this.id = id;
 		this.type = type;
-		this.end = end;
 		this.sensor = sensor;
 		this.start = start;
+		this.date = date;
 	}
 
 	public int getId() {
@@ -54,27 +57,36 @@ public class Breakdown {
 		this.sensor = sensor;
 	}
 
-	public Date getStart() {
-		return start;
+	/**
+	 * @return the date
+	 */
+	public Date getDate() {
+		return date;
 	}
 
-	public void setStart(Date start) {
-		this.start = start;
-	}
-
-	public Date getEnd() {
-		return end;
-	}
-
-	public void setEnd(Date end) {
-		this.end = end;
-	}
-
-	@Override
-	public String toString() {
-		return "Breakdown [id=" + id + ", type=" + type + ", sensor=" + sensor + ", start=" + start + ", end=" + end
-				+ "]";
+	/**
+	 * @param date the date to set
+	 */
+	public void setDate(Date date) {
+		this.date = date;
 	}
 	
+	public JSONObject toJSON() {
+		JSONObject breakdownToJson = new JSONObject();
+		breakdownToJson.put("id", id);
+		breakdownToJson.put("sensor", sensor);
+		breakdownToJson.put("start", start);
+		breakdownToJson.put("date", date);
+		return breakdownToJson;
+	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Breakdown [id=" + id + ", sensor=" + sensor + ", start=" + start + ", date=" + date + "]";
+	}
+
+	
 }
