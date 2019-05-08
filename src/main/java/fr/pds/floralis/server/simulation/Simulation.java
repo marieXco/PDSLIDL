@@ -55,7 +55,7 @@ public class Simulation {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, int sensorIndex)
+	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, Logger mainLogger, int sensorIndex)
 			throws IOException, InterruptedException {
 
 		threadState[sensorIndex] = false;
@@ -544,10 +544,12 @@ public class Simulation {
 		threadState[sensorIndex] = true;
 
 		List<Boolean> threadStateList = Arrays.asList(threadState);
+		
 		if (!threadStateList.contains(false)) {
-			sensorLogger.info("Sensor cache at the end of the simulation :\n" + sensorsCache.toString());
+			mainLogger.info("Sensor cache at the end of the simulation :\n" + sensorsCache.toString());
 			System.exit(0);
 		}
+		
 	}
 
 	public Sensor refreshSensorInfos(int sensorId, int sensorIndex) {
@@ -693,7 +695,7 @@ public class Simulation {
 						e.printStackTrace();
 					}
 					try {
-						simulation.simulationTest(propertiesData[index], loggers[index], index);
+						simulation.simulationTest(propertiesData[index], loggers[index], loggers[0], index);
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					} catch (java.lang.NullPointerException e1) {
