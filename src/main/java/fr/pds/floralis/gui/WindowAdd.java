@@ -502,8 +502,8 @@ public class WindowAdd extends JDialog implements ActionListener {
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
 						
 						//To configure
-						sensorCreate.setMin(null);
-						sensorCreate.setMax(null);
+						sensorCreate.setMin(0);
+						sensorCreate.setMax(0);
 						sensorCreate.setIdLocation(0);
 						sensorCreate.setAlert(false);
 						sensorCreate.setBreakdown(false);

@@ -28,8 +28,8 @@ public class Sensor {
 	private String port;
 	private Boolean configure;
 	private Date installation;
-	private String min;
-	private String max;
+	private int min;
+	private int max;
 	private Boolean breakdown;
 
 	public int getId() {
@@ -88,19 +88,19 @@ public class Sensor {
 		this.installation = installation;
 	}
 
-	public String getMin() {
+	public int getMin() {
 		return min;
 	}
 
-	public void setMin(String min) {
+	public void setMin(int min) {
 		this.min = min;
 	}
 
-	public String getMax() {
+	public int getMax() {
 		return max;
 	}
 
-	public void setMax(String max) {
+	public void setMax(int max) {
 		this.max = max;
 	}
 
@@ -146,7 +146,7 @@ public class Sensor {
 
 	public Sensor(int id, int idLocation, String type, Boolean state,
 			Boolean alert, String brand, String macAdress,
-			Date installation, String min, String max, Boolean breakdown, String ipAddress, 
+			Date installation, int min, int max, Boolean breakdown, String ipAddress, 
 			String port, Boolean configure) {
 		super();
 		this.id = id;

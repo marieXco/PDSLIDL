@@ -161,6 +161,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	int countAlert = 0;
 	int countNewAlert;
+	
+	int countSensors = 0;
+	int countNewSensor;
+	
+	int countLocation = 0;
+	int countNewLocation;
+	
+	int countThreshold = 0;
+	int countNewThreshold;
+	
 
 	/** 
 	 * Constructor, takes the host and port from the main
@@ -440,9 +450,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				WindowAdd toto = new WindowAdd(window);
-				toto.run();
-				System.out.println("ahahahahah ça marche putain");
+				new WindowAdd(window).run();
 			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
@@ -600,7 +608,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
 						message.setForeground(Color.BLACK);
-						refresh(last);
+						//refresh
 
 						// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 						// supprimer dans cette localisation l'occurence du capteur supprimé
@@ -671,8 +679,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					} else {
 						boolean sure = new WindowConfirm().init("supprimer la configuration du capteur " + sensorFoundConfig.getId() );
 						if (sure) {
-							sensorFoundConfig.setMin(null);
-							sensorFoundConfig.setMax(null);
+							sensorFoundConfig.setMin(0);
+							sensorFoundConfig.setMax(0);
 
 							sensorFoundConfig.setState(false);
 							sensorFoundConfig.setIpAddress(null);
@@ -695,7 +703,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 							ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 							ccSensorUpdate.run();
 
-							refresh(last);
 						}
 					} 
 				}
@@ -760,7 +767,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		Runnable task1 = () -> {
 			countMessage++;
-			System.out.println(" Refresh -- Alert - count : " + countMessage);
+			System.out.println(" Refresh - count : " + countMessage);
 			FindAllSensor fs = new FindAllSensor(host, port);
 			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
 			try {
@@ -769,11 +776,26 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			//Sensors
+			countNewSensor = sensorsFoundList.size();
+			// if it is the first connection
+			if(countSensors == 0) countSensors = countNewSensor;
+			
+			if(countSensors != countNewSensor) {
+				refresh(last);
+				System.out.println("Nombre de capteur initialement " + countSensors);
+				System.out.println("Nombre de capteur maintenant " + countNewSensor);
+				countSensors = countNewSensor;
+			} 
+			
+			//Alert
 			countNewAlert = 0;
+			
 			for(Sensor s : sensorsFoundList) {
 				if(s.getAlert()) countNewAlert++;
 			}
-
+			
 			if(countNewAlert == 0) countAlert = 0;
 
 			if(countAlert < countNewAlert) {
@@ -788,18 +810,50 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
 				message.setForeground(Color.RED);
 			}
+			
+			// Configuration => a new location
+			countNewLocation = 0;
+			for(Sensor s : sensorsFoundList) {
+				countNewLocation+= s.getIdLocation();
+			} 
 
-
+			if(countLocation == 0) countLocation = countNewLocation;
+			if(countLocation != countNewLocation) {
+				refresh(last);
+				System.out.println("Nombre de location initialement " + countLocation);
+				System.out.println("Nombre de location maintenant " + countNewLocation);
+				countLocation = countNewLocation;
+			} 
+			
+			// thresholds 
+//			countNewThreshold = 0;
+//			for(Sensor s : sensorsFoundList) {
+//				int toto = Integer.parseInt(s.getMin() + s.getMax()); 
+//				countNewThreshold+= toto;
+//				System.out.println("lkjlkjlkjl");
+//			} 
+//			System.out.println("ANombre de seuils initialement " + countThreshold);
+//			System.out.println("ANombre de seuils maintenant " + countNewThreshold);
+//			if(countThreshold == 0) countThreshold = countNewThreshold;
+//			System.out.println("Bombre de seuils initialement " + countThreshold);
+//			System.out.println("Bombre de seuils maintenant " + countNewThreshold);
+//			if(countThreshold != countNewThreshold) {
+//				refresh(last);
+//				System.out.println("Nombre de seuils initialement " + countThreshold);
+//				System.out.println("Nombre de seuils maintenant " + countNewThreshold);
+//				countThreshold = countNewThreshold;
+//			} 
+			
 		};
 
-		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
+		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 1, SECONDS);
 
 
 		ses.schedule(new Runnable() {
 			public void run() { 
 				scheduledFuture.cancel(true); 
 			}
-		}, 360, SECONDS
+		}, 3600, SECONDS
 				);
 	}
 
