@@ -20,10 +20,8 @@ public class FindSensorByBreakdown {
 	private static String host;
 	private static int port;
 
-	public FindSensorByBreakdown(String host, int port) {
+	public FindSensorByBreakdown() {
 		super();
-		this.host = host;
-		this.port = port;
 	}
 
 	public static List<Sensor> findByBreakdown(Boolean refresh, Boolean breakdown) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
@@ -39,7 +37,7 @@ public class FindSensorByBreakdown {
 		request.setEntity("SENSOR");
 		request.setFields(sensorsBreakdown);
 		
-		ConnectionClient ccSensorFindByBreakdown= new ConnectionClient(host, port, request.toJSON().toString());
+		ConnectionClient ccSensorFindByBreakdown= new ConnectionClient(request.toJSON().toString());
 		ccSensorFindByBreakdown.run();
 		
 		Sensor[] sensorsBreakdownTab =  objectMapper.readValue(ccSensorFindByBreakdown.getResponse(), Sensor[].class);

@@ -21,10 +21,8 @@ public class FindAlertBySensorByType {
 	private static String host;
 	private static int port;
 
-	public FindAlertBySensorByType(String host, int port) {
-		super();
-		this.host = host;
-		this.port = port;
+	public FindAlertBySensorByType() {
+
 	}
 
 	public static List<Alert> findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
@@ -40,7 +38,7 @@ public class FindAlertBySensorByType {
 		request.setEntity("SENSOR");
 		request.setFields(sensorToType);
 		
-		ConnectionClient ccSensorFindByType= new ConnectionClient(host, port, request.toJSON().toString());
+		ConnectionClient ccSensorFindByType= new ConnectionClient(request.toJSON().toString());
 		ccSensorFindByType.run();
 		
 		Sensor[] sensorsConfigTab =  objectMapper.readValue(ccSensorFindByType.getResponse(), Sensor[].class);
@@ -55,7 +53,7 @@ public class FindAlertBySensorByType {
 		request1.setEntity("HISTORY_ALERTS");
 		request1.setFields(new JSONObject());
 		
-		ConnectionClient ccAlertFindAll = new ConnectionClient(host, port, request.toJSON().toString());
+		ConnectionClient ccAlertFindAll = new ConnectionClient(request.toJSON().toString());
 		ccAlertFindAll.run();
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
@@ -76,7 +74,7 @@ public class FindAlertBySensorByType {
 			findByType(true, type);
 		}
 		
-		return alertResult;
+		return alertList;
 	}
 
 }

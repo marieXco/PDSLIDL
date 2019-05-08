@@ -36,7 +36,7 @@ public class FindAllAlert {
 		request.setEntity("HISTORY_ALERTS");
 		request.setFields(new JSONObject());
 		
-		ConnectionClient ccAlertFindAll = new ConnectionClient(host, port, request.toJSON().toString());
+		ConnectionClient ccAlertFindAll = new ConnectionClient(request.toJSON().toString());
 		ccAlertFindAll.run();
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
