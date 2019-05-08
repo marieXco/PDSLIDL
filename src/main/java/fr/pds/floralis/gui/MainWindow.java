@@ -762,7 +762,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	}
 
 	//If there are a new alert, the gui is refresh
-	public void refreshAlert() {
+	public void refreshNewElement() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
 		Runnable task1 = () -> {
@@ -784,12 +784,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			
 			if(countSensors != countNewSensor) {
 				refresh(last);
-				System.out.println("Nombre de capteur initialement " + countSensors);
-				System.out.println("Nombre de capteur maintenant " + countNewSensor);
 				countSensors = countNewSensor;
 			} 
 			
-			//Alert
+			// a new alert
 			countNewAlert = 0;
 			
 			for(Sensor s : sensorsFoundList) {
@@ -800,8 +798,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 			if(countAlert < countNewAlert) {
 				refresh(last);
-				System.out.println("Nombre de capteur en alert initialement " + countAlert);
-				System.out.println("Nombre de capteur en alert maintenant " + countNewAlert);
 				if(countMessage > 1) new WindowAlert().init();
 				countAlert = countNewAlert;
 			} 
@@ -811,7 +807,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				message.setForeground(Color.RED);
 			}
 			
-			// Configuration => a new location
+			// a new configuration
 			countNewLocation = 0;
 			for(Sensor s : sensorsFoundList) {
 				countNewLocation+= s.getIdLocation();
@@ -820,29 +816,19 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			if(countLocation == 0) countLocation = countNewLocation;
 			if(countLocation != countNewLocation) {
 				refresh(last);
-				System.out.println("Nombre de location initialement " + countLocation);
-				System.out.println("Nombre de location maintenant " + countNewLocation);
 				countLocation = countNewLocation;
 			} 
 			
-			// thresholds 
-//			countNewThreshold = 0;
-//			for(Sensor s : sensorsFoundList) {
-//				int toto = Integer.parseInt(s.getMin() + s.getMax()); 
-//				countNewThreshold+= toto;
-//				System.out.println("lkjlkjlkjl");
-//			} 
-//			System.out.println("ANombre de seuils initialement " + countThreshold);
-//			System.out.println("ANombre de seuils maintenant " + countNewThreshold);
-//			if(countThreshold == 0) countThreshold = countNewThreshold;
-//			System.out.println("Bombre de seuils initialement " + countThreshold);
-//			System.out.println("Bombre de seuils maintenant " + countNewThreshold);
-//			if(countThreshold != countNewThreshold) {
-//				refresh(last);
-//				System.out.println("Nombre de seuils initialement " + countThreshold);
-//				System.out.println("Nombre de seuils maintenant " + countNewThreshold);
-//				countThreshold = countNewThreshold;
-//			} 
+			// new thresholds 
+			countNewThreshold = 0;
+			for(Sensor s : sensorsFoundList) {
+				countNewThreshold+= s.getMin() + s.getMax(); 
+			} 
+			if(countThreshold == 0) countThreshold = countNewThreshold;
+			if(countThreshold != countNewThreshold) {
+				refresh(last);
+				countThreshold = countNewThreshold;
+			} 
 			
 		};
 
@@ -906,7 +892,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void run() {
 		try {
 			init();
-			refreshAlert();
+			refreshNewElement();
 			refreshSensors();
 		} catch (SQLException e) {
 			e.printStackTrace();
