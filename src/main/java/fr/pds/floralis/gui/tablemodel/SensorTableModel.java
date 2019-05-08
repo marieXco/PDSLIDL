@@ -21,7 +21,7 @@ public class SensorTableModel extends AbstractTableModel {
 
 	private List<Sensor> userData = new ArrayList<Sensor>();
 	private String[] columnNames = {"Id" ,"Marque", "Type", "Adresse Mac", "Date Installation", "Etat",
-			"Seuil Min", "Seuil Max", "Alerte", "Configuration"};
+			"Premier Seuil", "Deuxième Seuil", "Alerte", "Configuration"};
 
 	public SensorTableModel() {
 	}

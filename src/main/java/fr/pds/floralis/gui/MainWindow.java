@@ -584,30 +584,30 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			if (indexSensor > 0) {
 				Sensor SensorDelete = sensorsFoundList.get(indexSensor - 1);
 				if(!SensorDelete.getAlert()) {
-				JSONObject objSensorDelete = new JSONObject();
-				objSensorDelete.put("id", SensorDelete.getId());
+					JSONObject objSensorDelete = new JSONObject();
+					objSensorDelete.put("id", SensorDelete.getId());
 
-				boolean sure = new WindowConfirm().init("supprimer ce capteur");
+					boolean sure = new WindowConfirm().init("supprimer ce capteur");
 
-				if (sure) {
-					Request request = new Request();		
-					request.setType("DELETE");
-					request.setEntity("SENSOR");
-					request.setFields(objSensorDelete);
+					if (sure) {
+						Request request = new Request();		
+						request.setType("DELETE");
+						request.setEntity("SENSOR");
+						request.setFields(objSensorDelete);
 
-					ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
-					ccSensorDelete.run();
+						ConnectionClient ccSensorDelete = new ConnectionClient(host, port, request.toJSON().toString());
+						ccSensorDelete.run();
 
-					message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
-					message.setForeground(Color.BLACK);
-					refresh(last);
+						message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
+						message.setForeground(Color.BLACK);
+						refresh(last);
 
-					// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
-					// supprimer dans cette localisation l'occurence du capteur supprimé
+						// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
+						// supprimer dans cette localisation l'occurence du capteur supprimé
+					}
 				} else {
 					message.setText("Le capteur " + SensorDelete.getId() + " est en alerte vous ne pouvez pas le supprimer");
 					message.setForeground(Color.BLACK);
-				}
 				}
 			} else {
 				message.setText("Vous devez selectionner l'identifiant du capteur à Supprimer");
