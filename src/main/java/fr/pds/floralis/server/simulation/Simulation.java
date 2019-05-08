@@ -48,7 +48,7 @@ public class Simulation {
 		this.sensorsCache = sensorsCache;
 		this.propertiesLength = propertiesLength;
 		this.sensorFound = new Sensor[propertiesLength];
-		this.refreshHandle = new ScheduledFuture<?>[propertiesLength];
+		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength];
 	}
 
 	@SuppressWarnings("deprecation")
@@ -252,7 +252,7 @@ public class Simulation {
 						.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getKey());
 				int messageValue = Integer
 						.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
-				int realTimeValue = 1;
+				int realTimeSensors = 1;
 
 				Boolean alertCreated = false;
 
@@ -263,9 +263,9 @@ public class Simulation {
 						|| Integer.parseInt(sensorFound[sensorIndex].getMin()) >= messageValue;
 
 				/*
-				 * This type of sensors only send 1 or 0 as values
-				 * If 1 is sent, it means that the sensor is triggered
-				 * As the level of these sensors are seconds, our duration become our message when the sensor is triggered
+				 * This type of sensors only send 1 or 0 as values If 1 is sent, it means that
+				 * the sensor is triggered As the level of these sensors are seconds, our
+				 * duration become our message when the sensor is triggered
 				 */
 				if (sensorType.equals("BOOLEAN") || sensorType.equals("FIRE")) {
 					if (messageValue == 1) {
@@ -274,7 +274,7 @@ public class Simulation {
 						messageValue = Integer.parseInt(sensorFound[sensorIndex].getMax()) - 1;
 					}
 				}
-				
+
 				/*
 				 * See lines from 227 to 237
 				 */
@@ -286,71 +286,122 @@ public class Simulation {
 					request = messageValue <= Integer.parseInt(sensorFound[sensorIndex].getMax());
 				}
 
+				/*
+				 * The sensor isn't between the warning levels, alert
+				 */
 				if (request) {
-					alertCreated = false;
-					while (realTimeValue <= messageDuration && (request) && sensorFound[sensorIndex].getState()) {
 
-						while (realTimeValue < sensorSensitivity) {
+					/*
+					 * This boolean is used to know if the alert has already been created in the
+					 * history alert As we're on a while loop, it would create an history alert
+					 * every second if this boolean wasn't there
+					 */
+					alertCreated = false;
+
+					/*
+					 * While the duration time didin't fully passed and that the request is true
+					 * (the sensor is not between the warning levels) and that the sensor is on
+					 */
+					while (realTimeSensors <= messageDuration && (request) && sensorFound[sensorIndex].getState()) {
+
+						/*
+						 * We see if it's not a fake alert, thanks to the sensitivity (time before we
+						 * get a real alert, changes for evry type of sensors)
+						 */
+						while (realTimeSensors <= sensorSensitivity) {
+
+							/*
+							 * We remove the last "possible alert" entry on the cache (for this sensor) to
+							 * put a new one So we'll only have the last entries for the sensors in the
+							 * sensors cache
+							 */
 							if (sensorsCache.containsKey("POSSIBLEALERT" + sensorFound[sensorIndex].getId())) {
 								sensorsCache.remove("POSSIBLEALERT" + sensorFound[sensorIndex].getId());
 							}
 
-							sensorsCache.put("POSSIBLEALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
+							sensorsCache.put("POSSIBLEALERT" + sensorFound[sensorIndex].getId(), realTimeSensors);
 
-							if (realTimeValue % 5 == 0 || realTimeValue == 1) {
-								sensorLogger.warning("Type alert : POSSIBLEALERT for the sensor : "
-										+ sensorFound[sensorIndex].getId() + " for " + realTimeValue
+							/*
+							 * We log something every 5 seconds, or when we know that we will exit the
+							 * "while" on the next loop
+							 */
+							if (realTimeSensors % 5 == 0 || realTimeSensors == sensorSensitivity) {
+								sensorLogger.warning("Alert type : POSSIBLEALERT for the sensor : "
+										+ sensorFound[sensorIndex].getId() + "\nFor " + realTimeSensors
 										+ " seconds with the value " + messageValue);
 							}
 
 							Thread.sleep(1000);
-							realTimeValue++;
+							realTimeSensors++;
 						}
 
+						// TODO : do we keep the possible alerts in the cache ?
 						sensorsCache.remove("POSSIBLEALERT" + sensorFound[sensorIndex].getId());
 
+						/*
+						 * We remove the last "alert" entry on the cache (for this sensor) to put a new
+						 * one So we'll only have the last entries for the sensors in the sensors cache
+						 */
 						if (sensorsCache.containsKey("ALERT" + sensorFound[sensorIndex].getId())) {
 							sensorsCache.remove("ALERT" + sensorFound[sensorIndex].getId());
 						}
 
-						sensorsCache.put("ALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
+						sensorsCache.put("ALERT" + sensorFound[sensorIndex].getId(), realTimeSensors);
 
-						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration || realTimeValue == 1) {
-							sensorLogger.warning(
-									"Type alert : HIGHERMAX for the sensor : " + sensorFound[sensorIndex].getId()
-											+ " for " + realTimeValue + " seconds with the value " + messageValue);
+						/*
+						 * We log something every 5 seconds, or when we know that we will exit the
+						 * "while" on the next loop
+						 */
+						if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration) {
+							sensorLogger
+									.warning("Alert type : ALERT for the sensor : " + sensorFound[sensorIndex].getId()
+											+ "\nFor " + realTimeSensors + " seconds with the value " + messageValue);
 						}
 
-						if (sensorFound[sensorIndex].getAlert() == false) {
-							JSONObject newStateOnAlert = new JSONObject();
+						/*
+						 * If the sensor isn't in a alert state, we put the sensor in an alert state
+						 */
+						if (!sensorFound[sensorIndex].getAlert()) {
 							sensorFound[sensorIndex].setAlert(true);
-							newStateOnAlert.put("id", sensorFound[sensorIndex].getId());
-							newStateOnAlert.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
-							Request secondRequest = new Request();
-							secondRequest.setType("UPDATE");
-							secondRequest.setEntity("SENSOR");
-							secondRequest.setFields(newStateOnAlert);
+							JSONObject switchToAlertJson = new JSONObject();
+							switchToAlertJson.put("id", sensorFound[sensorIndex].getId());
+							switchToAlertJson.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
-							ConnectionClient ccr = new ConnectionClient(secondRequest.toJSON().toString());
-							ccr.run();
+							Request switchToAlertRequest = new Request();
+							switchToAlertRequest.setType("UPDATE");
+							switchToAlertRequest.setEntity("SENSOR");
+							switchToAlertRequest.setFields(switchToAlertJson);
+
+							ConnectionClient ccSwitchToAlert = new ConnectionClient(
+									switchToAlertRequest.toJSON().toString());
+							ccSwitchToAlert.run();
 						}
 
-						realTimeValue++;
+						realTimeSensors++;
 						Thread.sleep(1000);
 
 					}
 
-					if (alertCreated == false) {
+					/*
+					 * If the sensor alert is not already in the history alert
+					 */
+					if (!alertCreated) {
 						Calendar dateNow = Calendar.getInstance();
+
 						Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
 								dateNow.get(Calendar.DAY_OF_MONTH));
-						Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
-								dateNow.get(Calendar.SECOND) - 1);
 
 						Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
 								dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
+						Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
+								dateNow.get(Calendar.SECOND) - 1);
 
+						/*
+						 * This might raise a problem if the messages starts at, for exemple 15:59:40
+						 * and finishes at 16:01:02 A weird date would be put for beginning of alert
+						 * FIXME
+						 */
 						if (messageDuration > 60) {
 							beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
 							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
@@ -358,92 +409,127 @@ public class Simulation {
 							beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
 						}
 
-						Alert alerte = new Alert(2, sensorFound[sensorIndex].getId(), beginningOfAlert, endOfAlert,
-								today);
+						Alert alertForHistory = new Alert(2, sensorFound[sensorIndex].getId(), beginningOfAlert,
+								endOfAlert, today);
 
-						Request fifthRequest = new Request();
-						fifthRequest.setType("CREATE");
-						fifthRequest.setEntity("HISTORY_ALERTS");
-						fifthRequest.setFields(alerte.toJSON());
+						Request alertForHistoryRequest = new Request();
+						alertForHistoryRequest.setType("CREATE");
+						alertForHistoryRequest.setEntity("HISTORY_ALERTS");
+						alertForHistoryRequest.setFields(alertForHistory.toJSON());
 
-						ConnectionClient ccSensorInAlert = new ConnectionClient(fifthRequest.toJSON().toString());
-						ccSensorInAlert.run();
+						ConnectionClient ccAlertForHistory = new ConnectionClient(
+								alertForHistoryRequest.toJSON().toString());
+						ccAlertForHistory.run();
+
 						alertCreated = true;
 					}
 
 				}
 
+				/*
+				 * The sensor is between the warning levels, no alert
+				 */
 				else {
 
-					if (sensorsCache.containsKey("NOALERT" + sensorFound[sensorIndex].getId())) {
-						sensorsCache.remove("NOALERT" + sensorFound[sensorIndex].getId());
-					}
+					/*
+					 * While the duration time didin't fully passed and that the sensor is between
+					 * the warning level and that the sensor is on
+					 */
+					while (realTimeSensors <= messageDuration && (!request) && sensorFound[sensorIndex].getState()) {
+						/*
+						 * We remove the last "no alert" entry on the cache (for this sensor) to put a
+						 * new one So we'll only have the last entries for the sensors in the sensors
+						 * cache
+						 */
+						if (sensorsCache.containsKey("NOALERT" + sensorFound[sensorIndex].getId())) {
+							sensorsCache.remove("NOALERT" + sensorFound[sensorIndex].getId());
+						}
 
-					while (realTimeValue <= messageDuration && sensorFound[sensorIndex].getState()) {
+						sensorsCache.put("NOALERT" + sensorFound[sensorIndex].getId(), realTimeSensors);
 
-						sensorsCache.put("NOALERT" + sensorFound[sensorIndex].getId(), realTimeValue);
-						if (realTimeValue % 5 == 0 || realTimeValue == messageDuration - 1 || realTimeValue == 1) {
+						/*
+						 * We log something every 5 seconds, or when we know that we will exit the
+						 * "while" on the next loop
+						 */
+						if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration) {
 							sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId() + " for "
-									+ realTimeValue + " seconds with the value " + messageValue);
+									+ realTimeSensors + " seconds with the value " + messageValue);
 						}
 
+						/*
+						 * If the sensor is in a alert state, we put the sensor in an no alert state
+						 */
 						if (sensorFound[sensorIndex].getAlert()) {
-							JSONObject newStateNoAlert = new JSONObject();
 							sensorFound[sensorIndex].setAlert(false);
-							newStateNoAlert.put("id", sensorFound[sensorIndex].getId());
-							newStateNoAlert.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
-							Request thridRequest = new Request();
-							thridRequest.setType("UPDATE");
-							thridRequest.setEntity("SENSOR");
-							thridRequest.setFields(newStateNoAlert);
+							JSONObject switchToNoAlertJson = new JSONObject();
+							switchToNoAlertJson.put("id", sensorFound[sensorIndex].getId());
+							switchToNoAlertJson.put("sensorToUpdate", sensorFound[sensorIndex].toJSON());
 
-							ConnectionClient ccUpdateSensor = new ConnectionClient(thridRequest.toJSON().toString());
-							ccUpdateSensor.run();
+							Request switchToNoAlertRequest = new Request();
+							switchToNoAlertRequest.setType("UPDATE");
+							switchToNoAlertRequest.setEntity("SENSOR");
+							switchToNoAlertRequest.setFields(switchToNoAlertJson);
+
+							ConnectionClient ccSwitchToNoAlert = new ConnectionClient(
+									switchToNoAlertRequest.toJSON().toString());
+							ccSwitchToNoAlert.run();
 
 						}
 
-						realTimeValue++;
+						realTimeSensors++;
 						Thread.sleep(1000);
 
 					}
 
 				}
 
+				/*
+				 * If the sensor is on and that we still have messsages, we go to the next
+				 * message
+				 */
 				if (!propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
 					propertiesList.remove(propertiesList.size() - 1);
 				}
 
-				if (!propertiesList.isEmpty() && !sensorFound[sensorIndex].getState()) {
-					sensorLogger.warning("The sensor is now off but we get messages, something went wrong");
-					refreshHandle[sensorIndex].cancel(false);
-				}
-
 			}
 
-		} else {
-			if (!sensorFound[sensorIndex].getState() && !sensorFound[sensorIndex].getConfigure()) {
-				sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
-						+ " is off and does't have any warning limits, but we get messages;\nExit");
-				refreshHandle[sensorIndex].cancel(false);
-			}
-
-			else if (!sensorFound[sensorIndex].getState()) {
-				sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
-						+ " is off, but we get messages;\nExit");
-				refreshHandle[sensorIndex].cancel(false);
-			}
-
-			else if (!sensorFound[sensorIndex].getConfigure()) {
-				sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
-						+ " does't have any warning limits;\nExit");
-				refreshHandle[sensorIndex].cancel(false);
-			}
+		}
+		
+		/*
+		 * If the sensor is now off and that we still have messsages, we go to the next
+		 * messages and we wait for it to reconnect
+		 */
+		if (!propertiesList.isEmpty() && !sensorFound[sensorIndex].getState()) {
+			sensorLogger.warning("The sensor is now off but we get messages;\nWaiting");
+			propertiesList.remove(propertiesList.size() - 1);
+		} 
+		
+		if (!sensorFound[sensorIndex].getState() && !sensorFound[sensorIndex].getConfigure()) {
+			sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
+					+ " is off and does't have any warning limits, but we get messages;\nExit");
+			refreshHandle[sensorIndex].cancel(false);
+			Thread.currentThread().stop();
 		}
 
-		sensorLogger.info("Messages ended for this sensor");
+		if (!sensorFound[sensorIndex].getState()) {
+			sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
+					+ " is off, but we get messages;\nWaiting");
+			propertiesList.remove(propertiesList.size() - 1);
+		}
 
-		refreshHandle[sensorIndex].cancel(false);
+		if (!sensorFound[sensorIndex].getConfigure()) {
+			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
+					+ " does't have any warning limits;\nExit");
+			refreshHandle[sensorIndex].cancel(false);
+			Thread.currentThread().stop();
+		}
+		
+		else {
+			sensorLogger.info("Messages ended for this sensor");
+			refreshHandle[sensorIndex].cancel(false);
+		}
+	
 		Thread.currentThread().stop();
 	}
 
