@@ -287,7 +287,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		//get maximum window bounds
 		Rectangle maximumWindowBounds = graphicsEnvironment.getMaximumWindowBounds();
 
-		window.setBounds(0, 0, (int)maximumWindowBounds.getWidth(), (int)maximumWindowBounds.getHeight());
+		window.setBounds(0, 0, (int)maximumWindowBounds.getWidth() - 60, (int)maximumWindowBounds.getHeight() - 20);
 
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
 		infoSensorsPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 300));
@@ -450,7 +450,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				new WindowAdd(window).run();
+				new WindowAdd().run();
 			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
@@ -462,7 +462,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == addingLocation) {
 			try {
-				new WindowAdd(window).initAddLocation();
+				new WindowAdd().initAddLocation();
 			} catch (JsonParseException e1) {
 
 				e1.printStackTrace();
@@ -568,7 +568,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toJSON().toString());
 						ccSensorUpdateState.run();
-						refresh(last);
 
 					} else {
 						message.setText("Le capteur " + sensorUpdateState.getId() + " est en alerte, il ne peut pas être " + stateChange);
@@ -653,7 +652,36 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 
 		if(e.getSource() == buttonUpdateConfig) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			if(indexSensor > 0) {
+				Sensor sensorUpdateWarningLevel = sensorsFoundList.get(indexSensor - 1);
+				if(sensorUpdateWarningLevel.getConfigure()) {
+					if(!sensorUpdateWarningLevel.getAlert()) {
+						if(!sensorUpdateWarningLevel.getType().equals("FIRE")) {
+						try {
+							new WindowUpdateConfig().init(sensorUpdateWarningLevel.getId());
+						} catch (JSONException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						} else {
+							message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " est de type feu, il n'a pas de seuils ");
+							message.setForeground(Color.BLACK);
+						}
+					} else {
+						message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " est en alerte, ses seuils ne peuvent pas être modifié" );
+						message.setForeground(Color.BLACK);
+					}
+				} else {
+					message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " n'est pas configuré, ses seuils ne peuvent pas être modifié " );
+					message.setForeground(Color.BLACK);
+				}
+			} else {
+				message.setText("Vous devez sélectionner un capteur");
+				message.setForeground(Color.BLACK);
+			}
 
+		
 		}
 
 
@@ -804,12 +832,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				if(countMessage > 1) new WindowAlert().init();
 				countAlert = countNewAlert;
 			} 
-
-			// if there are new alert, then countAlert is upper than countNewSensor
-			if(countNewAlert > 0) {
-				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
-				message.setForeground(Color.RED);
-			}
 			
 			// a new configuration
 			countNewLocation = 0;

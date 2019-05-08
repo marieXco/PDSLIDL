@@ -128,16 +128,12 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 		sensorFound =  objectMapper.readValue(sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
 		// End sensor Find By Id
 		
-		if(sensorFound.getType().equals("FIRE")) {
-			container.setPreferredSize(new Dimension(LG + 200, HT + 20));
-		} else {
-			container.setPreferredSize(new Dimension(LG + 200, HT + 50));
-		}
+		container.setPreferredSize(new Dimension(LG + 200, HT));
 		
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
-		infos.setText("Configuration d'un capteur");
+		infos.setText("Modification des seuils d'un capteur");
 		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		infos.setOpaque(false);
 		infos.setEditable(false);
@@ -222,7 +218,8 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 			}
 
 			// If min > max
-			else if (sensorFound.getType().equals("TEMPERATRUE") && Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
+			else if (sensorFound.getType().equals("TEMPERATURE") && 
+					(Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText()))) {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 

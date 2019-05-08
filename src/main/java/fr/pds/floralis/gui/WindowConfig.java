@@ -93,7 +93,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 	JComboBox<Object> year = new JComboBox<Object>();
 
-	String[] years = new String[12];
+	String[] years = new String[6];
 	
 	
 	/**
@@ -237,7 +237,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		}
 
 		for (int yearIndex = 1; yearIndex < years.length; yearIndex++) {
-			String yearMax = (yearIndex + 2018) + "";
+			String yearMax = (yearIndex + 2014) + "";
 			years[yearIndex] = yearMax;
 		}
 
@@ -395,7 +395,8 @@ public class WindowConfig extends JFrame implements ActionListener {
 			}
 
 			// If min > max
-			else if (sensorFound.getType().equals("TEMPERATRUE") && Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
+			else if (sensorFound.getType().equals("TEMPERATURE") && 
+					(Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText()))) {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
