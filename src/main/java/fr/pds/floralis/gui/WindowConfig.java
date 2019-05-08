@@ -51,7 +51,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 	 */
 	private static final long serialVersionUID = -8097747904160110502L;
 	private int LG = 700;
-	private int HT = 130;
+	private int HT = 180;
 
 	JTextPane infos = new JTextPane();
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
@@ -62,6 +62,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 	JPanel containerSouth = new JPanel();
 	JPanel otherInfosPanel = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
+	JPanel thresholdsPanel = new JPanel();
 	JPanel locationPanel = new JPanel();
 	JPanel statePanel = new JPanel();
 
@@ -94,12 +95,46 @@ public class WindowConfig extends JFrame implements ActionListener {
 	JComboBox<Object> year = new JComboBox<Object>();
 
 	String[] years = new String[12];
-
+	
+	
+	/**
+	 * the thresholds are different accprding to the type of sensors
+	 */
+	/**
+	 * For TEMPERATURE
+	 * The temperature have to be between the min and the max
+	 */
 	JTextField min = new JTextField(5);
-	JLabel minLabel = new JLabel("Seuil Min :");
+	JLabel minLabel = new JLabel("Temperature Min :");
+	JLabel minTempUnit = new JLabel("C°");
 
 	JTextField max = new JTextField(5);
-	JLabel maxLabel = new JLabel("Seuil Max :");
+	JLabel maxLabel = new JLabel("Temperature Max :");
+	JLabel maxTempUnit = new JLabel("C°");
+	/**
+	 * For PASSAGE AND LIGHT
+	 * The sensibility of the sensor is different for the day and for the night
+	 */
+	JTextField duringDay = new JTextField(5);
+	JLabel dayLabel = new JLabel("Durée journée :");
+	JLabel dayTimeUnit = new JLabel("secondes");
+
+	JTextField duringNight = new JTextField(5);
+	JLabel nightLabel = new JLabel("Durée nuit :");
+	JLabel nightTimeUnit = new JLabel("secondes");
+	/**
+	 * For GASLEAK
+	 * It is just a maximum gas rate before the sensor is in alert
+	 */
+	JTextField gas = new JTextField(5);
+	JLabel gasLabel = new JLabel("Taux de gaz maximum :");
+	JLabel gasUnit = new JLabel("mg");
+	/**
+	 * For FIRE
+	 * No choice for the user because as soon as there are smoke, the sensor is in alert
+	 */
+	
+
 
 	// Parameters for locations
 	JTextField identifiant = new JTextField(10);
@@ -125,8 +160,6 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 	Sensor sensorFound;
-
-	boolean success = false;
 	
 	private String host;
 	private int port;
@@ -246,11 +279,6 @@ public class WindowConfig extends JFrame implements ActionListener {
 		mainInfosPanel.add(month);
 		mainInfosPanel.add(year);
 		
-		mainInfosPanel.add(minLabel);
-		mainInfosPanel.add(min);
-		mainInfosPanel.add(maxLabel);
-		mainInfosPanel.add(max);
-		
 		otherInfosPanel.add(addressIpLabel);
 		otherInfosPanel.add(addressIp);
 		otherInfosPanel.add(portLabel);
@@ -267,6 +295,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		
 		containerNorth.setLayout(new BoxLayout(containerNorth, BoxLayout.Y_AXIS));
 		containerNorth.add(BorderLayout.NORTH, mainInfosPanel);
+		containerNorth.add(BorderLayout.NORTH, thresholdsPanel);
 		containerNorth.add(BorderLayout.NORTH, otherInfosPanel);
 		
 		containerSouth.add(locationPanel);
@@ -274,6 +303,40 @@ public class WindowConfig extends JFrame implements ActionListener {
 		
 		container.add(infos);
 		container.add(buttonConfigSensor);
+
+		
+		switch (sensorFound.getType()) {
+		case "TEMPERATURE" :
+			thresholdsPanel.add(minLabel);
+			thresholdsPanel.add(min);
+			thresholdsPanel.add(minTempUnit);
+			thresholdsPanel.add(maxLabel);
+			thresholdsPanel.add(max);
+			thresholdsPanel.add(maxTempUnit);
+			break;
+		case "PRESENCE":
+			thresholdsPanel.add(dayLabel);
+			thresholdsPanel.add(duringDay);
+			thresholdsPanel.add(dayTimeUnit);
+			thresholdsPanel.add(nightLabel);
+			thresholdsPanel.add(duringNight);
+			thresholdsPanel.add(nightTimeUnit);
+			break;
+		case "LIGHT":
+			thresholdsPanel.add(dayLabel);
+			thresholdsPanel.add(duringDay);
+			thresholdsPanel.add(dayTimeUnit);
+			thresholdsPanel.add(nightLabel);
+			thresholdsPanel.add(duringNight);
+			thresholdsPanel.add(nightTimeUnit);
+			break;
+		case "GASLEAK":
+			thresholdsPanel.add(gasLabel);
+			thresholdsPanel.add(gas);
+			thresholdsPanel.add(gasUnit);
+			break;
+		}
+		
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -284,9 +347,20 @@ public class WindowConfig extends JFrame implements ActionListener {
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("Les seuils ne peuvent contenir que des chiffres");
 			}
-
-			if (min.getText().isEmpty() || max.getText().isEmpty()) {
-				infos.setText("Vous devez renseigner les seuils");
+			
+			// Checking informations
+			if (sensorFound.getType().equals("TEMPERATURE") && 
+					(min.getText().isEmpty() || max.getText().isEmpty())) {
+				infos.setText("Vous devez renseigner les seuils de température");
+			}
+			
+			else if((sensorFound.getType().equals("LIGHT") || sensorFound.getType().equals("PRESENCE")) && 
+					(duringDay.getText().isEmpty() || duringNight.getText().isEmpty())) {
+				infos.setText("Vous devez renseigner les seuils de durée");
+			}
+			
+			else if(sensorFound.getType().equals("GASLEAK") && gas.getText().isEmpty()) {
+				infos.setText("Vous devez renseigner le seuil de gaz");
 			}
 			
 			else if(addressIp.getText().isEmpty() || portSensor.getText().isEmpty()) {
@@ -308,32 +382,47 @@ public class WindowConfig extends JFrame implements ActionListener {
 			}
 
 			// If min > max
-			else if (Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
+			else if (sensorFound.getType().equals("TEMPERATRUE") && Integer.parseInt(min.getText()) >= Integer.parseInt(max.getText())) {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
 
 			else { 
-				Sensor sensorConfig = new Sensor();
-				sensorConfig.setBrand(sensorFound.getBrand());
-				sensorConfig.setMacAddress(sensorFound.getMacAddress());
-				sensorConfig.setId(getId());
-				sensorConfig.setType(sensorFound.getType());
 				
-				//Configuration
-				sensorConfig.setMin(min.getText().trim());
-				sensorConfig.setMax(max.getText().trim());
+				//Configuration acording to the type of the sensor
+				switch (sensorFound.getType()) {
+				case "TEMPERATURE":
+					sensorFound.setMin(min.getText().trim());
+					sensorFound.setMax(max.getText().trim());
+					break;
+				case "LIGHT":
+					sensorFound.setMin(duringNight.getText().trim());
+					sensorFound.setMax(duringDay.getText().trim());
+					break;
+				case "PRESENCE":
+					sensorFound.setMin(duringNight.getText().trim());
+					sensorFound.setMax(duringDay.getText().trim());
+					break;
+				case "GASLEAK":
+					sensorFound.setMin("0");
+					sensorFound.setMax(gas.getText().trim());
+					break;
+				case "FIRE":
+					sensorFound.setMin("0");
+					sensorFound.setMax("1");
+					break;	
+				}
 				
-				sensorConfig.setState(stateOnOff.isSelected(stateOn.getModel()));
-				sensorConfig.setIpAddress(addressIp.getText().trim());
-				sensorConfig.setPort(portSensor.getText().trim());
-				sensorConfig.setIdLocation(locationsFoundList.get(location.getSelectedIndex()-1).getId());
+				sensorFound.setState(stateOnOff.isSelected(stateOn.getModel()));
+				sensorFound.setIpAddress(addressIp.getText().trim());
+				sensorFound.setPort(portSensor.getText().trim());
+				sensorFound.setIdLocation(locationsFoundList.get(location.getSelectedIndex()-1).getId());
 				
 				// Now the sensor is configured
-				sensorConfig.setConfigure(true);
+				sensorFound.setConfigure(true);
 				
-				sensorConfig.setAlert(false);
-				sensorConfig.setBreakdown(false);
+				sensorFound.setAlert(false);
+				sensorFound.setBreakdown(false);
 
 				int dayInstallation = day.getSelectedIndex();
 				int monthInstallation = month.getSelectedIndex() - 1;
@@ -343,11 +432,11 @@ public class WindowConfig extends JFrame implements ActionListener {
 				Date dateInstallation = new Date(yearInstallation - 1900,
 						monthInstallation, dayInstallation);
 
-				sensorConfig.setInstallation(dateInstallation);
+				sensorFound.setInstallation(dateInstallation);
 				
 				JSONObject sensorConfigJson = new JSONObject();
-				sensorConfigJson.put("id", sensorConfig.getId());
-				sensorConfigJson.put("sensorToUpdate", sensorConfig.toJSON());
+				sensorConfigJson.put("id", sensorFound.getId());
+				sensorConfigJson.put("sensorToUpdate", sensorFound.toJSON());
 
 				Request thirdRequest = new Request();
 				thirdRequest.setType("UPDATE");
@@ -366,8 +455,6 @@ public class WindowConfig extends JFrame implements ActionListener {
 				// So, it have to add the new sensors at the 'sensor id table' of this location
 				// TODO : modifier l'ancienne localisation 
 				this.setVisible(false);
-				
-				success = true;
 			}
 
 
@@ -398,13 +485,6 @@ public class WindowConfig extends JFrame implements ActionListener {
 		this.id = id;
 	}
 
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public void setSuccess(boolean success) {
-		this.success = success;
-	}
 	
 	
 	
