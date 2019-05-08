@@ -168,8 +168,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	int countLocation = 0;
 	int countNewLocation;
 	
-	int countThreshold = 0;
-	int countNewThreshold;
+	int countWarningLevel = 0;
+	int countNewWarningLevel;
 	
 
 	/** 
@@ -782,6 +782,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			// if it is the first connection
 			if(countSensors == 0) countSensors = countNewSensor;
 			
+			// if there are new sensor or a sensor deleted, then countSensors is different than countNewSensor
 			if(countSensors != countNewSensor) {
 				refresh(last);
 				countSensors = countNewSensor;
@@ -790,10 +791,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			// a new alert
 			countNewAlert = 0;
 			
+			// count the number of alert
 			for(Sensor s : sensorsFoundList) {
 				if(s.getAlert()) countNewAlert++;
 			}
 			
+			// if it is the first connection
 			if(countNewAlert == 0) countAlert = 0;
 
 			if(countAlert < countNewAlert) {
@@ -802,6 +805,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countAlert = countNewAlert;
 			} 
 
+			// if there are new alert, then countAlert is upper than countNewSensor
 			if(countNewAlert > 0) {
 				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
 				message.setForeground(Color.RED);
@@ -809,6 +813,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			
 			// a new configuration
 			countNewLocation = 0;
+			
+			// if there are a new configuration the sum of the id location is update
 			for(Sensor s : sensorsFoundList) {
 				countNewLocation+= s.getIdLocation();
 			} 
@@ -819,15 +825,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countLocation = countNewLocation;
 			} 
 			
-			// new thresholds 
-			countNewThreshold = 0;
+			// new warning level 
+			countNewWarningLevel = 0;
 			for(Sensor s : sensorsFoundList) {
-				countNewThreshold+= s.getMin() + s.getMax(); 
+				countNewWarningLevel+= s.getMin() + s.getMax(); 
 			} 
-			if(countThreshold == 0) countThreshold = countNewThreshold;
-			if(countThreshold != countNewThreshold) {
+			if(countWarningLevel == 0) countWarningLevel = countNewWarningLevel;
+			if(countWarningLevel != countNewWarningLevel) {
 				refresh(last);
-				countThreshold = countNewThreshold;
+				countWarningLevel = countNewWarningLevel;
 			} 
 			
 		};

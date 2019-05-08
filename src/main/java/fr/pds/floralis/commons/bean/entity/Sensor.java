@@ -146,7 +146,7 @@ public class Sensor {
 
 	public Sensor(int id, int idLocation, String type, Boolean state,
 			Boolean alert, String brand, String macAdress,
-			Date installation, int min, int max, Boolean breakdown, String ipAddress, 
+			Date installation, int firstWarningLevel, int secondWarningLevel, Boolean breakdown, String ipAddress, 
 			String port, Boolean configure) {
 		super();
 		this.id = id;
@@ -160,8 +160,8 @@ public class Sensor {
 		this.ipAddress = ipAddress;
 		this.port = port;
 		this.configure = configure;
-		this.min = min;
-		this.max = max;
+		this.min = firstWarningLevel;
+		this.max = secondWarningLevel;
 		this.breakdown = breakdown;
 	}
 

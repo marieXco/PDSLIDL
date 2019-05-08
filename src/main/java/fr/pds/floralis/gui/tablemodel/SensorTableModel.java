@@ -86,17 +86,17 @@ public class SensorTableModel extends AbstractTableModel {
 		}
 
 		String configure = "";
-		String min;
-		String max;
+		String firstWarningLevel;
+		String secondWarningLevel;
 
 		if(userObject.getConfigure()) {
 			configure = "Configuré";
-			min = Integer.toString(userObject.getMin());
-			max = Integer.toString(userObject.getMax());
+			firstWarningLevel = Integer.toString(userObject.getMin());
+			secondWarningLevel = Integer.toString(userObject.getMax());
 		} else {
 			configure = "A configurer";
-			min = "";
-			max = "";
+			firstWarningLevel = "";
+			secondWarningLevel = "";
 		}
 
 
@@ -122,10 +122,10 @@ public class SensorTableModel extends AbstractTableModel {
 			userAttribute = on;
 			break;
 		case 6:
-			userAttribute = min;
+			userAttribute = firstWarningLevel;
 			break;
 		case 7:
-			userAttribute = max;
+			userAttribute = secondWarningLevel;
 			break;
 		case 8:
 			userAttribute = state;
