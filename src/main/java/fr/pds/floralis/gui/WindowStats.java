@@ -232,10 +232,13 @@ import fr.pds.floralis.server.dao.DAO;
 			sensorOption.addItem("Type de capteurs");
 			sensorOption.addItem("Etat des capteurs");
 			sensorOption.addItem("Panne des capteurs");
+			
+		    sensorOption.addItemListener(new ItemStateSensor());
+            
+			
 			JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
 			sensorPanel.add(labelSensor);
 			sensorPanel.add(sensorOption); 
-			JButton sensorChoice = new JButton("Filtrer");
 			requestPanel.add(sensorPanel);
 		    
 		    //Panel choice of alert
@@ -276,7 +279,12 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		}
 		
+	
+			    
+		
 		public void actionPerformed(ActionEvent e) {
+			
+		
 				
 				/*countSmokeSensor.setVisible(true);
 				countLightSensor.setVisible(true);
@@ -451,6 +459,15 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		}
 
-		}
+
+		  }
+	
+	  class ItemStateSensor implements ItemListener{
+		    public void itemStateChanged(ItemEvent e) {
+		      System.out.println("événement déclenché sur : " + e.getItem());
+		    }   
+	  } 
+	
+	
 	
 	
