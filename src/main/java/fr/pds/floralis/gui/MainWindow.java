@@ -120,8 +120,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	JMenuBar menuBar = new JMenuBar();
 	JMenu adding = new JMenu("Ajouts");
+	JMenu mapping = new JMenu("Map");
 	JMenuItem addingSensor = new JMenuItem("Ajouter un capteur");
 	JMenuItem addingLocation = new JMenuItem("Ajouter une localisation");
+	JMenuItem showingMap = new JMenuItem("Consulter la map des capteurs");
 	JMenu indicators = new JMenu("Indicateurs"); 
 	JMenuItem stats = new JMenuItem("Consulter les indicateurs");
 
@@ -190,8 +192,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		window.setJMenuBar(menuBar);
 		menuBar.add(adding);
+		menuBar.add(mapping);
 		adding.add(addingSensor);
-		adding.add(addingLocation);	
+		adding.add(addingLocation);
+		mapping.add(showingMap);
 		menuBar.add(indicators);
 		indicators.add(stats);
 
@@ -244,6 +248,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		buttonUpdateSensorState.addActionListener(this);
 		buttonRefreshSensor.addActionListener(this);
 		addingSensor.addActionListener(this);
+		showingMap.addActionListener(this);
 		addingLocation.addActionListener(this);
 		buttonConfigSensor.addActionListener(this);
 		buttonRefreshLocation.addActionListener(this);
@@ -478,6 +483,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 				e1.printStackTrace();
 			}
+		}
+		
+		if (e.getSource() == showingMap) {
+			
+				new WindowMap(getHost(), getPort()).initMap();
+			
 		}
 
 
