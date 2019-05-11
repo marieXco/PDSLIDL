@@ -87,7 +87,7 @@ public class Simulation {
 		 * This sleep is made to wait for the findById from all the sensor We wait 2
 		 * seconds for each sensor
 		 */
-		Thread.sleep(propertiesLength * 5000);
+		Thread.sleep(propertiesLength * 2000);
 
 		/*
 		 * We request the sensor sensitivity thanks to the type of the sensor
@@ -113,6 +113,43 @@ public class Simulation {
 					+ " doesn't have any warning limits;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
 			threadState[sensorIndex] = true;			
+		}
+		
+		String sensorType;
+
+		/*
+		 * If the sensor is a light sensor, a presence sensor or a fire then it'll send
+		 * us only 0 or 1 has value for one duration (see the config.properties files)
+		 * However, if it's a light or a presence sensor, the warning levels min/max
+		 * that are contained for the sensor refers to the max levels dependings on the
+		 * period of day Min --> Maximum for daytime Max --> Maximum for nighttime
+		 * 
+		 * It's made like this so the user can change the time before an alert when he
+		 * configures a light or a presence sensor For fire sensors, he cannot as it's a
+		 * sensor that is really important
+		 */
+		if (sensorFound[sensorIndex].getType().toUpperCase().equals("LIGHT")
+				|| sensorFound[sensorIndex].getType().toUpperCase().equals("PRESENCE")) {
+			sensorType = "BOOLEAN";
+		} else if (sensorFound[sensorIndex].getType().toUpperCase().equals("FIRE")) {
+			sensorType = "FIRE";
+		} else {
+			sensorType = "VALUE";
+		}
+		
+		for(Entry<String, String> entry : propertiesList) {
+			/*
+			 * This type of sensors only send 1 or 0 as values If 1 is sent, it means that
+			 * the sensor is triggered As the level of these sensors are seconds, our
+			 * duration become our message when the sensor is triggered
+			 */
+			if (sensorType.equals("BOOLEAN") || sensorType.equals("FIRE")) {
+				if (Integer.parseInt(entry.getValue()) == 1) {
+					entry.setValue(entry.getKey());
+				} else {
+					entry.setValue(String.valueOf(sensorFound[sensorIndex].getMax() - 1));
+				}
+			}
 		}
 
 		/*
@@ -240,27 +277,7 @@ public class Simulation {
 						ccSwitchToNoBreakdown.run();
 					}
 
-					String sensorType;
-
-					/*
-					 * If the sensor is a light sensor, a presence sensor or a fire then it'll send
-					 * us only 0 or 1 has value for one duration (see the config.properties files)
-					 * However, if it's a light or a presence sensor, the warning levels min/max
-					 * that are contained for the sensor refers to the max levels dependings on the
-					 * period of day Min --> Maximum for daytime Max --> Maximum for nighttime
-					 * 
-					 * It's made like this so the user can change the time before an alert when he
-					 * configures a light or a presence sensor For fire sensors, he cannot as it's a
-					 * sensor that is really important
-					 */
-					if (sensorFound[sensorIndex].getType().toUpperCase().equals("LIGHT")
-							|| sensorFound[sensorIndex].getType().toUpperCase().equals("PRESENCE")) {
-						sensorType = "BOOLEAN";
-					} else if (sensorFound[sensorIndex].getType().toUpperCase().equals("FIRE")) {
-						sensorType = "FIRE";
-					} else {
-						sensorType = "VALUE";
-					}
+					
 
 					/*
 					 * We retrieve the last messages from the sensor and we initialize an integer
@@ -275,18 +292,7 @@ public class Simulation {
 					 * This is the basic request : level Min < value < level Max
 					 */
 
-					/*
-					 * This type of sensors only send 1 or 0 as values If 1 is sent, it means that
-					 * the sensor is triggered As the level of these sensors are seconds, our
-					 * duration become our message when the sensor is triggered
-					 */
-					if (sensorType.equals("BOOLEAN") || sensorType.equals("FIRE")) {
-						if (messageValue == 1) {
-							messageValue = messageDuration;
-						} else {
-							messageValue = sensorFound[sensorIndex].getMax() - 1;
-						}
-					}
+					
 
 					/*
 					 * The sensor isn't between the warning levels, alert
@@ -354,7 +360,7 @@ public class Simulation {
 							 * We log something every 5 seconds, or when we know that we will exit the
 							 * "while" on the next loop
 							 */
-							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration) {
+							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 								sensorLogger.warning("Alert type : ALERT for the sensor : "
 										+ sensorFound[sensorIndex].getId() + "\nFor " + realTimeSensors
 										+ " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
@@ -382,51 +388,49 @@ public class Simulation {
 
 							realTimeSensors++;
 							Thread.sleep(1000);
-
-						}
-
-						/*
-						 * If the sensor alert is not already in the history alert
-						 */
-						if (!alertCreated) {
-							Calendar dateNow = Calendar.getInstance();
-
-							Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
-									dateNow.get(Calendar.DAY_OF_MONTH));
-
-							Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
-									dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
-							Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
-									dateNow.get(Calendar.SECOND) - 1);
-
+							
 							/*
-							 * This might raise a problem if the messages starts at, for exemple 15:59:40
-							 * and finishes at 16:01:02 A weird date would be put for beginning of alert
-							 * FIXME
+							 * If the sensor alert is not already in the history alert
 							 */
-							if (messageDuration > 60) {
-								beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
-								beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
-							} else {
-								beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
+							if (!alertCreated) {
+								Calendar dateNow = Calendar.getInstance();
+
+								Date today = new Date(dateNow.get(Calendar.YEAR) - 1900, dateNow.get(Calendar.MONTH),
+										dateNow.get(Calendar.DAY_OF_MONTH));
+
+								Time beginningOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY),
+										dateNow.get(Calendar.MINUTE), dateNow.get(Calendar.SECOND));
+								Time endOfAlert = new Time(dateNow.get(Calendar.HOUR_OF_DAY), dateNow.get(Calendar.MINUTE),
+										dateNow.get(Calendar.SECOND) - 1);
+
+								/*
+								 * This might raise a problem if the messages starts at, for exemple 15:59:40
+								 * and finishes at 16:01:02 A weird date would be put for beginning of alert
+								 * FIXME
+								 */
+								if (messageDuration > 60) {
+									beginningOfAlert.setMinutes(dateNow.get(Calendar.MINUTE) - messageDuration / 60);
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration % 60);
+								} else {
+									beginningOfAlert.setSeconds(dateNow.get(Calendar.SECOND) - messageDuration);
+								}
+
+								Alert alertForHistory = new Alert(2, sensorFound[sensorIndex].getId(), beginningOfAlert,
+										endOfAlert, today);
+
+								Request alertForHistoryRequest = new Request();
+								alertForHistoryRequest.setType("CREATE");
+								alertForHistoryRequest.setEntity("HISTORY_ALERTS");
+								alertForHistoryRequest.setFields(alertForHistory.toJSON());
+
+								ConnectionSimulation ccAlertForHistory = new ConnectionSimulation(
+										alertForHistoryRequest.toJSON().toString());
+								ccAlertForHistory.run();
+
+								alertCreated = true;
 							}
 
-							Alert alertForHistory = new Alert(2, sensorFound[sensorIndex].getId(), beginningOfAlert,
-									endOfAlert, today);
-
-							Request alertForHistoryRequest = new Request();
-							alertForHistoryRequest.setType("CREATE");
-							alertForHistoryRequest.setEntity("HISTORY_ALERTS");
-							alertForHistoryRequest.setFields(alertForHistory.toJSON());
-
-							ConnectionSimulation ccAlertForHistory = new ConnectionSimulation(
-									alertForHistoryRequest.toJSON().toString());
-							ccAlertForHistory.run();
-
-							alertCreated = true;
 						}
-
-
 
 
 						if (!propertiesList.isEmpty() && realTimeSensors == messageDuration) {
@@ -479,7 +483,7 @@ public class Simulation {
 							 * We log something every 5 seconds, or when we know that we will exit the
 							 * "while" on the next loop
 							 */
-							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration) {
+							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 								sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId()
 										+ " for " + realTimeSensors + " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
 							}
@@ -701,7 +705,7 @@ public class Simulation {
 		 * stocked in the propertiesData One logger for one sensor Plus a main logger
 		 */
 		Logger loggers[] = new Logger[propertiesData.length + 1];
-		FileHandler fileHandlers[] = new FileHandler[propertiesData.length];
+		FileHandler fileHandlers[] = new FileHandler[propertiesData.length + 1];
 		SimpleFormatter formatter = new SimpleFormatter();
 
 		/*
@@ -727,7 +731,7 @@ public class Simulation {
 			/*
 			 * We initialize every sensor Logger
 			 */
-			if ((i != 0) && (i != 5)) {
+			if ((i != 0)) {
 				loggers[i] = Logger.getLogger("Logger" + i + "");
 				fileHandlers[i] = new FileHandler("%hsimulationLogger" + i + ".log");
 				loggers[i].addHandler(fileHandlers[i]);
@@ -749,17 +753,10 @@ public class Simulation {
 						e.printStackTrace();
 					}
 					try {
-						simulation.simulationTest(propertiesData[index], loggers[index + 1], loggers[0], index);
+						simulation.simulationTest(propertiesData[index], loggers[index], loggers[0], index);
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
-					} catch (java.lang.NullPointerException e1) {
-						loggers[index].warning("This sensor doesn't exist;\nStoping the simulation for this sensor");
-						loggers[0].warning("The sensor number " + (index + 1)
-								+ " doesn't exist;\nStoping the simulation for this sensor");
-
-						refreshHandle[index].cancel(false);
-						threadState[index] = true;
-					}
+					} 
 				}
 			}.start();
 
