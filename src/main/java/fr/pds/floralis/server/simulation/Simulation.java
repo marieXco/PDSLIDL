@@ -87,7 +87,7 @@ public class Simulation {
 		 * This sleep is made to wait for the findById from all the sensor We wait 2
 		 * seconds for each sensor
 		 */
-		Thread.sleep(propertiesLength * 2000);
+		Thread.sleep(propertiesLength * 4000);
 
 		/*
 		 * We request the sensor sensitivity thanks to the type of the sensor
@@ -116,6 +116,7 @@ public class Simulation {
 		}
 		
 		String sensorType;
+		
 
 		/*
 		 * If the sensor is a light sensor, a presence sensor or a fire then it'll send
@@ -147,11 +148,17 @@ public class Simulation {
 				if (Integer.parseInt(entry.getValue()) == 1) {
 					entry.setValue(entry.getKey());
 				} else {
-					entry.setValue(String.valueOf(sensorFound[sensorIndex].getMax() - 1));
+					if(periodOfDay.equals("DAYTIME")) {
+						entry.setValue(String.valueOf(sensorFound[sensorIndex].getMin() - 1));
+					} else {
+						entry.setValue(String.valueOf(sensorFound[sensorIndex].getMax() - 1));
+					}
+					
 				}
 			}
 		}
-
+		
+		
 		/*
 		 * The sensor is on and configured (has warning levels)
 		 */
@@ -160,9 +167,14 @@ public class Simulation {
 		int messageValue = Integer
 				.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 		int realTimeSensors = 1;
+		
+		
+
 
 		while (sensorFound[sensorIndex].getState()) {
 			if (sensorFound[sensorIndex].getState() && sensorFound[sensorIndex].getConfigure()) {
+				
+				
 
 
 				/*
@@ -256,6 +268,22 @@ public class Simulation {
 				 * The sensor still has messages and is still on
 				 */
 				if (!propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
+					
+					boolean request;
+							
+					if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
+						request = sensorFound[sensorIndex].getMin() <= messageValue;
+					}
+					
+					else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
+						request = sensorFound[sensorIndex].getMax() <= messageValue;
+					}
+					
+					else {
+						request = sensorFound[sensorIndex].getMax() <= messageValue
+								|| sensorFound[sensorIndex].getMin() >= messageValue;
+					}
+					
 					/*
 					 * If the sensor is in a broken state, we put the sensor in no breakdown state
 					 * As he's sending infos, it means that the sensor is fully functioning
@@ -297,8 +325,7 @@ public class Simulation {
 					/*
 					 * The sensor isn't between the warning levels, alert
 					 */
-					while (sensorFound[sensorIndex].getMax() <= messageValue
-							|| sensorFound[sensorIndex].getMin() >= messageValue) {
+					while (request) {
 						/*
 						 * This boolean is used to know if the alert has already been created in the
 						 * history alert As we're on a while loop, it would create an history alert
@@ -310,8 +337,7 @@ public class Simulation {
 						 * While the duration time didin't fully passed and that the request is true
 						 * (the sensor is not between the warning levels) and that the sensor is on
 						 */
-						while (realTimeSensors < messageDuration && (sensorFound[sensorIndex].getMax() <= messageValue
-								|| sensorFound[sensorIndex].getMin() >= messageValue)) {
+						while (realTimeSensors < messageDuration && (request)) {
 							/*
 							 * We see if it's not a fake alert, thanks to the sensitivity (time before we
 							 * get a real alert, changes for evry type of sensors)
@@ -455,19 +481,30 @@ public class Simulation {
 							messageDuration = messageDuration - realTimeSensors;
 							realTimeSensors = 1;
 						}
+						
+						if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
+							request = sensorFound[sensorIndex].getMin() <= messageValue;
+						}
+						
+						else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
+							request = sensorFound[sensorIndex].getMax() <= messageValue;
+						}
+						
+						else {
+							request = sensorFound[sensorIndex].getMax() <= messageValue
+									|| sensorFound[sensorIndex].getMin() >= messageValue;
+						}
 					}
 
 					/*
 					 * The sensor is between the warning levels, no alert
 					 */
-					while (sensorFound[sensorIndex].getMax() > messageValue
-							&& sensorFound[sensorIndex].getMin() < messageValue)  {
+					while (!request)  {
 						/*
 						 * While the duration time didin't fully passed and that the sensor is between
 						 * the warning level and that the sensor is on
 						 */
-						while (realTimeSensors < messageDuration && (sensorFound[sensorIndex].getMax() >= messageValue
-								&& sensorFound[sensorIndex].getMin() <= messageValue)) {
+						while (realTimeSensors < messageDuration && (!request)) {
 							/*
 							 * We remove the last "no alert" entry on the cache (for this sensor) to put a
 							 * new one So we'll only have the last entries for the sensors in the sensors
@@ -536,6 +573,19 @@ public class Simulation {
 						if (!propertiesList.isEmpty() && realTimeSensors != messageDuration) {
 							messageDuration = messageDuration - realTimeSensors;
 							realTimeSensors = 1;
+						}
+						
+						if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
+							request = sensorFound[sensorIndex].getMin() <= messageValue;
+						}
+						
+						else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
+							request = sensorFound[sensorIndex].getMax() <= messageValue;
+						}
+						
+						else {
+							request = sensorFound[sensorIndex].getMax() <= messageValue
+									|| sensorFound[sensorIndex].getMin() >= messageValue;
 						}
 
 					}
