@@ -60,6 +60,7 @@ public class FindAlertBySensorByType {
 		alertList = Arrays.asList(alertFoundTab);
 		
 		List<Alert> alertResult = null;
+		//NOT WORKING
 		
 		for (Alert alert :alertList) {
 			for (Sensor sensor: sensorList ) {

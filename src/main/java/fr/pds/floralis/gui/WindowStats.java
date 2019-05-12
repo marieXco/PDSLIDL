@@ -55,14 +55,27 @@ import fr.pds.floralis.server.dao.DAO;
 		JPanel resultPanel = new JPanel(); 
 		JPanel indicatorInfo= new JPanel();
 		JPanel sensorPanel = new JPanel();
+		JPanel alertPanel = new JPanel();
 		JPanel panel= new JPanel();
-		JComboBox stateOption = new JComboBox();
 		JComboBox sensorOption = new JComboBox();
+		JComboBox stateOption = new JComboBox();
 		JComboBox breakOption = new JComboBox();
+		JComboBox alertOption = new JComboBox();
 		JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
 		JLabel labelState= new JLabel("Etats des capteurs : ");
 		JLabel labelBreak= new JLabel("Panne des capteurs : ");
+		JLabel labelAlert= new JLabel("Filtrer sur les alertes : ");
 		
+		String ttemp = "Capteurs de température"; 
+		String fire = "Capteurs de type fumée"; 
+		String ggas = "Capteurs de fuite de gaz";
+		String ppresence = "Capteurs de présence"; 
+		String llight = "Capteurs de type lumière";
+		String smoke = 	"FIRE";
+		String presence = "PRESENCE"; 
+		String light = 	"LIGHT"; 
+		String gas = "GASLEAK"; 
+		String temperature = 	"TEMPERATURE"; 
 		
 		// Indicators values
 		List<Location> roomFoundList; 
@@ -109,7 +122,7 @@ import fr.pds.floralis.server.dao.DAO;
 		    roomResult.setFont(new Font("Calibri", 1, 20));
 		    
 		    // count alert
-		    
+	    
 			FindAllAlert faa = new FindAllAlert(host, port);
 			roomResult.setFont(new Font("Calibri", 1, 20));
 			try {
@@ -155,10 +168,14 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		 
 		    
-		    //Panel choice of alert
-		    JButton alert = new JButton("Jcombo box des alertes");
-		    requestPanel.add(alert);
-		    //requestPanel.setPreferredSize(new Dimension(700, 200));
+		    //Alert Option 
+			alertOption.addItem("Alerte par mois");
+			alertOption.addItem("Alerte par an");
+			alertOption.addItem("Alerte par type de capteurs");
+			alertPanel.add(labelAlert);
+		    alertPanel.add(alertOption); 
+		    requestPanel.add(alertPanel);
+		    alertOption.addActionListener(this);
 		    requestPanel.setLayout(new GridLayout(2, 1));
 		    
 		   //TODO: ajouter des éléments dans la bdd pour les tests (patients, anciennes alertes) 
@@ -209,22 +226,13 @@ import fr.pds.floralis.server.dao.DAO;
 				int countAlertYear = alertFoundList.size(); 	
 				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
 			}
-			
-			
-			if (e.getSource() == countAlertBySensorType) {
-				FindAlertBySensorByType faby = new FindAlertBySensorByType();
-				String type = "FIRE";
-				try {
-					alertFoundList = faby.findByType(false, type);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertType = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte d'alerte de capteurs de fumée: " + countAlertType);	 
-			}*/
+			*/
 
 		public void actionPerformed(ActionEvent e) {
+			
+			/*
+			 * SENSOR OPTION 
+			 */
 	
 			// TODO Auto-generated method stub
 				int indexSensor = sensorOption.getSelectedIndex();
@@ -237,8 +245,7 @@ import fr.pds.floralis.server.dao.DAO;
 					 * SMOKE TYPE 
 					 */
 					
-					String fire = "Capteurs de type fumée"; 
-					String smoke = 	"FIRE"; 
+					
 					FindSensorByType fsbtf = new FindSensorByType(host, port);
 					try {
 						sensorFoundList = fsbtf.findByType(false, smoke);
@@ -252,7 +259,6 @@ import fr.pds.floralis.server.dao.DAO;
 					 *  LIGHT TYPE
 					 */
 					
-					String llight = "Capteurs de type lumière";
 					String light = 	"LIGHT"; 
 					FindSensorByType fsbtl = new FindSensorByType(host, port);
 					try {
@@ -267,8 +273,6 @@ import fr.pds.floralis.server.dao.DAO;
 					 * GAS TYPE
 					 */
 					
-					String ggas = "Capteurs de fuite de gaz";
-					String gas = "GASLEAK"; 
 					FindSensorByType fsbtg = new FindSensorByType(host, port);
 					try {
 						sensorFoundList = fsbtg.findByType(false, gas);
@@ -282,8 +286,7 @@ import fr.pds.floralis.server.dao.DAO;
 					 *  PRESENCE TYPE
 					 */
 					
-					String ppresence = "Capteurs de présence"; 
-					String presence = "PRESENCE"; 
+
 					FindSensorByType fsbtp = new FindSensorByType(host, port);
 					try {
 						sensorFoundList = fsbtp.findByType(false, presence);
@@ -297,8 +300,6 @@ import fr.pds.floralis.server.dao.DAO;
 					 * TEMPERATURE TYPE 
 					 */
 
-					String ttemp = "Capteurs de température"; 
-					String temperature = 	"TEMPERATURE"; 
 					FindSensorByType fsbtt = new FindSensorByType(host, port);
 					try {
 						sensorFoundList = fsbtt.findByType(false, temperature);
@@ -466,13 +467,122 @@ import fr.pds.floralis.server.dao.DAO;
 					int countWorking = sensorFoundList.size(); 	
 					JLabel sensorWorking = new JLabel("Nombre de capteurs fonctionnel : " + countWorking);	
 					resultPanel.add(sensorWorking);
-					break; 
-					
-				case 3 : 
-					break ; 
+					break;
 					
 					default : 
 						System.out.println("aie coup dur pour Célia");
+				}
+				
+				/*
+				 * ALERT OPTION 
+				 */
+				
+				int indexAlert = alertOption.getSelectedIndex();
+
+				switch(indexAlert) {
+				case 0: 
+					//  case of alert by month 
+					break; 
+				case 1: 
+					
+					// case of alert by year 
+					break; 
+						
+				case 2: 
+					//  case of alert by sensor type 
+// case of sensor type filter 
+					
+					/*
+					 * SMOKE TYPE 
+					 */
+					
+					FindAlertBySensorByType fabyf = new FindAlertBySensorByType();
+					try {
+						alertFoundList = fabyf.findByType(false, smoke);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertSmoke = alertFoundList.size(); 	
+					
+					
+					/*
+					 *  LIGHT TYPE
+					 */
+					
+					FindAlertBySensorByType fabyl = new FindAlertBySensorByType();
+					try {
+						alertFoundList = fabyl.findByType(false, light);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertLight = alertFoundList.size(); 
+					
+
+					/*
+					 * GAS TYPE
+					 */
+					
+					FindAlertBySensorByType fabyg = new FindAlertBySensorByType();
+					try {
+						alertFoundList = fabyg.findByType(false, gas);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertGas = alertFoundList.size(); 
+					
+					/*
+					 *  PRESENCE TYPE
+					 */
+					
+					FindAlertBySensorByType fabyp = new FindAlertBySensorByType();
+					try {
+						alertFoundList = fabyl.findByType(false, presence);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertMove = alertFoundList.size(); 
+
+					/*
+					 * TEMPERATURE TYPE 
+					 */
+					
+					FindAlertBySensorByType fabyt = new FindAlertBySensorByType();
+					try {
+						alertFoundList = fabyt.findByType(false, temperature);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertTemperature = alertFoundList.size(); 
+
+					/*List<Alert> alertgFoundList;
+					List<Alert> alertlFoundList;
+					List<Alert> alertpFoundList;
+					List<Alert> alertTFoundList;*/
+						
+					// put values on JFRAME
+					
+					Object[][] donnees = {
+		            { fire , countAlertSmoke },
+		            { llight, countAlertLight},
+		            { ggas, countAlertGas},
+		            { ppresence, countAlertMove},
+		            { ttemp, countAlertTemperature},
+					};
+
+					String[] entetes = {"Description", "Nombre"};
+					JTable tabResultType = new JTable(donnees, entetes); 
+					resultPanel.add(tabResultType); 
+					break;
+					
+					
+					default : 
+						System.out.println("aie coup dur pour Célia");
+						break; 
 				}
 		} 
 
