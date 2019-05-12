@@ -477,7 +477,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == stats) {
 			try {
-				new WindowStats(getHost(), getPort()).initIndicators();
+				new WindowStats().initIndicators();
 			} catch (JsonParseException e1) {
 				e1.printStackTrace();
 			} catch (JsonMappingException e1) {
