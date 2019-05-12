@@ -17,8 +17,9 @@ import fr.pds.floralis.commons.bean.entity.Location;
 
 public class LocationDao implements DAO<Location> {
 	Connection connect = null;
-	
-	public LocationDao(Connection connect) throws ClassNotFoundException, SQLException {
+
+	public LocationDao(Connection connect) throws ClassNotFoundException,
+			SQLException {
 		this.connect = connect;
 	}
 
@@ -51,18 +52,18 @@ public class LocationDao implements DAO<Location> {
 			System.exit(0);
 		}
 
-		if(success > 0) {
+		if (success > 0) {
 			return true;
 		} else {
 			return false;
 		}
-		
+
 	}
 
 	@Override
 	public boolean delete(int id) {
 		int success = 0;
-		
+
 		try {
 			connect.setAutoCommit(false);
 
@@ -79,13 +80,13 @@ public class LocationDao implements DAO<Location> {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			System.exit(0);
 		}
-		
-		if(success > 0) {
+
+		if (success > 0) {
 			return true;
 		} else {
 			return false;
 		}
-	
+
 	}
 
 	@Override
@@ -112,12 +113,12 @@ public class LocationDao implements DAO<Location> {
 			System.exit(0);
 		}
 
-		if(success > 0) {
+		if (success > 0) {
 			return true;
 		} else {
 			return false;
 		}
-	
+
 	}
 
 	@Override
@@ -179,5 +180,7 @@ public class LocationDao implements DAO<Location> {
 
 		return locationList;
 	}
+
+	
 
 }

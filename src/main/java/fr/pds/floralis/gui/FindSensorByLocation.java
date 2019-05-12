@@ -24,6 +24,7 @@ public class FindSensorByLocation {
 	private static ObjectMapper objectMapper;
 	private static String host;
 	private static int port;
+	private static List<Sensor> sensorsLocationList;
 
 	public FindSensorByLocation(String host, int port) {
 		super();
@@ -32,15 +33,16 @@ public class FindSensorByLocation {
 	}
 
 	public static List<Sensor> findByLocation(Boolean refresh,
-			Boolean idLocation) throws JsonParseException,
+			int idLocation) throws JsonParseException,
 			JsonMappingException, JSONException, IOException,
 			InterruptedException {
 
+		sensorsLocationList = null; 
 		objectMapper = new ObjectMapper();
-		List<Sensor> sensorsLocationList;
+		
 
 		JSONObject sensorsLocation = new JSONObject();
-		sensorsLocation.put("location", idLocation);
+		sensorsLocation.put("idLocation", idLocation);
 
 		Request request = new Request();
 		request.setType("FINDBYLOCATION");
@@ -51,6 +53,7 @@ public class FindSensorByLocation {
 				.toJSON().toString());
 		ccSensorFindByLocation.run();
 
+		System.out.println(ccSensorFindByLocation.getResponse());
 		Sensor[] sensorsLocationTab = objectMapper.readValue(
 				ccSensorFindByLocation.getResponse(), Sensor[].class);
 		sensorsLocationList = Arrays.asList(sensorsLocationTab);

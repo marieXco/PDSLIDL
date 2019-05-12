@@ -320,7 +320,7 @@ public class SensorDao implements DAO<Sensor> {
 	}
 
 
-	public List<Sensor> findByLocation(boolean idLocation) {
+	public List<Sensor> findByLocation(int idLocation) {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Sensor> sensors = new ArrayList<Sensor>();
 		Sensor sensor = new Sensor();

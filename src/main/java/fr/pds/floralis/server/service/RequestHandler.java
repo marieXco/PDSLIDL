@@ -78,6 +78,8 @@ public class RequestHandler implements Runnable {
 			try {
 				writer = new PrintWriter(sock.getOutputStream());
 				reader = new BufferedInputStream(sock.getInputStream());
+				
+				
 
 				String request = read();
 
@@ -107,7 +109,7 @@ public class RequestHandler implements Runnable {
 						+ "\n";
 				debug += "\t with parameters : " + parameters + "\n";
 				System.err.println("\n" + debug);
-
+				
 				String toSend = "";
 
 				switch (table.toUpperCase()) {
@@ -195,7 +197,7 @@ public class RequestHandler implements Runnable {
 					case "FINDBYLOCATION":
 						List<Sensor> sensorListLocation = sensorDao
 								.findByLocation(parameters
-										.getBoolean("idLocation"));
+										.getInt("idLocation"));
 						JSONArray sensorFoundByLocation = new JSONArray(
 								sensorListLocation);
 						toSend = sensorFoundByLocation.toString();
@@ -227,6 +229,7 @@ public class RequestHandler implements Runnable {
 
 						toSend = locationFound.toJSON().toString();
 						break;
+						
 
 					case "CREATE":
 						Location locationToCreate = objectMapper.readValue(
