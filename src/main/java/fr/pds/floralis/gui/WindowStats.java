@@ -82,6 +82,7 @@ import fr.pds.floralis.server.dao.DAO;
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
 		List<Patient> patientFoundList;
+		Date date = new Date();
 		
 
 		public void initIndicators() throws IOException{
@@ -197,36 +198,7 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		}
 		
-			
-		//OLD ACTION PERFORMED 
-		/*
-			
-			if (e.getSource() == countAlertByMonth) {
-				FindAlertByMonthYear faby = new FindAlertByMonthYear(host, port);
-				Date date = new Date();
-				try {
-					alertFoundList = faby.findByMonthYear(false, date);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertMonthYear = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);	
-			}
-			
-			if (e.getSource() == countAlertByYear) {
-				FindAlertByYear faby = new FindAlertByYear(host, port);
-				Date date = new Date();
-				try {
-					alertFoundList = faby.findByYear(false, date);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertYear = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
-			}
-			*/
+	
 
 		public void actionPerformed(ActionEvent e) {
 			
@@ -481,16 +453,37 @@ import fr.pds.floralis.server.dao.DAO;
 
 				switch(indexAlert) {
 				case 0: 
-					//  case of alert by month 
+					// case of alert by month
+					//TODO: adding compare option 
+						
+						FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
+						try {
+							alertFoundList = fabmy.findByMonthYear(false, date);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						int countAlertMonthYear = alertFoundList.size(); 	
+						System.out.println("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);		
 					break; 
 				case 1: 
 					
 					// case of alert by year 
+					//TODO : adding compare option 
+					FindAlertByYear faby = new FindAlertByYear(host, port);
+					try {
+						alertFoundList = faby.findByYear(false, date);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countAlertYear = alertFoundList.size(); 	
+					System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
+				
 					break; 
 						
 				case 2: 
 					//  case of alert by sensor type 
-// case of sensor type filter 
 					
 					/*
 					 * SMOKE TYPE 
@@ -558,11 +551,6 @@ import fr.pds.floralis.server.dao.DAO;
 						e1.printStackTrace();
 					}
 					int countAlertTemperature = alertFoundList.size(); 
-
-					/*List<Alert> alertgFoundList;
-					List<Alert> alertlFoundList;
-					List<Alert> alertpFoundList;
-					List<Alert> alertTFoundList;*/
 						
 					// put values on JFRAME
 					
