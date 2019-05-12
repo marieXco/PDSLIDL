@@ -47,9 +47,7 @@ import fr.pds.floralis.server.dao.DAO;
 	public class WindowStats extends JFrame implements ActionListener {
 		private String host;
 		private int port;
-		
-	
-		
+
 		
 		// Creation of panels
 		JPanel container = new JPanel();
@@ -71,8 +69,6 @@ import fr.pds.floralis.server.dao.DAO;
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
 		List<Patient> patientFoundList;
-		
-		
 		
 
 		public void initIndicators() throws IOException{
@@ -114,7 +110,6 @@ import fr.pds.floralis.server.dao.DAO;
 		    
 		    // count alert
 		    
-		    /*
 			FindAllAlert faa = new FindAllAlert(host, port);
 			roomResult.setFont(new Font("Calibri", 1, 20));
 			try {
@@ -128,7 +123,7 @@ import fr.pds.floralis.server.dao.DAO;
 			JLabel alertResult = new JLabel("Nombre d'alertes : " + countAlert);
 			alertResult.setFont(new Font("Calibri", 1, 20));
 			indicatorInfo.add(alertResult);
-			*/
+			
 			
 			// count patient
 			
@@ -152,6 +147,7 @@ import fr.pds.floralis.server.dao.DAO;
 		    sensorOption.addItem("Type de capteurs");
 		    sensorOption.addItem("Etats des capteurs");
 		    sensorOption.addItem("Panne des capteurs");
+		    sensorOption.addItem("Capteurs non configurés");
 			sensorPanel.add(labelSensor);
 			sensorPanel.add(sensorOption); 
 			requestPanel.add(sensorPanel);
@@ -181,69 +177,12 @@ import fr.pds.floralis.server.dao.DAO;
 		    this.getContentPane().add(indicatorInfo, BorderLayout.NORTH);
 		    this.getContentPane().add(panel, BorderLayout.SOUTH);
 		    this.setVisible(true);
-		 
-		    
 			
 		}
 		
-	
-			    
-		
-		
 			
 		//OLD ACTION PERFORMED 
-				
-				/*countSmokeSensor.setVisible(true);
-				countLightSensor.setVisible(true);
-				countGasSensor.setVisible(true);
-				countMoveSensor.setVisible(true);
-				countTempSensor.setVisible(true);
-				countOffSensor.setVisible(true);
-				countOnSensor.setVisible(true);
-				countNoLocationSensor.setVisible(true);*/
-			
-			
-		/*	if(e.getSource() == countOffSensor) {
-				FindSensorByState allloc = new FindSensorByState(host, port);
-				try {
-					sensorFoundList = allloc.findByState(false, false);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countOff = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs éteint : " + countOff);	
-			}
-			
-			if(e.getSource() == countOnSensor) {
-				FindSensorByState allloc = new FindSensorByState(host, port);
-				try {
-					sensorFoundList = allloc.findByState(false, true);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countOn = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs allumés : " + countOn);
-				
-			}
-			
-			if(e.getSource() == countNoConfigSensor) {
-				FindSensorByConfig allloc = new FindSensorByConfig(host, port);
-				try {
-					sensorFoundList = allloc.findByConfig(false, false);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countNoConfig = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs non configurés : " + countNoConfig);	
-			}
-			
-		
-	
-			
-			
+		/*
 			
 			if (e.getSource() == countAlertByMonth) {
 				FindAlertByMonthYear faby = new FindAlertByMonthYear(host, port);
@@ -271,17 +210,6 @@ import fr.pds.floralis.server.dao.DAO;
 				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
 			}
 			
-			if(e.getSource() == countBreakdownSensor) {
-				FindSensorByBreakdown fsbb = new FindSensorByBreakdown();
-				try {
-					sensorFoundList = fsbb.findByBreakdown(false, true);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countBreakdown = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs en panne : " + countBreakdown);	
-			}
 			
 			if (e.getSource() == countAlertBySensorType) {
 				FindAlertBySensorByType faby = new FindAlertBySensorByType();
@@ -303,7 +231,7 @@ import fr.pds.floralis.server.dao.DAO;
 
 				switch(indexSensor) {
 				case 0: 
-					// create a list of sensor by their type 
+					// case of sensor type filter 
 					
 					/*
 					 * SMOKE TYPE 
@@ -395,8 +323,11 @@ import fr.pds.floralis.server.dao.DAO;
 					resultPanel.add(tabResultType); 
 					break; 
 				case 1: 
-					System.out.print("je suis un second test");
+					
+					// case of sensor state filter
+					
 					//TODO: fonctionne mais ne se raffraichit pas automatiquement
+					
 					stateOption.addItem("Aucun");
 					stateOption.addItem("Eteind");
 					stateOption.addItem("Allumé");
@@ -404,8 +335,11 @@ import fr.pds.floralis.server.dao.DAO;
 					sensorPanel.add(stateOption);
 					stateOption.addActionListener(this);
 					break; 
+					
 				case 2: 
-					System.out.println("Il se passe des choses ");
+					
+					// case of sensor breakdown filter
+					
 					breakOption.addItem("Aucun");
 					breakOption.addItem("En panne");
 					breakOption.addItem("En marche");
@@ -414,39 +348,128 @@ import fr.pds.floralis.server.dao.DAO;
 					breakOption.addActionListener(this);
 					break; 
 					
+				case 3: 
+					
+					// case of sensor which havent configuration 
+					FindSensorByConfig fsbc = new FindSensorByConfig(host, port);
+					try {
+						sensorFoundList = fsbc.findByConfig(false, false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countNoConfig = sensorFoundList.size(); 	
+					JLabel noConfig = new JLabel("Nombre de Capteurs non configurés : " + countNoConfig);	
+					resultPanel.add(noConfig);
+					
+					break; 
+					
+					
 					default : 
 						System.out.println("aie coup dur pour Célia");
 						break; 
 				}
+				
+				
+				
 				//cette partie la du code doit aller dans une autre méthode
 				//comment bloquer la deuxieme ecoute de la 1ere JCOMBOBOx
+				
+				/* 
+				 *  choice of state in JCombobox treatment
+				 */
+				
 				int indexStateSensor = stateOption.getSelectedIndex();
 				switch(indexStateSensor) {
 				case 0: 
-					System.out.println("Rien est sélectionné, init");
+					System.out.println("init");
 					break; 
 				case 1: 
-					System.out.println("je suis dans tout mes états");
+					
+					/*
+					 * case of off sensor
+					 */
+					
+					FindSensorByState fsbsoff = new FindSensorByState(host, port);
+					try {
+						sensorFoundList = fsbsoff.findByState(false, false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countOff = sensorFoundList.size(); 	
+					JLabel offSensor = new JLabel("Nombres de capteurs éteind : " + countOff); 
+					resultPanel.add(offSensor);
 					break; 
 				case 2: 
-					System.out.println("Je fonctionne bien ");
+					
+					/*
+					 * case of on sensor 
+					 */
+
+					FindSensorByState fsbson = new FindSensorByState(host, port);
+					try {
+						sensorFoundList = fsbson.findByState(false, true);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countOn = sensorFoundList.size(); 	
+					JLabel onSensor = new JLabel("Nombre de capteurs allumés : " + countOn);
+					resultPanel.add(onSensor);
+					
+					
 					break; 
 					
 					default : 
 						System.out.println("aie coup dur pour Célia");
 				}
 				
+				// not working
+				// TODO: ajouter le cas de panne par mois 
 				int indexBreakSensor = breakOption.getSelectedIndex();
 				switch(indexBreakSensor) {
-				case 0: 
-					System.out.println("Rien est sélectionné, init");
+				case 0:           	
+					System.out.println("init");
 					break; 
 				case 1: 
-					System.out.println("je suis en panne");
+					
+					/*
+					 * case of breakdown sensor
+					 */
+					//TODO: réinitialiser la page, la rafraichir 
+			
+					FindSensorByBreakdown fsbb = new FindSensorByBreakdown();
+					try {
+						sensorFoundList = fsbb.findByBreakdown(false, true);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countBreakdown = sensorFoundList.size(); 	
+					JLabel sensorBreakdown = new JLabel("Nombre de capteurs en panne : " + countBreakdown);	
+					resultPanel.add(sensorBreakdown);
+					
 					break; 
 				case 2: 
-					System.out.println("Je marche bien ");
+					
+					/*
+					 * case of working sensor
+					 */
+					FindSensorByBreakdown fsbw = new FindSensorByBreakdown();
+					try {
+						sensorFoundList = fsbw.findByBreakdown(false, false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countWorking = sensorFoundList.size(); 	
+					JLabel sensorWorking = new JLabel("Nombre de capteurs fonctionnel : " + countWorking);	
+					resultPanel.add(sensorWorking);
 					break; 
+					
+				case 3 : 
+					break ; 
 					
 					default : 
 						System.out.println("aie coup dur pour Célia");
