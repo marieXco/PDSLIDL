@@ -107,16 +107,16 @@ public class Simulation {
 		String responseRequestSensitivity = ccRequestSensitivity.getResponse();
 		TypeSensor typeFound = objectMapper.readValue(responseRequestSensitivity.toString(), TypeSensor.class);
 		// End of requestSensitivities
-		
+
 		if (!sensorFound[sensorIndex].getConfigure()) {
 			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 					+ " doesn't have any warning limits;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
 			threadState[sensorIndex] = true;			
 		}
-		
+
 		String sensorType;
-		
+
 
 		/*
 		 * If the sensor is a light sensor or a presence sensor then it'll send
@@ -138,7 +138,7 @@ public class Simulation {
 		} else {
 			sensorType = "VALUE";
 		}
-		
+
 		for(Entry<String, String> entry : propertiesList) {
 			/*
 			 * This type of sensors only send 1 or 0 as values If 1 is sent, it means that
@@ -155,11 +155,11 @@ public class Simulation {
 					} else {
 						entry.setValue(String.valueOf(sensorFound[sensorIndex].getMax() - 1));
 					}
-					
+
 				}
 			}
 		}
-		
+
 		/*
 		 * We retrieve the last messages from the sensor and we initialize an integer
 		 * that will create a "fake" real time
@@ -169,9 +169,9 @@ public class Simulation {
 		int messageValue = Integer
 				.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 		int realTimeSensors = 1;
-		
+
 		boolean simulationOn = true;
-		
+
 		/*
 		 * While the sensor is on
 		 */
@@ -180,7 +180,9 @@ public class Simulation {
 			 * The sensor is on and configured (has warning levels)
 			 */
 			if (sensorFound[sensorIndex].getState() && sensorFound[sensorIndex].getConfigure()) {
-				
+
+				boolean alertCreated = false;
+
 				/*
 				 * The sensor sensitivity depends on the period of the day
 				 */
@@ -206,7 +208,7 @@ public class Simulation {
 					int breakdownTriggerTime = 120;
 					int realTimeBreakdown = 1;
 
-					while (realTimeBreakdown <= breakdownTriggerTime && realTimeBreakdown % 5 == 0) {
+					while (realTimeBreakdown <= breakdownTriggerTime && realTimeBreakdown % 5 == 0 && sensorFound[sensorIndex].getState()) {
 						sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 								+ " is on but we get no messages, possible breakdown for " + realTimeBreakdown
 								+ " seconds");
@@ -272,30 +274,30 @@ public class Simulation {
 				 * The sensor still has messages and is still on
 				 */
 				if (!propertiesList.isEmpty() && sensorFound[sensorIndex].getState()) {
-					
+
 					/*
 					 * See lines : 121
 					 */
 					boolean request;
-					
+
 					/*
 					 * This boolean is made to see if we already put the alert in history_alerts
 					 */
-					boolean alertCreated = false;
-							
+
+
 					if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
 						request = sensorFound[sensorIndex].getMin() <= messageValue;
 					}
-					
+
 					else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
 						request = sensorFound[sensorIndex].getMax() <= messageValue;
 					}
-					
+
 					else {
 						request = sensorFound[sensorIndex].getMax() <= messageValue
 								|| sensorFound[sensorIndex].getMin() >= messageValue;
 					}
-					
+
 					/*
 					 * If the sensor is in a broken state, we put the sensor in no breakdown state
 					 * As he's sending infos, it means that the sensor is functioning and not in breakdown anymore
@@ -321,17 +323,17 @@ public class Simulation {
 					/*
 					 * The sensor isn't between the warning levels, alert
 					 */
-					while (request) {
+					while (request && sensorFound[sensorIndex].getState()) {
 						/*
 						 * While the duration time didin't fully passed and that the request is true
 						 * (the sensor is not between the warning levels)
 						 */
-						while (realTimeSensors < messageDuration && (request)) {
+						while (realTimeSensors < messageDuration && (request) && sensorFound[sensorIndex].getState()) {
 							/*
 							 * We see if it's not a fake alert, thanks to the sensitivity (time before we
 							 * get a real alert, changes for evry type of sensors)
 							 */
-							while (realTimeSensors <= sensorSensitivity) {
+							while (realTimeSensors <= sensorSensitivity && sensorFound[sensorIndex].getState()) {
 
 								/*
 								 * We remove the last "possible alert" entry on the cache (for this sensor) to
@@ -400,27 +402,30 @@ public class Simulation {
 								ConnectionSimulation ccSwitchToAlert = new ConnectionSimulation(
 										switchToAlertRequest.toJSON().toString());
 								ccSwitchToAlert.run();
+
+								sensorLogger.info("The sensor : "
+										+ sensorFound[sensorIndex].getId() + "is now in alert state");
 							}
 
 							realTimeSensors++;
 							Thread.sleep(1000);
-							
+
 							// FIXME
 							if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
 								request = sensorFound[sensorIndex].getMin() <= messageValue;
 							}
-							
+
 							else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
 								request = sensorFound[sensorIndex].getMax() <= messageValue;
 							}
-							
+
 							else {
 								request = sensorFound[sensorIndex].getMax() <= messageValue
 										|| sensorFound[sensorIndex].getMin() >= messageValue;
 							}
-						
+
 						}
-						
+
 						/*
 						 * We put the alert in history alert when 
 						 * the duration alert fully passed
@@ -460,17 +465,20 @@ public class Simulation {
 							ConnectionSimulation ccAlertForHistory = new ConnectionSimulation(
 									alertForHistoryRequest.toJSON().toString());
 							ccAlertForHistory.run();
-							
+
 							alertCreated = true;
+							sensorLogger.info("Alert for the sensor : "
+									+ sensorFound[sensorIndex].getId() + "in in history");
 						}
 
 						/*
 						 * If the sensor messages fully passed, we go to
 						 * another message
 						 */
-						if (!propertiesList.isEmpty() &&realTimeSensors == messageDuration) {
+						if (!propertiesList.isEmpty() && realTimeSensors == messageDuration) {
 							propertiesList.remove(propertiesList.size() - 1);
-							
+							alertCreated = false;
+
 							/*
 							 * If by removing the messages that passed
 							 * makes the config.properties empty;
@@ -490,19 +498,19 @@ public class Simulation {
 										((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 								realTimeSensors = 1;
 							}
-							
+
 						} 
 					}
 
 					/*
 					 * The sensor is between the warning levels, no alert
 					 */
-					while (!request)  {
+					while (!request && sensorFound[sensorIndex].getState())  {
 						/*
 						 * While the duration time didin't fully passed and that the sensor is between
 						 * the warning level and that the sensor is on
 						 */
-						while (realTimeSensors < messageDuration && !request) {
+						while (realTimeSensors < messageDuration && !request && sensorFound[sensorIndex].getState()) {
 							/*
 							 * We remove the last "no alert" entry on the cache (for this sensor) to put a
 							 * new one 
@@ -523,7 +531,6 @@ public class Simulation {
 								sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId()
 										+ " for " + realTimeSensors + " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
 							}
-							sensorLogger.info(request + "");
 
 							/*
 							 * If the sensor is in a alert state, we put the sensor in an no alert state
@@ -544,20 +551,22 @@ public class Simulation {
 										switchToNoAlertRequest.toJSON().toString());
 								ccSwitchToNoAlert.run();
 
+								sensorLogger.info("The sensor : "
+										+ sensorFound[sensorIndex].getId() + "is now in a no alert state");
 							}
 
 							realTimeSensors++;
 							Thread.sleep(1000);
-							
+
 							// FIXME
 							if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
 								request = sensorFound[sensorIndex].getMin() <= messageValue;
 							}
-							
+
 							else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
 								request = sensorFound[sensorIndex].getMax() <= messageValue;
 							}
-							
+
 							else {
 								request = sensorFound[sensorIndex].getMax() <= messageValue
 										|| sensorFound[sensorIndex].getMin() >= messageValue;
@@ -571,7 +580,8 @@ public class Simulation {
 						 */
 						if (!propertiesList.isEmpty() && realTimeSensors == messageDuration) {
 							propertiesList.remove(propertiesList.size() - 1);
-							
+							alertCreated = false;
+
 							/*
 							 * If by removing the messages that passed
 							 * makes the config.properties empty;
@@ -591,7 +601,7 @@ public class Simulation {
 										((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 								realTimeSensors = 1;
 							}
-							
+
 						} 
 
 						/*
@@ -604,12 +614,13 @@ public class Simulation {
 						if (!propertiesList.isEmpty() && realTimeSensors != messageDuration) {
 							messageDuration = messageDuration - realTimeSensors;
 							realTimeSensors = 1;
+							alertCreated = false;
 						}
-						
-						
+
+
 
 					}
-					
+
 				}
 
 			}
@@ -626,7 +637,7 @@ public class Simulation {
 					simulationOn = false;
 				}
 			}
-			
+
 			/*
 			 * The sensor is on but not configured (no warning levels), we exit
 			 */
@@ -639,31 +650,33 @@ public class Simulation {
 			}
 
 		}
-		
+
 		/*
 		 * The sensor is off at the beggining of the simulation (configured or not), we exit 
 		 */
-		if (!sensorFound[sensorIndex].getState()) {			
-			if (sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
-				sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
-						+ " is off;\nExiting for this sensor");
-				refreshHandle[sensorIndex].cancel(false);
-				threadState[sensorIndex] = true;
-				simulationOn = false;
-			}
+		if(simulationOn) {
+			if (!sensorFound[sensorIndex].getState()) {			
+				if (sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
+					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
+							+ " is off;\nExiting for this sensor");
+					refreshHandle[sensorIndex].cancel(false);
+					threadState[sensorIndex] = true;
+					simulationOn = false;
+				}
 
-			else if (!sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
-				sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
-						+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
-				refreshHandle[sensorIndex].cancel(false);
-				threadState[sensorIndex] = true;
-				simulationOn = false;
-			} 
-			
+				else if (!sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
+					sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
+							+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
+					refreshHandle[sensorIndex].cancel(false);
+					threadState[sensorIndex] = true;
+					simulationOn = false;
+				} 
+
+			}
 		}
-		
+
 		sensorLogger.info(simulationOn + "");
-		
+
 		List<Boolean> threadStateList = Arrays.asList(threadState);
 
 		if (!threadStateList.contains(false)) {
