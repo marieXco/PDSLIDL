@@ -12,20 +12,13 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Alert;
@@ -35,22 +28,24 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
 
 public class Simulation {
-
-	static ObjectMapper objectMapper = new ObjectMapper();
+	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-	private Sensor sensorFound[];
 	HashMap<String, Integer> sensorsCache;
 	ArrayList<Entry<String, String>>[] propertiesTab;
-	private String periodOfDay = "";
-	static ScheduledFuture<?> refreshHandle[];
-	private int propertiesLength;
+	
+	private Sensor sensorFound[];
 	private static Boolean[] threadState;
+	static ScheduledFuture<?> refreshHandle[];
+	
+	private String periodOfDay = "";
+	private int propertiesLength;
+	static ObjectMapper objectMapper = new ObjectMapper();
 
 	public Simulation(HashMap<String, Integer> sensorsCache, int propertiesLength) {
 		this.sensorsCache = sensorsCache;
 		this.propertiesLength = propertiesLength;
 		this.sensorFound = new Sensor[propertiesLength];
-		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength];
+		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength * 2];
 		Simulation.threadState = new Boolean[propertiesLength];
 	}
 
@@ -58,12 +53,23 @@ public class Simulation {
 	public void simulationTest(ArrayList<Entry<String, String>> propertiesList, Logger sensorLogger, Logger mainLogger,
 			int sensorIndex) throws IOException, InterruptedException {
 
+		/*
+		 * ThreadState is an array made to know when 
+		 * all the sensors finished their simulation
+		 */
 		threadState[sensorIndex] = false;
+		
+		/*
+		 * simulationOn is a boolean made to know 
+		 * if the simulation should keep going
+		 */
+		boolean simulationOn = true;
+		
 		/*
 		 * Taking care of the warning levels depending of the period of day From
 		 * 09:00:00 to 19:59:00 --> Daytime
 		 */
-		refreshPeriodOfDay();
+		refreshPeriodOfDay(sensorIndex);
 
 		/*
 		 * We catch the exception that would be raised if theconfig.properties wasn't
@@ -73,6 +79,10 @@ public class Simulation {
 			Integer.parseInt((propertiesList.get(0)).getValue());
 		} catch (java.lang.NumberFormatException e1) {
 			sensorLogger.warning("The sensor id is not of integer type;\n Exit");
+			refreshHandle[sensorIndex].cancel(false);
+			refreshHandle[sensorIndex + 1].cancel(false);
+			threadState[sensorIndex] = true;			
+			simulationOn = false;
 		}
 
 		int propertiesId = Integer.parseInt((propertiesList.get(0)).getValue());
@@ -112,6 +122,7 @@ public class Simulation {
 			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 					+ " doesn't have any warning limits;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
+			refreshHandle[sensorIndex + 1].cancel(false);
 			threadState[sensorIndex] = true;			
 		}
 
@@ -170,10 +181,9 @@ public class Simulation {
 				.parseInt(((Entry<String, String>) propertiesList.get(propertiesList.size() - 1)).getValue());
 		int realTimeSensors = 1;
 
-		boolean simulationOn = true;
-
+		
 		/*
-		 * While the sensor is on
+		 * While the sensor is on and that the simulation should keep going
 		 */
 		while (sensorFound[sensorIndex].getState() && simulationOn) {
 			/*
@@ -236,6 +246,9 @@ public class Simulation {
 						ConnectionSimulation ccSwitchToBreakdown = new ConnectionSimulation(
 								switchToBreakdown.toJSON().toString());
 						ccSwitchToBreakdown.run();
+						
+						sensorLogger.info("The sensor : "
+								+ sensorFound[sensorIndex].getId() + " is now in a breakdown state in the database");
 
 						/*
 						 * Then, we put this breakdown in history breakdown, once the breakdown the 120
@@ -267,6 +280,10 @@ public class Simulation {
 						ConnectionSimulation ccBreakdownForHistory = new ConnectionSimulation(
 								breakdownForHistoryRequest.toJSON().toString());
 						ccBreakdownForHistory.run();
+						
+						sensorLogger.info("The sensor : "
+								+ sensorFound[sensorIndex].getId() + " is now in a history_breakdown");
+						
 					}
 				}
 
@@ -278,25 +295,7 @@ public class Simulation {
 					/*
 					 * See lines : 121
 					 */
-					boolean request;
-
-					/*
-					 * This boolean is made to see if we already put the alert in history_alerts
-					 */
-
-
-					if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
-						request = sensorFound[sensorIndex].getMin() <= messageValue;
-					}
-
-					else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
-						request = sensorFound[sensorIndex].getMax() <= messageValue;
-					}
-
-					else {
-						request = sensorFound[sensorIndex].getMax() <= messageValue
-								|| sensorFound[sensorIndex].getMin() >= messageValue;
-					}
+					boolean request = refreshRequest(sensorType, messageValue, sensorIndex);
 
 					/*
 					 * If the sensor is in a broken state, we put the sensor in no breakdown state
@@ -317,6 +316,9 @@ public class Simulation {
 						ConnectionSimulation ccSwitchToNoBreakdown = new ConnectionSimulation(
 								switchToNoBreakdown.toJSON().toString());
 						ccSwitchToNoBreakdown.run();
+						
+						sensorLogger.info("The sensor : "
+								+ sensorFound[sensorIndex].getId() + " is now in a no breakdown state in the database");
 					}
 
 
@@ -333,7 +335,7 @@ public class Simulation {
 							 * We see if it's not a fake alert, thanks to the sensitivity (time before we
 							 * get a real alert, changes for evry type of sensors)
 							 */
-							while (realTimeSensors <= sensorSensitivity && sensorFound[sensorIndex].getState()) {
+							while (realTimeSensors <= sensorSensitivity && realTimeSensors < messageDuration && sensorFound[sensorIndex].getState()) {
 
 								/*
 								 * We remove the last "possible alert" entry on the cache (for this sensor) to
@@ -361,7 +363,6 @@ public class Simulation {
 								realTimeSensors++;
 							}
 
-							// TODO : do we keep the possible alerts in the cache ?
 							sensorsCache.remove("POSSIBLEALERT" + sensorFound[sensorIndex].getId());
 
 							/*
@@ -404,25 +405,13 @@ public class Simulation {
 								ccSwitchToAlert.run();
 
 								sensorLogger.info("The sensor : "
-										+ sensorFound[sensorIndex].getId() + "is now in alert state");
+										+ sensorFound[sensorIndex].getId() + " is now in alert state in the database");
 							}
 
 							realTimeSensors++;
 							Thread.sleep(1000);
 
-							// FIXME
-							if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
-								request = sensorFound[sensorIndex].getMin() <= messageValue;
-							}
-
-							else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
-								request = sensorFound[sensorIndex].getMax() <= messageValue;
-							}
-
-							else {
-								request = sensorFound[sensorIndex].getMax() <= messageValue
-										|| sensorFound[sensorIndex].getMin() >= messageValue;
-							}
+							request = refreshRequest(sensorType, messageValue, sensorIndex);
 
 						}
 
@@ -468,7 +457,7 @@ public class Simulation {
 
 							alertCreated = true;
 							sensorLogger.info("Alert for the sensor : "
-									+ sensorFound[sensorIndex].getId() + "in in history");
+									+ sensorFound[sensorIndex].getId() + " is now in history_alerts");
 						}
 
 						/*
@@ -488,6 +477,7 @@ public class Simulation {
 							if(propertiesList.isEmpty()) {
 								sensorLogger.info("Messages ended for this sensor;\nExiting for this sensor");
 								refreshHandle[sensorIndex].cancel(false);
+								refreshHandle[sensorIndex + 1].cancel(false);
 								threadState[sensorIndex] = true;
 								simulationOn = false;
 							} else {
@@ -552,26 +542,13 @@ public class Simulation {
 								ccSwitchToNoAlert.run();
 
 								sensorLogger.info("The sensor : "
-										+ sensorFound[sensorIndex].getId() + "is now in a no alert state");
+										+ sensorFound[sensorIndex].getId() + "is now in a no alert state in the database");
 							}
 
 							realTimeSensors++;
 							Thread.sleep(1000);
 
-							// FIXME
-							if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
-								request = sensorFound[sensorIndex].getMin() <= messageValue;
-							}
-
-							else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
-								request = sensorFound[sensorIndex].getMax() <= messageValue;
-							}
-
-							else {
-								request = sensorFound[sensorIndex].getMax() <= messageValue
-										|| sensorFound[sensorIndex].getMin() >= messageValue;
-							}
-
+							request = refreshRequest(sensorType, messageValue, sensorIndex);
 						}
 
 						/*
@@ -591,6 +568,7 @@ public class Simulation {
 							if(propertiesList.isEmpty()) {
 								sensorLogger.info("Messages ended for this sensor;\nExiting for this sensor");
 								refreshHandle[sensorIndex].cancel(false);
+								refreshHandle[sensorIndex + 1].cancel(false);
 								threadState[sensorIndex] = true;
 								simulationOn = false;
 							} else {
@@ -633,6 +611,7 @@ public class Simulation {
 					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " got disconnected;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
+					refreshHandle[sensorIndex + 1].cancel(false);
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				}
@@ -645,6 +624,7 @@ public class Simulation {
 				sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 						+ " doesn't have any warning limits;\nExiting for this sensor");
 				refreshHandle[sensorIndex].cancel(false);
+				refreshHandle[sensorIndex + 1].cancel(false);
 				threadState[sensorIndex] = true;
 				simulationOn = false;
 			}
@@ -660,6 +640,7 @@ public class Simulation {
 					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " is off;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
+					refreshHandle[sensorIndex + 1].cancel(false);
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				}
@@ -668,6 +649,7 @@ public class Simulation {
 					sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
+					refreshHandle[sensorIndex + 1].cancel(false);
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				} 
@@ -676,9 +658,15 @@ public class Simulation {
 		}
 
 		sensorLogger.info(simulationOn + "");
-
+		
+		/*
+		 * We create a list with what contains threadState
+		 */
 		List<Boolean> threadStateList = Arrays.asList(threadState);
-
+		
+		/*
+		 * If this list doesn't contain false, it means that every simulation ended
+		 */
 		if (!threadStateList.contains(false)) {
 			mainLogger.info("Sensor cache at the end of the simulation :\n" + sensorsCache.toString());
 			System.exit(0);
@@ -686,8 +674,7 @@ public class Simulation {
 
 	}
 
-	public Sensor refreshSensorInfos(int sensorId, int sensorIndex) {
-		Sensor sensorToChange = new Sensor();
+	public void refreshSensorInfos(int sensorId, int sensorIndex) {
 		final Runnable refresh = new Runnable() {
 
 			public void run() {
@@ -714,11 +701,9 @@ public class Simulation {
 
 		refreshHandle[sensorIndex] = scheduler.scheduleAtFixedRate(refresh, 1, 3, SECONDS);
 
-		return sensorToChange;
 	}
 
-	// TODO : refactoring this
-	public String refreshPeriodOfDay() {
+	public void refreshPeriodOfDay(int sensorIndex) {
 		final Runnable refresh = new Runnable() {
 
 			public void run() {
@@ -741,107 +726,27 @@ public class Simulation {
 			}
 
 		};
+		
+		refreshHandle[sensorIndex + 1] = scheduler.scheduleAtFixedRate(refresh, 0, 60, SECONDS);
 
-		final ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 0, 30, SECONDS);
-
-		scheduler.schedule(new Runnable() {
-			public void run() {
-				refreshHandle.cancel(true);
-			}
-		}, 360, SECONDS);
-
-		return periodOfDay;
 	}
-
-	public static void main(String[] args) throws JsonParseException, JsonMappingException, JSONException, IOException,
-	InterruptedException, BrokenBarrierException {
-		/*
-		 * We set a format on every logger
-		 */
-		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %5$s%6$s%n");
-
-		/*
-		 * We read the .properties file
-		 */
-		PropertiesReader propertiesFile = new PropertiesReader();
-		ArrayList<Entry<String, String>>[] propertiesData = propertiesFile.getPropValues();
-
-		/*
-		 * The cache and the cyclic barrier is created The Cyclic Barrier will make
-		 * every thread start at the same time, the simulation will start at the same
-		 * ime for every sensor that is into the config.properties file
-		 */
-		HashMap<String, Integer> cache = new HashMap<String, Integer>();
-		final CyclicBarrier cyclicGate = new CyclicBarrier(propertiesData.length + 1);
-
-		Simulation simulation = new Simulation(cache, propertiesData.length);
-
-		/*
-		 * We create a number of logger that is equal to the number of sensors that is
-		 * stocked in the propertiesData One logger for one sensor Plus a main logger
-		 */
-		Logger loggers[] = new Logger[propertiesData.length + 1];
-		FileHandler fileHandlers[] = new FileHandler[propertiesData.length + 1];
-		SimpleFormatter formatter = new SimpleFormatter();
-
-		/*
-		 * We initialize the main Logger
-		 */
-		loggers[0] = Logger.getLogger("Logger");
-		fileHandlers[0] = new FileHandler("%hmainLogger.log");
-		loggers[0].addHandler(fileHandlers[0]);
-		fileHandlers[0].setFormatter(formatter);
-
-		/*
-		 * We catch an exception if the config.properties is empty
-		 */
-		try {
-			propertiesData[0].toString();
-		} catch (java.lang.NullPointerException e) {
-			loggers[0].warning("The config.properties file is empty;\n Exiting the simulation");
-			System.exit(0);
+	
+	public boolean refreshRequest(String sensorType, int messageValue, int sensorIndex) {
+		boolean request;
+		if(sensorType.equals("BOOLEAN") && periodOfDay.equals("DAYTIME")) {
+			request = sensorFound[sensorIndex].getMin() <= messageValue;
 		}
 
-		for (int i = 0; i <= propertiesData.length; i++) {
-
-			/*
-			 * We initialize every sensor Logger
-			 */
-			if ((i != 0)) {
-				loggers[i] = Logger.getLogger("Logger" + i + "");
-				fileHandlers[i] = new FileHandler("%hsimulationLogger" + i + ".log");
-				loggers[i].addHandler(fileHandlers[i]);
-				fileHandlers[i].setFormatter(formatter);
-			}
-
-			/*
-			 * We create a thread for every sensor stocked in the config.properties file
-			 * Each thread will start at the same time thanks to the syclic barrier We put
-			 * the sensors messages (propertiesData[index]), one logger (loggers[index]) and
-			 * an int (index) that will be usefull for the refreshSensorInfos()
-			 */
-			int index = i;
-			new Thread() {
-				public void run() {
-					try {
-						cyclicGate.await();
-					} catch (InterruptedException | BrokenBarrierException e) {
-						e.printStackTrace();
-					}
-					try {
-						simulation.simulationTest(propertiesData[index], loggers[index + 1], loggers[0], index);
-					} catch (IOException | InterruptedException e) {
-						e.printStackTrace();
-					} 
-				}
-			}.start();
-
+		else if(sensorType.equals("BOOLEAN") && periodOfDay.equals("NIGHTTIME")) {
+			request = sensorFound[sensorIndex].getMax() <= messageValue;
 		}
 
-		/*
-		 * This will make every thred wait until they are here to start
-		 */
-		cyclicGate.await();
-		loggers[0].info("The simulation is started for all the sensors");
+		else {
+			request = sensorFound[sensorIndex].getMax() <= messageValue
+					|| sensorFound[sensorIndex].getMin() >= messageValue;
+		}
+		
+		return request;
 	}
+
 }

@@ -37,7 +37,6 @@ public class PropertiesReader {
 			/**
 			 * We get the id property and the type property
 			 */
-
 			String id = "";
 
 			Map<String, String> map = new HashMap<String, String>();
@@ -52,12 +51,16 @@ public class PropertiesReader {
 
 			String value = "";
 			String duration = "";
-			int numberOfValues = 2;
+		
 			int numberOfSensors = Integer.parseInt(map.get("numberOfSensors"));
+			int numberOfValues;
+			
 			entryList = (ArrayList<Entry<String, String>>[]) new ArrayList[numberOfSensors];
+			
 			ArrayList<Map.Entry<String, String>> testList = null;
 
 			while (!(map.isEmpty())) {
+				
 				while (numberOfSensors > 0) {
 
 					if (map.containsKey(numberOfSensors + ".id")) {
@@ -68,6 +71,7 @@ public class PropertiesReader {
 						numberOfValues = Integer.parseInt(map.get(numberOfSensors + ".numberOfValues"));
 
 						while (numberOfValues > 0) {
+							
 							if (map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".value")
 									&& map.containsKey(numberOfSensors + ".iter." + numberOfValues + ".duration")) {
 								value = map.get(numberOfSensors + ".iter." + numberOfValues + ".value");
@@ -75,8 +79,8 @@ public class PropertiesReader {
 								map.remove(numberOfSensors + ".iter." + numberOfValues + ".value");
 								map.remove(numberOfSensors + ".iter." + numberOfValues + ".duration");
 								list.put(duration, value);
-
 							}
+							
 							numberOfValues--;
 						}
 
@@ -90,10 +94,9 @@ public class PropertiesReader {
 					else {
 						numberOfSensors--;
 					}
+					
 				}
-
-				map.clear();
-
+				map.clear();	
 			}
 
 		} catch (Exception e) {
