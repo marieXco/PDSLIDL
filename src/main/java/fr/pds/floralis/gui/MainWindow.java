@@ -795,7 +795,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				e.printStackTrace();
 			}
 			
-			//a new sensor
+			//a new sensor or a sensor delete
 			countNewSensor = sensorsFoundList.size();
 			// if it is the first connection
 			if(countSensors == 0) countSensors = countNewSensor;
@@ -817,6 +817,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			// if it is the first connection
 			if(countNewAlert == 0) countAlert = 0;
 
+			// if the number of alert is changing
 			if(countAlert < countNewAlert) {
 				refresh(last);
 				if(countMessage > 1) new WindowAlert().init();
@@ -831,6 +832,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countNewLocation+= s.getIdLocation();
 			} 
 
+			// if it is the first connection
 			if(countLocation == 0) countLocation = countNewLocation;
 			if(countLocation != countNewLocation) {
 				refresh(last);

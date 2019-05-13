@@ -72,7 +72,7 @@ public class WindowOpening extends Thread {
 		window.setVisible(true);
 		int position = 0;
 
-		// progressBar grow up og 8 all the 2 msc
+		// progressBar grow up of 8 all the 2 msc
 		while (position < 100) {
 			progressbar.setValue(position);
 			try {
