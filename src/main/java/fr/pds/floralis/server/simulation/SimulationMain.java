@@ -2,7 +2,9 @@ package fr.pds.floralis.server.simulation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -108,6 +110,14 @@ public class SimulationMain {
 		cyclicGate.await();
 		loggers[0].info("The simulation just started for each sensor");
 		
+		List<Boolean> threadStateList = Arrays.asList(Simulation.threadState);
+		
+		while (threadStateList.contains(false)) {
+			
+		}
+		
+		loggers[0].info("Sensor cache at the end of the simulation :\n" + cache.toString());
+		System.exit(0);
 		
 	}
 }

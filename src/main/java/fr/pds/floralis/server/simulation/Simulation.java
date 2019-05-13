@@ -34,7 +34,7 @@ public class Simulation {
 	ArrayList<Entry<String, String>>[] propertiesTab;
 
 	private Sensor sensorFound[];
-	private static Boolean[] threadState;
+	static Boolean[] threadState;
 	static ScheduledFuture<?> refreshHandle[];
 
 	private String periodOfDay = "";
@@ -45,7 +45,7 @@ public class Simulation {
 		this.sensorsCache = sensorsCache;
 		this.propertiesLength = propertiesLength;
 		this.sensorFound = new Sensor[propertiesLength];
-		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength * 2];
+		Simulation.refreshHandle = new ScheduledFuture<?>[propertiesLength];
 		Simulation.threadState = new Boolean[propertiesLength];
 	}
 
@@ -80,7 +80,7 @@ public class Simulation {
 		} catch (java.lang.NumberFormatException e1) {
 			sensorLogger.warning("The sensor id is not of integer type;\n Exit");
 			refreshHandle[sensorIndex].cancel(false);
-			refreshHandle[sensorIndex + 1].cancel(false);
+			 
 			threadState[sensorIndex] = true;			
 			simulationOn = false;
 		}
@@ -122,7 +122,7 @@ public class Simulation {
 			sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 					+ " doesn't have any warning limits;\nExiting for this sensor");
 			refreshHandle[sensorIndex].cancel(false);
-			refreshHandle[sensorIndex + 1].cancel(false);
+			 
 			threadState[sensorIndex] = true;			
 		}
 
@@ -478,7 +478,7 @@ public class Simulation {
 							if(propertiesList.isEmpty()) {
 								sensorLogger.info("Messages ended for this sensor;\nExiting for this sensor");
 								refreshHandle[sensorIndex].cancel(false);
-								refreshHandle[sensorIndex + 1].cancel(false);
+								 
 								threadState[sensorIndex] = true;
 								simulationOn = false;
 							} else {
@@ -569,7 +569,7 @@ public class Simulation {
 							if(propertiesList.isEmpty()) {
 								sensorLogger.info("Messages ended for this sensor;\nExiting for this sensor");
 								refreshHandle[sensorIndex].cancel(false);
-								refreshHandle[sensorIndex + 1].cancel(false);
+								 
 								threadState[sensorIndex] = true;
 								simulationOn = false;
 							} else {
@@ -612,7 +612,7 @@ public class Simulation {
 					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " got disconnected;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
-					refreshHandle[sensorIndex + 1].cancel(false);
+					 
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				}
@@ -625,7 +625,7 @@ public class Simulation {
 				sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 						+ " doesn't have any warning limits;\nExiting for this sensor");
 				refreshHandle[sensorIndex].cancel(false);
-				refreshHandle[sensorIndex + 1].cancel(false);
+				 
 				threadState[sensorIndex] = true;
 				simulationOn = false;
 			}
@@ -641,7 +641,7 @@ public class Simulation {
 					sensorLogger.warning("The sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " is off;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
-					refreshHandle[sensorIndex + 1].cancel(false);
+					 
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				}
@@ -650,7 +650,7 @@ public class Simulation {
 					sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
 							+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
 					refreshHandle[sensorIndex].cancel(false);
-					refreshHandle[sensorIndex + 1].cancel(false);
+					 
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				} 
@@ -727,8 +727,8 @@ public class Simulation {
 			}
 
 		};
-
-		refreshHandle[sensorIndex + 1] = scheduler.scheduleAtFixedRate(refresh, 0, 60, SECONDS);
+		
+		ScheduledFuture<?> refreshHandle = scheduler.scheduleAtFixedRate(refresh, 0, 60, SECONDS);
 
 	}
 
