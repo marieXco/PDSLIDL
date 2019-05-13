@@ -612,6 +612,10 @@ import fr.pds.floralis.server.dao.DAO;
 				// launch a new request 
 				if (e.getSource() == newRequest) {
 					result.removeAll();
+					sensorPanel.remove(breakOption);
+					sensorPanel.remove(labelBreak);
+					sensorPanel.remove(stateOption);
+					sensorPanel.remove(labelState);
 				}
 		} 
 
