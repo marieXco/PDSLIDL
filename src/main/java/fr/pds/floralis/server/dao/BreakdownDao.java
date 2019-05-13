@@ -14,7 +14,6 @@ import org.postgresql.util.PGobject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.pds.floralis.commons.bean.entity.Breakdown;
-import fr.pds.floralis.commons.bean.entity.Location;
 
 public class BreakdownDao implements DAO<Breakdown> {
 	Connection connect = null;
