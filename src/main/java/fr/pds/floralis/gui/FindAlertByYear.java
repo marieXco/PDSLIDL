@@ -51,13 +51,8 @@ public class FindAlertByYear {
 			SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
 			String dateString = sdf.format(date);
 	        String dateAlert = sdf.format(alert.getDate());
-	        System.out.println("La date qui rentre en parametre de la session" +date);
-	        System.out.println("Alerte" + alert);
-	        // System.out.println(alertAuGogoles++);
+
 	        Integer test = Integer.parseInt(dateString)- 1900 ;
-	        
-	        // System.out.println("Date String " +  );
-	        // System.out.println("Date alerte " + dateAlert);
 	        
 			if(dateAlert.equals(test.toString())) {
 				alertAuGogoles++; 

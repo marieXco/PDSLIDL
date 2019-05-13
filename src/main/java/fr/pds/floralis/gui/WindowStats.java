@@ -470,26 +470,27 @@ import fr.pds.floralis.server.dao.DAO;
 					//TODO: adding compare option 
 						
 					FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
-					Date date = new Date();
+					Date date = new Date(2019, 05, 01);
+					int countAlertMonthYear = 0;
 						try {
-							alertFoundList = fabmy.findByMonthYear(false, date);
+							countAlertMonthYear = fabmy.findByMonthYear(false, date);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-					int countAlertMonthYear = alertFoundList.size(); 	
-					String alertMY = "Nombre d'alerte du mois en cours: ";
+						
+					String alertMY = "En cours: ";
 					FindAlertByMonthYear fabmy1 = new FindAlertByMonthYear(host, port);
 					
 					Date date1 = new Date(2019, 04, 12);
+					int countAlertMonthYear1 = 0;
 						try {
-							alertFoundList = fabmy1.findByMonthYear(false, date1);
+							countAlertMonthYear1 = fabmy1.findByMonthYear(false, date1);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-					int countAlertMonthYear1 = alertFoundList.size(); 
-					String alertMY1= "Nombre d'alerte du mois d'Avril"; 
+					String alertMY1= "Avril"; 
 					Object[][] data = {
 				           { alertMY , countAlertMonthYear },
 				           { alertMY1, countAlertMonthYear1}
@@ -508,7 +509,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertFound = 0;
 					Date dateYear = new Date(2018, 02, 12);
 					try {
-						countAlertFound = faby.findByYear(false, dateYear);
+					countAlertFound = faby.findByYear(false, dateYear);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

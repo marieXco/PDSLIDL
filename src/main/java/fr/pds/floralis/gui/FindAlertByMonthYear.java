@@ -29,7 +29,7 @@ public class FindAlertByMonthYear {
 	}
 
 	
-	public static List<Alert> findByMonthYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByMonthYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -44,25 +44,28 @@ public class FindAlertByMonthYear {
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
-		
+		int alertCount = 0;
 		for (Alert alert :alertList) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM");
-	        sdf.format(date);
-	        sdf.format(alert.getDate());
-	        System.out.println(date);
-	        System.out.println(alert);
-
-			if(alert.equals(date)) {
-				alertList.remove(alert);
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYYMM");
+			String dateString = sdf.format(date);
+	        String dateAlert = sdf.format(alert.getDate());
+	        System.out.println("EN STRING CA DONNE CA " + dateString);
+	        Integer test = Integer.parseInt(dateString)- 190001 ;
+	        System.out.println( "LE RESULTAT DU  TEST" + test);
+	        
+			if(dateAlert.equals(test.toString())) {
+				alertCount++; 
 			}
+			
 		}
+		
 		
 		if(refresh) { 
 			Thread.sleep(6000);
 			findByMonthYear(true, date);
 		}
 		
-		return alertList;
+		return alertCount;
 	}
 	
 

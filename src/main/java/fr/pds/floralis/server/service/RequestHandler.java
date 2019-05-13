@@ -149,8 +149,8 @@ public class RequestHandler implements Runnable {
 						break;
 						
 					case "FINDBYBREAKDOWN":
-						List<Sensor> sensorListBreak = sensorDao.findByBreakdown(parameters.getBoolean("breakdown"));
-						JSONArray sensorFoundByBreakdown = new JSONArray(sensorListBreak);
+						List<Sensor> sensorListBreakdown = sensorDao.findByBreakdown(parameters.getBoolean("breakdown"));
+						JSONArray sensorFoundByBreakdown = new JSONArray(sensorListBreakdown);
 						toSend = sensorFoundByBreakdown.toString();
 						break;
 				 
