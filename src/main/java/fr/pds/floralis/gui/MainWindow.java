@@ -173,6 +173,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	
 	int countWarningLevel = 0;
 	int countNewWarningLevel;
+	
+	int countSensorsOn = 0;
+	int countNewSensorsOn;
 
 
 	/** 
@@ -551,6 +554,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				if(sensorUpdateState.getState()) stateChange = "Eteint";
 				else stateChange = "Allumé";
 				if(sensorUpdateState.getConfigure()) {
+					System.out.println("coucou3 " + sensorUpdateState.getConfigure());
 					if(!sensorUpdateState.getAlert()) {
 						if (sensorUpdateState.getState()) {
 							sensorUpdateState.setState(false);
@@ -583,11 +587,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					message.setForeground(Color.BLACK);
 				}
 			} else {
-				message.setText("Vous devez sélectionner un capteur");
+				message.setText("Vous devez sélectionner un capteur !");
 				message.setForeground(Color.BLACK);
 			}
 			
-			refresh(last);
+			//refresh(last);
 
 		}
 
@@ -862,6 +866,20 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				refresh(last);
 				countWarningLevel = countNewWarningLevel;
 			} 
+			
+			// a new state of sensor
+			countNewSensorsOn = 0;
+			for(Sensor s : sensorsFoundList) {
+				if(s.getState()) countNewSensorsOn++ ; 
+			}
+			if(countSensorsOn == 0) countSensorsOn = countNewSensorsOn;
+			
+			if(countSensorsOn != countNewSensorsOn) {
+				refresh(last);
+				countSensorsOn = countNewSensorsOn;
+			}
+			
+			
 			
 		};
 
