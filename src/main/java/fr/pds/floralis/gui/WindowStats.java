@@ -424,7 +424,7 @@ import fr.pds.floralis.server.dao.DAO;
 					 */
 					//TODO: réinitialiser la page, la rafraichir 
 			
-					FindSensorByBreakdown fsbb = new FindSensorByBreakdown();
+					FindSensorByBreakdown fsbb = new FindSensorByBreakdown(host, port);
 					try {
 						sensorFoundList = fsbb.findByBreakdown(false, true);
 					} catch (JSONException | IOException | InterruptedException e1) {
@@ -440,7 +440,7 @@ import fr.pds.floralis.server.dao.DAO;
 					/*
 					 * case of working sensor
 					 */
-					FindSensorByBreakdown fsbw = new FindSensorByBreakdown();
+					FindSensorByBreakdown fsbw = new FindSensorByBreakdown(host, port);
 					try {
 						sensorFoundList = fsbw.findByBreakdown(false, false);
 					} catch (JSONException | IOException | InterruptedException e1) {
