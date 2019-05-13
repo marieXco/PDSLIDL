@@ -525,69 +525,68 @@ import fr.pds.floralis.server.dao.DAO;
 					/*
 					 * SMOKE TYPE 
 					 */
-					
+					int countAlertSmoke = 0; 
 					FindAlertBySensorByType fabyf = new FindAlertBySensorByType();
 					try {
-						alertFoundList = fabyf.findByType(false, smoke);
+						countAlertSmoke= fabyf.findByType(false, smoke);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}
-					int countAlertSmoke = alertFoundList.size(); 	
+					} 	
 					
-					
+				
 					/*
 					 *  LIGHT TYPE
 					 */
-					
+					int countAlertLight = 0;
 					FindAlertBySensorByType fabyl = new FindAlertBySensorByType();
 					try {
-						alertFoundList = fabyl.findByType(false, light);
+						countAlertLight = fabyl.findByType(false, light);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					int countAlertLight = alertFoundList.size(); 
+		 
 					
 
 					/*
 					 * GAS TYPE
 					 */
-					
+					int countAlertGas = 0; 
 					FindAlertBySensorByType fabyg = new FindAlertBySensorByType();
 					try {
-						alertFoundList = fabyg.findByType(false, gas);
+						countAlertGas = fabyg.findByType(false, gas);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					int countAlertGas = alertFoundList.size(); 
+			
 					
 					/*
 					 *  PRESENCE TYPE
 					 */
-					
+					int countAlertMove = 0; 
 					FindAlertBySensorByType fabyp = new FindAlertBySensorByType();
 					try {
-						alertFoundList = fabyl.findByType(false, presence);
+						countAlertMove = fabyl.findByType(false, presence);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					int countAlertMove = alertFoundList.size(); 
+					
 
 					/*
 					 * TEMPERATURE TYPE 
 					 */
-					
+					int countAlertTemperature = 0; 
 					FindAlertBySensorByType fabyt = new FindAlertBySensorByType();
 					try {
-						alertFoundList = fabyt.findByType(false, temperature);
+						countAlertTemperature = fabyt.findByType(false, temperature);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					int countAlertTemperature = alertFoundList.size(); 
+					
 						
 					// put values on JFRAME
 					

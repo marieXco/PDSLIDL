@@ -25,7 +25,7 @@ public class FindAlertBySensorByType {
 
 	}
 
-	public static List<Alert> findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorList;
@@ -53,20 +53,21 @@ public class FindAlertBySensorByType {
 		request1.setEntity("HISTORY_ALERTS");
 		request1.setFields(new JSONObject());
 		
-		ConnectionClient ccAlertFindAll = new ConnectionClient(request.toJSON().toString());
+		ConnectionClient ccAlertFindAll = new ConnectionClient(request1.toJSON().toString());
 		ccAlertFindAll.run();
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
 		
-		List<Alert> alertResult = null;
-		//NOT WORKING
+		int alertResult = 0;
 		
 		for (Alert alert :alertList) {
 			for (Sensor sensor: sensorList ) {
+				System.out.println(" Alert get ID" + alert.getSensor());
+				System.out.println("SENSOR GET ALERT"+ sensor.getId());
 
-			if(!sensor.getAlert().equals(alert.getId())) {
-				alertList.remove(alert);
+			if(alert.getSensor() == sensor.getId()) {
+				alertResult ++;
 			}
 			}
 		}
@@ -75,7 +76,7 @@ public class FindAlertBySensorByType {
 			findByType(true, type);
 		}
 		
-		return alertList;
+		return alertResult;
 	}
 
 }
