@@ -38,6 +38,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -341,7 +342,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		// Empty border for the space between the two panel
 		locationList.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
 		// Empty border for all the window
-		mainContainer.setBorder(BorderFactory.createEmptyBorder(5, 3, 5, 3));
+		mainContainer.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 5));
+		// Border for the space between the two panel of buttons
+		infoSensorsPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		displaySensorsPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		
 
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setContentPane(mainContainer);
