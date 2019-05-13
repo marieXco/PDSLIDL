@@ -109,7 +109,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	JButton buttonDeleteSensor = new JButton("Supprimer le capteur");
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
 	JButton buttonUpdateSensorState = new JButton(onOff);
-	JButton buttonRefreshSensor = new JButton("Refresh");
+	JButton buttonRefreshSensor = new JButton("Capteurs");
 	JButton buttonNoConfigSensor = new JButton("Capteurs non configurés");
 	JButton buttonYesConfigSensor = new JButton("Capteurs déjà configurés");
 	JButton buttonConfigSensor = new JButton (configuration);
@@ -163,6 +163,16 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	int countAlert = 0;
 	int countNewAlert;
+	
+	int countSensors = 0;
+	int countNewSensor;
+	
+	int countLocation = 0;
+	int countNewLocation;
+	
+	int countWarningLevel = 0;
+	int countNewWarningLevel;
+	
 
 	/** 
 	 * Constructor, takes the host and port from the main
@@ -228,15 +238,15 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
+		infoSensorsPanel.add(buttonUpdateConfig);
+		infoSensorsPanel.add(buttonConfigSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
 		infoSensorsPanel.add(buttonRefreshSensor);
 		infoSensorsPanel.add(buttonYesConfigSensor);
 		infoSensorsPanel.add(buttonNoConfigSensor);
-		infoSensorsPanel.add(buttonUpdateConfig);
-		infoSensorsPanel.add(buttonConfigSensor);
 
 
-		// Mise en place des raccourcis
+		// Keyboard shortcut
 		addingSensor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,
 				InputEvent.ALT_DOWN_MASK));
 		addingLocation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
@@ -264,12 +274,12 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		messagePanel.setBorder(BorderFactory.createTitledBorder("Message"));
 
 
-		// Elements les uns à côté des autres
+		// Elements are one next to the other
 		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel, BoxLayout.X_AXIS));
 		southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
 
-		// Elements un en dessous des autres
+		// Elements are one below the other
 		locationList.setLayout(new BoxLayout(locationList, BoxLayout.Y_AXIS));
 		locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
 		sensorsPanel.setLayout(new BoxLayout(sensorsPanel, BoxLayout.Y_AXIS));
@@ -282,7 +292,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		//get maximum window bounds
 		Rectangle maximumWindowBounds = graphicsEnvironment.getMaximumWindowBounds();
 
-		window.setBounds(0, 0, (int)maximumWindowBounds.getWidth(), (int)maximumWindowBounds.getHeight());
+		window.setBounds(0, 0, (int)maximumWindowBounds.getWidth() - 60, (int)maximumWindowBounds.getHeight() - 20);
 
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
 		infoSensorsPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 300));
@@ -322,24 +332,22 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		messagePanel.add(message);
 		message.setHorizontalAlignment(SwingConstants.CENTER);
 
-		// Bordures vides pour l'espace entre les deux gros panneaux
+		// Empty border for the space between the two panel
 		northPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 		southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		// Bordures vides pour l'espace dans le panneau des capteurs (du padding)
+		// Empty border for the space between the two panel
 		locationList.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
-		// Bordures vides pour toute la fenêtre
+		// Empty border for all the window
 		mainContainer.setBorder(BorderFactory.createEmptyBorder(5, 3, 5, 3));
 
-
-		// DISPOSE --> ne ferme pas, laisse la place à la fenêtre de déconnection
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setContentPane(mainContainer);
 		window.setTitle("Floralis");
 		window.setLocationRelativeTo(null);
 		window.setVisible(true);
 
-		// Si la fenêtre est fermée alors on notifie le main, 
-		// que la fenêtre vient de se fermer
+		// If the window is closed
+		// Then the main is notify
 		window.addWindowListener(new WindowAdapter() {
 			public void windowClosed(WindowEvent e) {
 				synchronized (valueWait) {
@@ -445,13 +453,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addingSensor) {
 			try {
-				WindowAdd toto = new WindowAdd(window);
-				toto.run();
-				System.out.println("ahahahahah ça marche putain");
+				new WindowAdd().run();
 			} catch (JSONException e1) {
 				e1.printStackTrace();
 			} catch (HeadlessException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -459,7 +464,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		if (e.getSource() == addingLocation) {
 			try {
-				new WindowAdd(window).initAddLocation();
+				new WindowAdd().initAddLocation();
 			} catch (JsonParseException e1) {
 
 				e1.printStackTrace();
@@ -493,14 +498,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 
 		if (e.getSource() == buttonRefreshLocation) {
-			// Ici, un refresh vient d'être fait sur les localisations, fonctionne comme pour les lignes 270-293
+
 			FindAllLocation fl = new FindAllLocation(host, port);
 			List<Location> locationsFoundList;
 
 			try {
 				locationsFoundList = fl.findAll(false);
 
-				// On retire tout ce qui est contenu dans le panneau locationList
 				locationList.removeAll();
 				locationList.revalidate();
 				locationList.repaint(); 
@@ -515,25 +519,17 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				}
 
 			} catch (JsonParseException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (JsonMappingException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (JSONException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
-
-
-			// On retire tout ce qui est dans le panneau des localisations et on y rajoute les composants modifiés
 			locationPanel.removeAll();
 			locationPanel.add(buttonRefreshLocation);
 			locationPanel.add(locationList);
@@ -571,7 +567,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						ConnectionClient ccSensorUpdateState = new ConnectionClient(host, port, request.toJSON().toString());
 						ccSensorUpdateState.run();
-						refresh(last);
+						
+						if(sensorUpdateState.getState()) message.setText("Le capteur " + sensorUpdateState.getId() + " a été allumé" );
+						else message.setText("Le capteur " + sensorUpdateState.getId() + " a été éteind" );
+							
 
 					} else {
 						message.setText("Le capteur " + sensorUpdateState.getId() + " est en alerte, il ne peut pas être " + stateChange);
@@ -585,6 +584,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				message.setText("Vous devez sélectionner un capteur");
 				message.setForeground(Color.BLACK);
 			}
+			
+			refresh(last);
 
 		}
 
@@ -611,7 +612,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 						message.setText("Le capteur " + SensorDelete.getId() + " a été supprimé avec succès");
 						message.setForeground(Color.BLACK);
-						refresh(last);
 
 						// TODO : Ici, il faut récupérer la localisation qui est associée au capteur pour 
 						// supprimer dans cette localisation l'occurence du capteur supprimé
@@ -638,7 +638,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 							new WindowUpdate(getHost(), getPort()).initUpdateSensor(sensorUpdate.getId());
 							refresh(last);
 						} catch (HeadlessException | JSONException | InterruptedException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					} catch (IOException e1) {
@@ -656,7 +655,35 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		}
 
 		if(e.getSource() == buttonUpdateConfig) {
+			int indexSensor = comboSensors.getSelectedIndex();
+			if(indexSensor > 0) {
+				Sensor sensorUpdateWarningLevel = sensorsFoundList.get(indexSensor - 1);
+				if(sensorUpdateWarningLevel.getConfigure()) {
+					if(!sensorUpdateWarningLevel.getAlert()) {
+						if(!sensorUpdateWarningLevel.getType().equals("FIRE")) {
+						try {
+							new WindowUpdateConfig().init(sensorUpdateWarningLevel.getId());
+						} catch (JSONException | IOException e1) {
+							e1.printStackTrace();
+						}
+						} else {
+							message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " est de type feu, il n'a pas de seuils ");
+							message.setForeground(Color.BLACK);
+						}
+					} else {
+						message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " est en alerte, ses seuils ne peuvent pas être modifié" );
+						message.setForeground(Color.BLACK);
+					}
+				} else {
+					message.setText("Le capteur " + sensorUpdateWarningLevel.getId() + " n'est pas configuré, ses seuils ne peuvent pas être modifié " );
+					message.setForeground(Color.BLACK);
+				}
+			} else {
+				message.setText("Vous devez sélectionner un capteur");
+				message.setForeground(Color.BLACK);
+			}
 
+		
 		}
 
 
@@ -671,7 +698,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 							try {
 								new WindowConfig(getHost(), getPort()).initConfigSensor(sensorFoundConfig.getId());
 							} catch (HeadlessException | JSONException | InterruptedException e1) {
-								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						} catch (IOException e1) {
@@ -682,8 +708,8 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					} else {
 						boolean sure = new WindowConfirm().init("supprimer la configuration du capteur " + sensorFoundConfig.getId() );
 						if (sure) {
-							sensorFoundConfig.setMin(null);
-							sensorFoundConfig.setMax(null);
+							sensorFoundConfig.setMin(0);
+							sensorFoundConfig.setMax(0);
 
 							sensorFoundConfig.setState(false);
 							sensorFoundConfig.setIpAddress(null);
@@ -706,7 +732,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 							ConnectionClient ccSensorUpdate = new ConnectionClient(host, port, thirdRequest.toJSON().toString());
 							ccSensorUpdate.run();
 
-							refresh(last);
 						}
 					} 
 				}
@@ -765,13 +790,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 	}
 
-	//If there are a new alert, the gui is refresh
-	public void refreshAlert() {
+	//If there are a new alert, the sensors are refresh
+	public void refreshNewElement() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
 		Runnable task1 = () -> {
 			countMessage++;
-			System.out.println(" Refresh -- Alert - count : " + countMessage);
+			System.out.println(" Refresh - count : " + countMessage);
 			FindAllSensor fs = new FindAllSensor(host, port);
 			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
 			try {
@@ -780,41 +805,78 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			//a new sensor or a sensor delete
+			countNewSensor = sensorsFoundList.size();
+			// if it is the first connection
+			if(countSensors == 0) countSensors = countNewSensor;
+			
+			// if there are new sensor or a sensor deleted, then countSensors is different than countNewSensor
+			if(countSensors != countNewSensor) {
+				refresh(last);
+				countSensors = countNewSensor;
+			} 
+			
+			// a new alert
 			countNewAlert = 0;
+			
+			// count the number of alert
 			for(Sensor s : sensorsFoundList) {
 				if(s.getAlert()) countNewAlert++;
 			}
-
+			
+			// if it is the first connection
 			if(countNewAlert == 0) countAlert = 0;
 
+			// if the number of alert is changing
 			if(countAlert < countNewAlert) {
 				refresh(last);
-				System.out.println("Nombre de capteur en alert initialement " + countAlert);
-				System.out.println("Nombre de capteur en alert maintenant " + countNewAlert);
 				if(countMessage > 1) new WindowAlert().init();
 				countAlert = countNewAlert;
 			} 
+			
+			// a new configuration
+			countNewLocation = 0;
+			
+			// if there are a new configuration the sum of the id location is update
+			for(Sensor s : sensorsFoundList) {
+				countNewLocation+= s.getIdLocation();
+			} 
 
-			if(countNewAlert > 0) {
-				message.setText("Vous avez " + countAlert + " capteur(s) en alerte");
-				message.setForeground(Color.RED);
-			}
-
-
+			// if it is the first connection
+			if(countLocation == 0) countLocation = countNewLocation;
+			if(countLocation != countNewLocation) {
+				refresh(last);
+				countLocation = countNewLocation;
+			} 
+			
+			// new warning level 
+			countNewWarningLevel = 0;
+			for(Sensor s : sensorsFoundList) {
+				countNewWarningLevel+= s.getMin() + s.getMax(); 
+			} 
+			if(countWarningLevel == 0) countWarningLevel = countNewWarningLevel;
+			if(countWarningLevel != countNewWarningLevel) {
+				refresh(last);
+				countWarningLevel = countNewWarningLevel;
+			} 
+			
 		};
 
-		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 30, SECONDS);
+		ScheduledFuture<?> scheduledFuture = ses.scheduleAtFixedRate(task1, 0 , 1, SECONDS);
 
 
 		ses.schedule(new Runnable() {
 			public void run() { 
 				scheduledFuture.cancel(true); 
 			}
-		}, 360, SECONDS
+		}, 3600, SECONDS
 				);
 	}
 
-	//All the 30 seconds the gui is refresh
+	// All the 30 seconds the sensors are refresh
+	// This method is need if another client manage a sensor
+	// Thus, the sensors are refresh 
 	public void refreshSensors() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -830,7 +892,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			public void run() { 
 				scheduledFuture.cancel(true); 
 			}
-		}, 360, SECONDS 
+		}, 3600, SECONDS 
 				);
 	}
 
@@ -863,7 +925,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void run() {
 		try {
 			init();
-			refreshAlert();
+			refreshNewElement();
 			refreshSensors();
 		} catch (SQLException e) {
 			e.printStackTrace();

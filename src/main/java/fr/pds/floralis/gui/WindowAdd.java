@@ -3,12 +3,9 @@ package fr.pds.floralis.gui;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
-import java.awt.GraphicsConfiguration;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +40,7 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
-public class WindowAdd extends JDialog implements ActionListener {
+public class WindowAdd extends JFrame implements ActionListener {
 	// watch WindowConfirm for serialVersionUID
 	private static final long serialVersionUID = -5982857209357189773L;
 	
@@ -138,22 +135,7 @@ public class WindowAdd extends JDialog implements ActionListener {
 	//TODO delete
 	int port = 1234;
 	String host = "1921685353";
-	
-	private JFrame toto;
-	
-	
-	public WindowAdd(JFrame parent) {
-		super(parent);
-		this.toto = parent;
-	}
-	
-	public void createUI() {
-        window.setLocationRelativeTo(toto);
-        window.setTitle("Dialog created by extending JDialog class.");
-        window.setSize(new Dimension(400, 100));
-        window.setModal(true);
-        window.setVisible(true);
-    }
+
 	
 	// TODO method for the Pop-up to add a Personnel
 	public void initAddPersonnel() {
@@ -502,8 +484,8 @@ public class WindowAdd extends JDialog implements ActionListener {
 						sensorCreate.setId(Integer.parseInt(identifiant.getText()));
 						
 						//To configure
-						sensorCreate.setMin(null);
-						sensorCreate.setMax(null);
+						sensorCreate.setMin(0);
+						sensorCreate.setMax(0);
 						sensorCreate.setIdLocation(0);
 						sensorCreate.setAlert(false);
 						sensorCreate.setBreakdown(false);

@@ -72,8 +72,8 @@ public class WindowOpening extends Thread {
 		window.setVisible(true);
 		int position = 0;
 
-		// progressBar qui augmente de 8 toutes les 2 millisecondes
-		while (position < 105) {
+		// progressBar grow up of 8 all the 2 msc
+		while (position < 100) {
 			progressbar.setValue(position);
 			try {
 				Thread.sleep(200);
