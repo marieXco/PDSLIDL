@@ -30,7 +30,7 @@ public class FindAlertByYear {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static List<Alert> findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -46,15 +46,21 @@ public class FindAlertByYear {
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
 		
+		int alertAuGogoles = 0; 
 		for (Alert alert :alertList) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-	        sdf.format(date);
-	        sdf.format(alert.getDate());
-	        System.out.println(date);
-	        System.out.println(alert);
-
-			if(alert.equals(date)) {
-				alertList.remove(alert);
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+			String dateString = sdf.format(date);
+	        String dateAlert = sdf.format(alert.getDate());
+	        System.out.println("La date qui rentre en parametre de la session" +date);
+	        System.out.println("Alerte" + alert);
+	        // System.out.println(alertAuGogoles++);
+	        Integer test = Integer.parseInt(dateString)- 1900 ;
+	        
+	        // System.out.println("Date String " +  );
+	        // System.out.println("Date alerte " + dateAlert);
+	        
+			if(dateAlert.equals(test.toString())) {
+				alertAuGogoles++; 
 			}
 			
 		}
@@ -64,7 +70,7 @@ public class FindAlertByYear {
 			findByYear(true, date);
 		}
 		
-		return alertList;
+		return alertAuGogoles;
 	}
 	
 

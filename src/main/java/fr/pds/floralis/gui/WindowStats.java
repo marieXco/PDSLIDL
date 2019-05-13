@@ -158,7 +158,7 @@ import fr.pds.floralis.server.dao.DAO;
 		    
 		    
 		    // Sensor option 
-		    
+		    sensorOption.addItem("Aucun");
 		    sensorOption.addItem("Type de capteurs");
 		    sensorOption.addItem("Etats des capteurs");
 		    sensorOption.addItem("Panne des capteurs");
@@ -171,6 +171,7 @@ import fr.pds.floralis.server.dao.DAO;
 		 
 		    
 		    //Alert Option 
+			alertOption.addItem("Aucun");
 			alertOption.addItem("Alerte par mois");
 			alertOption.addItem("Alerte par an");
 			alertOption.addItem("Alerte par type de capteurs");
@@ -217,7 +218,10 @@ import fr.pds.floralis.server.dao.DAO;
 				int indexSensor = sensorOption.getSelectedIndex();
 
 				switch(indexSensor) {
-				case 0: 
+				case 0 : 
+				
+					break; 
+				case 1	: 
 					// case of sensor type filter 
 					
 					/*
@@ -303,14 +307,14 @@ import fr.pds.floralis.server.dao.DAO;
 					result.add(tabResultType); 
 					pack();
 					break; 
-				case 1: 
+				case 2: 
 					
 					// case of sensor state filter
 					
 					//TODO: fonctionne mais ne se raffraichit pas automatiquement
 					
 					stateOption.addItem("Aucun");
-					stateOption.addItem("Eteind");
+					stateOption.addItem("Eteint");
 					stateOption.addItem("Allumé");
 					sensorPanel.add(labelState); 
 					sensorPanel.add(stateOption);
@@ -318,7 +322,7 @@ import fr.pds.floralis.server.dao.DAO;
 					pack();
 					break; 
 					
-				case 2: 
+				case 3: 
 					
 					// case of sensor breakdown filter
 					
@@ -331,7 +335,7 @@ import fr.pds.floralis.server.dao.DAO;
 					pack(); 
 					break; 
 					
-				case 3: 
+				case 4: 
 					
 					// case of sensor which havent configuration 
 					FindSensorByConfig fsbc = new FindSensorByConfig(host, port);
@@ -460,6 +464,8 @@ import fr.pds.floralis.server.dao.DAO;
 
 				switch(indexAlert) {
 				case 0: 
+					break; 
+				case 1: 
 					// case of alert by month
 					//TODO: adding compare option 
 						
@@ -472,29 +478,47 @@ import fr.pds.floralis.server.dao.DAO;
 							e1.printStackTrace();
 						}
 					int countAlertMonthYear = alertFoundList.size(); 	
-					JLabel alertMY = new JLabel ("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);
-					result.add(alertMY);
+					String alertMY = "Nombre d'alerte du mois en cours: ";
+					FindAlertByMonthYear fabmy1 = new FindAlertByMonthYear(host, port);
+					
+					Date date1 = new Date(2019, 04, 12);
+						try {
+							alertFoundList = fabmy1.findByMonthYear(false, date1);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					int countAlertMonthYear1 = alertFoundList.size(); 
+					String alertMY1= "Nombre d'alerte du mois d'Avril"; 
+					Object[][] data = {
+				           { alertMY , countAlertMonthYear },
+				           { alertMY1, countAlertMonthYear1}
+						};
+
+					String[] entetes = {"Description", "Nombre"};
+					JTable tabResultAMType = new JTable(data, entetes); 
+					result.add(tabResultAMType); 
 					pack(); 
 						
 					break; 
-				case 1: 
+				case 2: 
 					
 					// case of alert by year 
 					FindAlertByYear faby = new FindAlertByYear(host, port);
-					Date date1 = new Date();
+					int countAlertFound = 0;
+					Date dateYear = new Date(2018, 02, 12);
 					try {
-						alertFoundList = faby.findByYear(false, date1);
+						countAlertFound = faby.findByYear(false, dateYear);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}
-					int countAlertYear = alertFoundList.size(); 	
-					JLabel alertYear = new JLabel("Nombre d'alerte de l'année en cours: " + countAlertYear);
-					result.add(alertYear);
+					}	
+					JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année en cours: " + countAlertFound);
+					result.add(labelalertYear);
 					pack();
 					break; 
 						
-				case 2: 
+				case 3: 
 					//  case of alert by sensor type 
 					
 					/*
@@ -574,8 +598,8 @@ import fr.pds.floralis.server.dao.DAO;
 		            { ttemp, countAlertTemperature},
 					};
 
-					String[] entetes = {"Description", "Nombre"};
-					JTable tabResultAlertType = new JTable(dataAlert, entetes); 
+					String[] tetes = {"Description", "Nombre"};
+					JTable tabResultAlertType = new JTable(dataAlert, tetes); 
 					result.add(tabResultAlertType); 
 					pack(); 
 					break;
