@@ -2,22 +2,16 @@ package fr.pds.floralis.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.sql.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
@@ -35,21 +29,26 @@ import fr.pds.floralis.commons.bean.entity.Sensor;
 import fr.pds.floralis.gui.connexion.ConnectionClient;
 
 public class WindowUpdateConfig extends JFrame implements ActionListener {
-	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2688404162934797933L;
+
 	private int LG = 700;
 	private int HT = 100;
-	
+
 	// Creation of panels
 	JPanel container = new JPanel();
 	JPanel mainInfosPanel = new JPanel();
-	
+
 	JTextField resultSend = new JTextField(10);
 	JTextPane infos = new JTextPane();
-	
+
 	/**
 	 * the thresholds are different according to the type of sensors
 	 */
-	
+
 	/**
 	 * For TEMPERATURE
 	 * The temperature have to be between the min and the max
@@ -83,13 +82,13 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 	 * For FIRE
 	 * No choice for the user because as soon as there are smoke, the sensor is in alert
 	 */
-	
+
 	Button buttonUpdateWarningLevel = new Button("Modifier les seuils");
 
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
 	protected int id;
 	Sensor sensorFound;
-	
+
 
 	public void init(int id) throws JsonParseException, JsonMappingException, JSONException, IOException {
 
@@ -111,12 +110,12 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 		// Recovery of the sensor associate at the id in parameter
 		JSONObject sensorIdFindById = new JSONObject();
 		sensorIdFindById.put("id", getId());
-		
+
 		Request request = new Request();
 		request.setType("FINDBYID");
 		request.setEntity("SENSOR");
 		request.setFields(sensorIdFindById);
-		
+
 		ConnectionClient ccSensorFindById = new ConnectionClient(request.toJSON().toString());
 		ccSensorFindById.run();
 
@@ -127,9 +126,9 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 		ObjectMapper objectMapper = new ObjectMapper();
 		sensorFound =  objectMapper.readValue(sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
 		// End sensor Find By Id
-		
+
 		container.setPreferredSize(new Dimension(LG + 200, HT));
-		
+
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 
 		infos.setParagraphAttributes(centrer, true);
@@ -151,7 +150,7 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 		container.add(infos);
 		container.add(buttonUpdateWarningLevel);
 
-		
+		// The warning level depend of the type of the sensor
 		switch (sensorFound.getType()) {
 		case "TEMPERATURE" :
 			mainInfosPanel.add(minLabel);
@@ -201,20 +200,12 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 			} catch (java.lang.NumberFormatException ex) {
 				infos.setText("Les seuils ne peuvent contenir que des chiffres");
 			}
-			
+
 			// Checking informations
+			// for type TEMPERATURE
 			if (sensorFound.getType().equals("TEMPERATURE") && 
 					(min.getText().isEmpty() || max.getText().isEmpty())) {
 				infos.setText("Vous devez renseigner les seuils de température");
-			}
-			
-			else if((sensorFound.getType().equals("LIGHT") || sensorFound.getType().equals("PRESENCE")) && 
-					(duringDay.getText().isEmpty() || duringNight.getText().isEmpty())) {
-				infos.setText("Vous devez renseigner les seuils de durée");
-			}
-			
-			else if(sensorFound.getType().equals("GASLEAK") && gas.getText().isEmpty()) {
-				infos.setText("Vous devez renseigner le seuil de gaz");
 			}
 
 			// If min > max
@@ -223,10 +214,20 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
+			// For type LIGHT and PRESENCE
+			else if((sensorFound.getType().equals("LIGHT") || sensorFound.getType().equals("PRESENCE")) && 
+					(duringDay.getText().isEmpty() || duringNight.getText().isEmpty())) {
+				infos.setText("Vous devez renseigner les seuils de durée");
+			}
 
+			// For type GASLEAK
+			else if(sensorFound.getType().equals("GASLEAK") && gas.getText().isEmpty()) {
+				infos.setText("Vous devez renseigner le seuil de gaz");
+			}
+			
 			else { 
-				
-				//Configuration acording to the type of the sensor
+
+				//Configuration depend of the type of the sensor
 				switch (sensorFound.getType()) {
 				case "TEMPERATURE":
 					sensorFound.setMin(Integer.parseInt(min.getText().trim()));
@@ -245,7 +246,7 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 					sensorFound.setMax(Integer.parseInt(gas.getText().trim()));
 					break;
 				}
-				
+
 				JSONObject sensorConfigJson = new JSONObject();
 				sensorConfigJson.put("id", sensorFound.getId());
 				sensorConfigJson.put("sensorToUpdate", sensorFound.toJSON());
@@ -271,9 +272,9 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 
 
 		}
-		
+
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -282,6 +283,6 @@ public class WindowUpdateConfig extends JFrame implements ActionListener {
 	public void setId(int id) {
 		this.id = id;
 	}
-	
-	
+
+
 }
