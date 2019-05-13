@@ -80,6 +80,9 @@ public class MyPanel extends JPanel implements MouseListener {
 		System.out.println("Rentre dans le paintComponent");
 
 		Graphics2D g2 = (Graphics2D) g.create();
+		Graphics2D g3 = (Graphics2D) g.create();
+		g3.setColor(Color.RED);
+		
 		if (image != null) {
 			int x = (getWidth() - image.getWidth()) / 2;
 			int y = (getHeight() - image.getHeight()) / 2;
@@ -88,22 +91,12 @@ public class MyPanel extends JPanel implements MouseListener {
 				g2.setColor(Color.green);
 				// g2.translate(rectangle.x, rectangle.y);
 					g2.draw(rectangle);
+					g3.drawString(id.toString(), rectangle.x, rectangle.y);
+					
 				});
 		}
 		g2.dispose();
-		/*
-		 * // int planWidth = getWidth(); // int panelWidth = this.getWidth();
-		 * 
-		 * // Draw image // g2.drawImage(img1, 700, 50, 500, 500, this); //
-		 * g2.drawImage(img2, 700, 400, 500, 500, this);
-		 * 
-		 * g.setColor(Color.GREEN); // // Draw rectangle g.drawRect(foyer.x,
-		 * foyer.y, foyer.width, foyer.height); g.drawRect(toilettes.x,
-		 * toilettes.y, toilettes.width, toilettes.height);
-		 * g.drawRect(salledejeu.x, salledejeu.y, salledejeu.width,
-		 * salledejeu.height); g.drawRect(ascenseur.x, ascenseur.y,
-		 * ascenseur.width, ascenseur.height); validate();
-		 */
+		
 	}
 
 	@Override
