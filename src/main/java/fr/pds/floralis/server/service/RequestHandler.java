@@ -157,6 +157,17 @@ public class RequestHandler implements Runnable {
 
 						toSend = sensorUpdating.toString();
 						break;
+						
+					case "UPDATELOCATIONID":
+						Sensor sensorToUpdateForLocation = objectMapper.readValue(
+								parameters.get("sensorToUpdate").toString(),
+								Sensor.class);
+
+						Boolean sensorUpdatingForLocationId = sensorDao.updateLocation(
+								parameters.getInt("idLocation"), sensorToUpdateForLocation);
+
+						toSend = sensorUpdatingForLocationId.toString();
+						break;
 
 					case "FINDBYCONFIG":
 						List<Sensor> sensorListConfig = sensorDao

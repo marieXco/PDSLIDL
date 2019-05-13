@@ -2,6 +2,8 @@ package fr.pds.floralis.server.dao;
 
 import java.util.List;
 
+import fr.pds.floralis.commons.bean.entity.Sensor;
+
 public interface DAO<T> {
 
 
@@ -52,4 +54,5 @@ public interface DAO<T> {
 	 */
 	
 	public abstract List<T> findAll();
+
 }

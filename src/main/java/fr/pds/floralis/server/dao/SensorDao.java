@@ -146,6 +146,34 @@ public class SensorDao implements DAO<Sensor> {
 		}
 
 	}
+	
+	public Boolean updateLocation(int idLocation, Sensor sensorToConfigure) {
+		int success = 0;
+		JSONObject jsonObject = sensorToConfigure.toJSON();
+
+		try {
+			connect.setAutoCommit(false);
+			String sql = "UPDATE sensors SET data = '" + jsonObject + "' WHERE (data -> 'idLocation')::json::text = '" + idLocation + "'::json::text;";
+
+			PreparedStatement statement = connect.prepareStatement(sql);
+
+			success = statement.executeUpdate();
+			connect.commit();
+
+
+			statement.close();
+
+		} catch (Exception e) {
+			System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			System.exit(0);
+		}
+
+		if(success > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see fr.pds.floralis.server.dao.TestDAO#find(org.json.JSONObject)
@@ -329,7 +357,7 @@ public class SensorDao implements DAO<Sensor> {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data ->> 'idLocation')::text = '" + idLocation + "'::text;");
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'idLocation')::json::text = '" + idLocation + "'::json::text;");
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
 				sensors.add(sensor);
@@ -346,5 +374,8 @@ public class SensorDao implements DAO<Sensor> {
 		
 		return sensors;
 	}
+
+
+
 
 }

@@ -3,26 +3,20 @@ package fr.pds.floralis.gui;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.HeadlessException;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -30,12 +24,19 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.impl.ExternalTypeHandler.Builder;
 
+import fr.pds.floralis.commons.bean.entity.Request;
 import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.gui.connexion.ConnectionClient;
 import fr.pds.floralis.gui.tablemodel.SensorTableModel;
 
 public class WindowMap extends JFrame  implements ActionListener{
@@ -100,8 +101,11 @@ public class WindowMap extends JFrame  implements ActionListener{
 	private JTextField idSensortoLocate;
 	private JButton addLocation;
 	private JPanel showLocation;
-
-
+	private static Sensor sensorToDisplay;
+	
+	JTextPane infos = new JTextPane();
+	SimpleAttributeSet centrer = new SimpleAttributeSet();
+	
 	// Button
 	Button addingSensor = new Button("Ajouter un capteur");
 	private JComboBox<Object> comboSensors1 = new JComboBox<Object>();
@@ -131,7 +135,13 @@ public class WindowMap extends JFrame  implements ActionListener{
 		MyPanel image = new MyPanel(img1, listRectangle, host, port, sensorsTable, comboSensors);
 		MyPanel image2 = new MyPanel(img2, listRectangle, host, port, sensorsTable, comboSensors);
 		
-		
+		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
+		infos.setParagraphAttributes(centrer, true);
+		infos.setText("Ajout d'un capteur");
+		infos.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+		infos.setOpaque(false);
+		infos.setEditable(false);
+		infos.setFocusable(false);
 		
 		backPanel.add(sensorsLocated);
 		backPanel.add(sensorsTable);
@@ -145,8 +155,8 @@ public class WindowMap extends JFrame  implements ActionListener{
 		backPanel.setLayout(fLayout);
 		backPanel.add(image, BorderLayout.NORTH);
 		backPanel.add(image2, BorderLayout.SOUTH);
-		backPanel.add(new JLabel("Saisir l'id du capteur à placer : "));
-		idSensortoLocate = new JTextField(20);
+		backPanel.add(new JLabel("Id du capteur à placer:"));
+		idSensortoLocate = new JTextField(8);
 		backPanel.add(idSensortoLocate);
 		addLocation = new JButton("Attribuer une localisation");
 		addLocation.addActionListener(this);
@@ -202,7 +212,54 @@ public class WindowMap extends JFrame  implements ActionListener{
 			JButton clickedButton = (JButton)e.getSource();
 			if(clickedButton == addLocation){
 				
-				showPopupToSetLocation();	
+				this.sensorToDisplay=null;
+				String idToFind = idSensortoLocate.getText().toString().trim();
+				if(idToFind.trim().length()>0){
+					showLocation.remove(infos);
+					backPanel.validate();
+					int idFound = Integer.parseInt(idToFind);
+					JSONObject sensorIdFindById = new JSONObject();
+					sensorIdFindById.put("id", idFound);
+					
+					Request request = new Request();
+					request.setType("FINDBYID");
+					request.setEntity("SENSOR");
+					request.setFields(sensorIdFindById);
+					
+					ConnectionClient ccSensorFindById = new ConnectionClient(host, port, request.toJSON().toString());
+					ccSensorFindById.run();
+
+					String retourSensorFindById = ccSensorFindById.getResponse();
+					JSONObject sensorFoundJson = new JSONObject();
+					sensorFoundJson.put("sensorFoundJson", retourSensorFindById);
+
+					ObjectMapper objectMapper = new ObjectMapper();
+					try {
+						sensorToDisplay =  objectMapper.readValue(sensorFoundJson.get("sensorFoundJson").toString(), Sensor.class);
+					} catch (Exception e1) {
+
+						e1.printStackTrace();
+					} 
+					if ((Object) sensorToDisplay == null){
+						showLocation = new JPanel(new FlowLayout());
+						showLocation.add(infos);
+						
+						infos.setText("Ce capteur n'existe pas");
+						backPanel.add(showLocation);
+						backPanel.validate();
+					} else {
+						showPopupToSetLocation();
+					}
+				}else {
+					showLocation = new JPanel(new FlowLayout());
+					showLocation.add(infos);
+					
+					infos.setText("Veuillez saisir un identifiant");
+					backPanel.add(showLocation);
+					backPanel.validate();
+					
+				}			
+			}else if(clickedButton == addLocation){
 				
 			}
 		}
@@ -210,17 +267,19 @@ public class WindowMap extends JFrame  implements ActionListener{
 	}
 	
 
-	private void showPopupToSetLocation() {
-		showLocation = new JPanel(new GridLayout(0, 2, 10, 2));
-		
-		JTextField locationToconfig= new JTextField(15);
+	
 
-		showLocation.add(new JLabel("Nouvelle localisation du capteur:"));
-		showLocation.add(locationToconfig);
-		backPanel.add(showLocation);
-		backPanel.validate();
-		//showLocation.setVisible(true);
-		// showLocation.setEnabled(true);
+	private void showPopupToSetLocation() {
+			showLocation = new JPanel(new FlowLayout());
+			JTextField locationToconfig= new JTextField(10);
+			FlowLayout fLayout = (FlowLayout) showLocation.getLayout();
+			showLocation.add(new JLabel("Nouvelle localisation du capteur:"));
+			showLocation.add(locationToconfig);
+			JButton validateLocation = new JButton("Valider");
+			showLocation.add(validateLocation, BorderLayout.SOUTH);
+			backPanel.add(showLocation, BorderLayout.SOUTH);
+			backPanel.validate();
+		
 	}
 
 
