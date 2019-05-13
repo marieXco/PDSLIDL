@@ -53,6 +53,7 @@ import fr.pds.floralis.server.dao.DAO;
 		JPanel container = new JPanel();
 		JPanel requestPanel = new JPanel();
 		JPanel resultPanel = new JPanel(); 
+		JPanel result = new JPanel(); 
 		JPanel indicatorInfo= new JPanel();
 		JPanel sensorPanel = new JPanel();
 		JPanel alertPanel = new JPanel();
@@ -65,6 +66,7 @@ import fr.pds.floralis.server.dao.DAO;
 		JLabel labelState= new JLabel("Etats des capteurs : ");
 		JLabel labelBreak= new JLabel("Panne des capteurs : ");
 		JLabel labelAlert= new JLabel("Filtrer sur les alertes : ");
+		JButton newRequest = new JButton("Nouvelle requête"); 
 		
 		String ttemp = "Capteurs de température"; 
 		String fire = "Capteurs de type fumée"; 
@@ -82,7 +84,6 @@ import fr.pds.floralis.server.dao.DAO;
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
 		List<Patient> patientFoundList;
-		Date date = new Date();
 		
 
 		public void initIndicators() throws IOException{
@@ -182,7 +183,9 @@ import fr.pds.floralis.server.dao.DAO;
 		   //TODO: ajouter des éléments dans la bdd pour les tests (patients, anciennes alertes) 
 		    //TODO: implémenter la comparaison sur les 12 mois, cette partie doit se trouver dans l'item listener des dates 
 
-		    resultPanel.setLayout(new GridLayout(1, 1));
+		    resultPanel.add(newRequest); 
+		    resultPanel.add(result); 
+		    newRequest.addActionListener(this);
 		    
 		    panel.add(requestPanel);
 		    panel.add(resultPanel);
@@ -201,6 +204,10 @@ import fr.pds.floralis.server.dao.DAO;
 	
 
 		public void actionPerformed(ActionEvent e) {
+			
+			/*
+			 * to do a new request 
+			 */
 			
 			/*
 			 * SENSOR OPTION 
@@ -283,7 +290,7 @@ import fr.pds.floralis.server.dao.DAO;
 						
 					// put values on JFRAME
 					
-					Object[][] donnees = {
+					Object[][] data = {
 		            { fire , countSmoke },
 		            { llight, countLight},
 		            { ggas, countGas},
@@ -292,8 +299,9 @@ import fr.pds.floralis.server.dao.DAO;
 					};
 
 					String[] entetes = {"Description", "Nombre"};
-					JTable tabResultType = new JTable(donnees, entetes); 
-					resultPanel.add(tabResultType); 
+					JTable tabResultType = new JTable(data, entetes); 
+					result.add(tabResultType); 
+					pack();
 					break; 
 				case 1: 
 					
@@ -307,6 +315,7 @@ import fr.pds.floralis.server.dao.DAO;
 					sensorPanel.add(labelState); 
 					sensorPanel.add(stateOption);
 					stateOption.addActionListener(this);
+					pack();
 					break; 
 					
 				case 2: 
@@ -319,6 +328,7 @@ import fr.pds.floralis.server.dao.DAO;
 					sensorPanel.add(labelBreak); 
 					sensorPanel.add(breakOption);
 					breakOption.addActionListener(this);
+					pack(); 
 					break; 
 					
 				case 3: 
@@ -333,8 +343,8 @@ import fr.pds.floralis.server.dao.DAO;
 					}
 					int countNoConfig = sensorFoundList.size(); 	
 					JLabel noConfig = new JLabel("Nombre de Capteurs non configurés : " + countNoConfig);	
-					resultPanel.add(noConfig);
-					
+					result.add(noConfig);
+					pack(); 
 					break; 
 					
 					
@@ -372,7 +382,7 @@ import fr.pds.floralis.server.dao.DAO;
 					}
 					int countOff = sensorFoundList.size(); 	
 					JLabel offSensor = new JLabel("Nombres de capteurs éteind : " + countOff); 
-					resultPanel.add(offSensor);
+					result.add(offSensor);
 					break; 
 				case 2: 
 					
@@ -389,9 +399,7 @@ import fr.pds.floralis.server.dao.DAO;
 					}
 					int countOn = sensorFoundList.size(); 	
 					JLabel onSensor = new JLabel("Nombre de capteurs allumés : " + countOn);
-					resultPanel.add(onSensor);
-					
-					
+					result.add(onSensor);
 					break; 
 					
 					default : 
@@ -421,8 +429,7 @@ import fr.pds.floralis.server.dao.DAO;
 					}
 					int countBreakdown = sensorFoundList.size(); 	
 					JLabel sensorBreakdown = new JLabel("Nombre de capteurs en panne : " + countBreakdown);	
-					resultPanel.add(sensorBreakdown);
-					
+					result.add(sensorBreakdown);
 					break; 
 				case 2: 
 					
@@ -438,7 +445,7 @@ import fr.pds.floralis.server.dao.DAO;
 					}
 					int countWorking = sensorFoundList.size(); 	
 					JLabel sensorWorking = new JLabel("Nombre de capteurs fonctionnel : " + countWorking);	
-					resultPanel.add(sensorWorking);
+					result.add(sensorWorking);
 					break;
 					
 					default : 
@@ -456,30 +463,35 @@ import fr.pds.floralis.server.dao.DAO;
 					// case of alert by month
 					//TODO: adding compare option 
 						
-						FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
+					FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
+					Date date = new Date();
 						try {
 							alertFoundList = fabmy.findByMonthYear(false, date);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-						int countAlertMonthYear = alertFoundList.size(); 	
-						System.out.println("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);		
+					int countAlertMonthYear = alertFoundList.size(); 	
+					JLabel alertMY = new JLabel ("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);
+					result.add(alertMY);
+					pack(); 
+						
 					break; 
 				case 1: 
 					
 					// case of alert by year 
-					//TODO : adding compare option 
 					FindAlertByYear faby = new FindAlertByYear(host, port);
+					Date date1 = new Date();
 					try {
-						alertFoundList = faby.findByYear(false, date);
+						alertFoundList = faby.findByYear(false, date1);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					int countAlertYear = alertFoundList.size(); 	
-					System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
-				
+					JLabel alertYear = new JLabel("Nombre d'alerte de l'année en cours: " + countAlertYear);
+					result.add(alertYear);
+					pack();
 					break; 
 						
 				case 2: 
@@ -554,7 +566,7 @@ import fr.pds.floralis.server.dao.DAO;
 						
 					// put values on JFRAME
 					
-					Object[][] donnees = {
+					Object[][] dataAlert = {
 		            { fire , countAlertSmoke },
 		            { llight, countAlertLight},
 		            { ggas, countAlertGas},
@@ -563,14 +575,19 @@ import fr.pds.floralis.server.dao.DAO;
 					};
 
 					String[] entetes = {"Description", "Nombre"};
-					JTable tabResultType = new JTable(donnees, entetes); 
-					resultPanel.add(tabResultType); 
+					JTable tabResultAlertType = new JTable(dataAlert, entetes); 
+					result.add(tabResultAlertType); 
+					pack(); 
 					break;
 					
 					
 					default : 
 						System.out.println("aie coup dur pour Célia");
 						break; 
+				}
+				// launch a new request 
+				if (e.getSource() == newRequest) {
+					result.removeAll();
 				}
 		} 
 
