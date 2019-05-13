@@ -393,8 +393,8 @@ public class WindowConfig extends JFrame implements ActionListener {
 				infos.setText("Vous devez renseigner l'adresse IP et le port du capteur");
 			}
 
-			else if(portSensor.getText().length()>4) {
-				infos.setText("Le port doit être constitué de 4 chiffres");
+			else if(portSensor.getText().length()<3) {
+				infos.setText("Un port est constitué d'au moins 4 chiffres");
 			}
 
 			// If date = 0 : any selected location

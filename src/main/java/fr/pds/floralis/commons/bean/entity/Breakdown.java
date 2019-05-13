@@ -18,7 +18,6 @@ public class Breakdown {
 	private int id;
 	private int sensor;
 	private Time start;
-	private Time end;
 	private Date date;
 
 	public Breakdown() {
@@ -30,7 +29,6 @@ public class Breakdown {
 		this.id = id;
 		this.sensor = sensor;
 		this.start = start;
-		this.end = end;
 		this.date = date;
 	}
 
@@ -77,19 +75,6 @@ public class Breakdown {
 		this.start = start;
 	}
 
-	/**
-	 * @return the end
-	 */
-	public Time getEnd() {
-		return end;
-	}
-
-	/**
-	 * @param end the end to set
-	 */
-	public void setEnd(Time end) {
-		this.end = end;
-	}
 
 	/**
 	 * @return the date
@@ -110,7 +95,6 @@ public class Breakdown {
 		breakdownToJson.put("id", id);
 		breakdownToJson.put("sensor", sensor);
 		breakdownToJson.put("start", start);
-		breakdownToJson.put("end", end);
 		breakdownToJson.put("date", date);
 		return breakdownToJson;
 	}
@@ -120,7 +104,8 @@ public class Breakdown {
 	 */
 	@Override
 	public String toString() {
-		return "Breakdown [id=" + id + ", sensor=" + sensor + ", start=" + start + ", end=" + end + ", date=" + date
-				+ "]";
-	}	
+		return "Breakdown [id=" + id + ", sensor=" + sensor + ", start=" + start + ", date=" + date + "]";
+	}
+
+	
 }

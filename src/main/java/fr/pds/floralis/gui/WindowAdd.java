@@ -496,13 +496,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 						
 						//The sensor is not configure
 						sensorCreate.setConfigure(false);
-
-						JSONObject sensorCreateJson = new JSONObject(sensorCreate);
 						
 						Request forthRequest = new Request();
 						forthRequest.setType("CREATE");
 						forthRequest.setEntity("SENSOR");
-						forthRequest.setFields(sensorCreateJson);
+						forthRequest.setFields(sensorCreate.toJSON());
 						
 						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toJSON().toString());
 						ccSensorCreate.run();

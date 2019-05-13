@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -37,6 +38,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +83,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	 */
 	JPanel sensorsPanel = new JPanel();
 	JPanel infoSensorsPanel = new JPanel();
+	JPanel displaySensorsPanel = new JPanel();
 
 	/**
 	 * Location panels
@@ -109,11 +112,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	JButton buttonDeleteSensor = new JButton("Supprimer le capteur");
 	JButton buttonUpdateSensor = new JButton("Modifier les infos du capteur");
 	JButton buttonUpdateSensorState = new JButton(onOff);
-	JButton buttonRefreshSensor = new JButton("Capteurs");
-	JButton buttonNoConfigSensor = new JButton("Capteurs non configurés");
-	JButton buttonYesConfigSensor = new JButton("Capteurs déjà configurés");
+	JButton buttonRefreshSensor = new JButton("Afficher tous les capteurs");
+	JButton buttonNoConfigSensor = new JButton("Afficher les capteurs non configurés");
+	JButton buttonYesConfigSensor = new JButton("Afficher les capteurs déjà configurés");
 	JButton buttonConfigSensor = new JButton (configuration);
-	JButton buttonUpdateConfig = new JButton ("Modifier les seuils");
+	JButton buttonUpdateConfig = new JButton ("Modifier les seuils du capteur");
 
 	/**
 	 * JMenubar and its componants
@@ -171,6 +174,9 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	int countWarningLevel = 0;
 	int countNewWarningLevel;
 	
+	int countSensorsOn = 0;
+	int countNewSensorsOn;
+
 
 	/** 
 	 * Constructor, takes the host and port from the main
@@ -223,6 +229,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		String[] sensorsComboBox = new String[sensorModel.getRowCount() + 1];
 		sensorsComboBox[0] = "-- Identifiant du capteur --";
 
+		
 		for (int listIndex = 0; listIndex < sensorsFoundList.size(); listIndex++) {
 			int tabIndex = listIndex + 1;
 			sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId() + " ";
@@ -230,16 +237,20 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		comboSensors = new JComboBox<Object>(sensorsComboBox);
 
-
+		// First Panel of buttons
+		displaySensorsPanel.setLayout(new GridLayout(1,3));
+		displaySensorsPanel.add(buttonRefreshSensor);
+		displaySensorsPanel.add(buttonYesConfigSensor);
+		displaySensorsPanel.add(buttonNoConfigSensor);
+		
+		// Second Panel of buttons
+		infoSensorsPanel.setLayout(new GridLayout(1,6));
 		infoSensorsPanel.add(comboSensors);
 		infoSensorsPanel.add(buttonDeleteSensor);
 		infoSensorsPanel.add(buttonUpdateSensor);
 		infoSensorsPanel.add(buttonUpdateConfig);
 		infoSensorsPanel.add(buttonConfigSensor);
 		infoSensorsPanel.add(buttonUpdateSensorState);
-		infoSensorsPanel.add(buttonRefreshSensor);
-		infoSensorsPanel.add(buttonYesConfigSensor);
-		infoSensorsPanel.add(buttonNoConfigSensor);
 
 
 		// Keyboard shortcut
@@ -270,7 +281,6 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 
 		// Elements are one next to the other
-		infoSensorsPanel.setLayout(new BoxLayout(infoSensorsPanel, BoxLayout.X_AXIS));
 		southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
 
@@ -291,6 +301,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		buttonRefreshLocation.setMaximumSize(new Dimension(80, 40));
 		infoSensorsPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 300));
+		displaySensorsPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 300));
 		locationList.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 400));
 		locationPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 400));
 		sensorsPanel.setMaximumSize(new Dimension(maximumWindowBounds.width, maximumWindowBounds.height - 400));
@@ -316,6 +327,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		locationPanel.add(buttonRefreshLocation, BorderLayout.CENTER);
 		locationPanel.add(locationList);
+		sensorsPanel.add(displaySensorsPanel, BorderLayout.CENTER);
 		sensorsPanel.add(infoSensorsPanel);	
 		sensorsPanel.add(new JScrollPane(paneSensors));
 		southPanel.add(sensorsPanel);
@@ -333,7 +345,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 		// Empty border for the space between the two panel
 		locationList.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
 		// Empty border for all the window
-		mainContainer.setBorder(BorderFactory.createEmptyBorder(5, 3, 5, 3));
+		mainContainer.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 5));
+		// Border for the space between the two panel of buttons
+		infoSensorsPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		displaySensorsPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		
 
 		window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		window.setContentPane(mainContainer);
@@ -535,9 +551,10 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			String stateChange;
 			if(indexSensor > 0) {
 				Sensor sensorUpdateState = sensorsFoundList.get(indexSensor - 1);
-				if(sensorUpdateState.getState()) stateChange = "Eteind";
+				if(sensorUpdateState.getState()) stateChange = "Eteint";
 				else stateChange = "Allumé";
 				if(sensorUpdateState.getConfigure()) {
+					System.out.println("coucou3 " + sensorUpdateState.getConfigure());
 					if(!sensorUpdateState.getAlert()) {
 						if (sensorUpdateState.getState()) {
 							sensorUpdateState.setState(false);
@@ -570,11 +587,11 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 					message.setForeground(Color.BLACK);
 				}
 			} else {
-				message.setText("Vous devez sélectionner un capteur");
+				message.setText("Vous devez sélectionner un capteur !");
 				message.setForeground(Color.BLACK);
 			}
 			
-			refresh(last);
+			//refresh(last);
 
 		}
 
@@ -849,6 +866,20 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				refresh(last);
 				countWarningLevel = countNewWarningLevel;
 			} 
+			
+			// a new state of sensor
+			countNewSensorsOn = 0;
+			for(Sensor s : sensorsFoundList) {
+				if(s.getState()) countNewSensorsOn++ ; 
+			}
+			if(countSensorsOn == 0) countSensorsOn = countNewSensorsOn;
+			
+			if(countSensorsOn != countNewSensorsOn) {
+				refresh(last);
+				countSensorsOn = countNewSensorsOn;
+			}
+			
+			
 			
 		};
 

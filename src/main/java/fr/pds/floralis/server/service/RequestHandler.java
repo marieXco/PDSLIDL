@@ -1,6 +1,5 @@
 package fr.pds.floralis.server.service;
 
-import java.util.List;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,16 +8,33 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import fr.pds.floralis.commons.bean.entity.*;
+import fr.pds.floralis.commons.bean.entity.Alert;
+import fr.pds.floralis.commons.bean.entity.Breakdown;
+import fr.pds.floralis.commons.bean.entity.Building;
+import fr.pds.floralis.commons.bean.entity.Floor;
+import fr.pds.floralis.commons.bean.entity.Location;
+import fr.pds.floralis.commons.bean.entity.Patient;
+import fr.pds.floralis.commons.bean.entity.Room;
+import fr.pds.floralis.commons.bean.entity.Sensor;
+import fr.pds.floralis.commons.bean.entity.TypeSensor;
 import fr.pds.floralis.server.configurationpool.DataSource;
 import fr.pds.floralis.server.configurationpool.JDBCConnectionPool;
-import fr.pds.floralis.server.dao.*;
+import fr.pds.floralis.server.dao.AlertDao;
+import fr.pds.floralis.server.dao.BreakdownDao;
+import fr.pds.floralis.server.dao.BuildingDao;
+import fr.pds.floralis.server.dao.FloorDao;
+import fr.pds.floralis.server.dao.LocationDao;
+import fr.pds.floralis.server.dao.PatientDao;
+import fr.pds.floralis.server.dao.RoomDao;
+import fr.pds.floralis.server.dao.SensorDao;
+import fr.pds.floralis.server.dao.TypeSensorDao;
 
 /**
  * RequestHandler 
