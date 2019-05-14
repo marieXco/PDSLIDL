@@ -214,7 +214,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		// Beginning of the sensor FindAll
 		FindAllSensor fs = new FindAllSensor(host, port);
-		sensorsFoundList = fs.findAll(false);
+		sensorsFoundList = fs.findAll();
 		// End of the sensor FindAll
 
 		SensorTableModel sensorModel = new SensorTableModel(sensorsFoundList);
@@ -312,7 +312,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		// Beginning of the locations recovery
 		FindAllLocation fl = new FindAllLocation(host, port);
-		List <Location>locationsFoundList = fl.findAll(false);
+		List <Location>locationsFoundList = fl.findAll();
 		// End of the locations recovery
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
@@ -375,7 +375,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void allSensors() {
 		try {
 			FindAllSensor fs = new FindAllSensor(host, port);
-			sensorsFoundList = fs.findAll(false);
+			sensorsFoundList = fs.findAll();
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -405,7 +405,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void yesConfigSensors() {
 		try {
 			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, true);
+			sensorsFoundList = fs.findByConfig(true);
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -435,7 +435,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void noConfigSensors() {
 		try {
 			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, false);
+			sensorsFoundList = fs.findByConfig(false);
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -508,7 +508,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			List<Location> locationsFoundList;
 
 			try {
-				locationsFoundList = fl.findAll(false);
+				locationsFoundList = fl.findAll();
 
 				locationList.removeAll();
 				locationList.revalidate();
@@ -772,7 +772,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
 				Sensor sensorSelected = new Sensor();
 				try {
-					sensorSelected = di.findById(false, idSensor);
+					sensorSelected = di.findById(idSensor);
 				} catch (JSONException | IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -796,7 +796,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 	}
 
-	//If there are a new alert, the sensors are refresh
+	//If there are a new alert, a new sensors, a new warning level, a new state or the sensors are refresh
 	public void refreshNewElement() {
 		ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
@@ -806,13 +806,13 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			FindAllSensor fs = new FindAllSensor(host, port);
 			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
 			try {
-				sensorsFoundList = fs.findAll(false);
+				sensorsFoundList = fs.findAll();
 			} catch (JSONException | IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			//a new sensor or a sensor delete
+			// -------------- a new sensor or a sensor deleted --------------
 			countNewSensor = sensorsFoundList.size();
 			// if it is the first connection
 			if(countSensors == 0) countSensors = countNewSensor;
@@ -823,7 +823,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countSensors = countNewSensor;
 			} 
 			
-			// a new alert
+			// -------------- a new alert --------------
 			countNewAlert = 0;
 			
 			// count the number of alert
@@ -841,7 +841,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countAlert = countNewAlert;
 			} 
 			
-			// a new configuration
+			// -------------- a new configuration --------------
 			countNewLocation = 0;
 			
 			// if there are a new configuration the sum of the id location is update
@@ -856,24 +856,31 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				countLocation = countNewLocation;
 			} 
 			
-			// new warning level 
+			// -------------- a new warning level --------------
 			countNewWarningLevel = 0;
 			for(Sensor s : sensorsFoundList) {
 				countNewWarningLevel+= s.getMin() + s.getMax(); 
-			} 
+			}
+			
+			// if it is a new connection
 			if(countWarningLevel == 0) countWarningLevel = countNewWarningLevel;
+			
+			// if a first warning level or a second warning level is changed
 			if(countWarningLevel != countNewWarningLevel) {
 				refresh(last);
 				countWarningLevel = countNewWarningLevel;
 			} 
 			
-			// a new state of sensor
+			// -------------- a new state of sensor --------------
 			countNewSensorsOn = 0;
 			for(Sensor s : sensorsFoundList) {
 				if(s.getState()) countNewSensorsOn++ ; 
 			}
+			
+			// if it is the first connection
 			if(countSensorsOn == 0) countSensorsOn = countNewSensorsOn;
 			
+			// if the number of sensors turn on is different
 			if(countSensorsOn != countNewSensorsOn) {
 				refresh(last);
 				countSensorsOn = countNewSensorsOn;

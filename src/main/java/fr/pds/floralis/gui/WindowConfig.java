@@ -252,7 +252,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 		//Location
 		FindAllLocation fl = new FindAllLocation(host, port);
-		locationsFoundList = fl.findAll(false);
+		locationsFoundList = fl.findAll();
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
 		locationsComboBox[0] = "--Localisation--";

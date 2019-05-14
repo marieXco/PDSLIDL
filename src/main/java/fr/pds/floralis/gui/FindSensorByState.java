@@ -26,7 +26,7 @@ public class FindSensorByState {
 		this.port = port;
 	}
 
-	public static List<Sensor> findByState(Boolean refresh, Boolean state) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findByState(Boolean state) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsStateList;
@@ -44,11 +44,6 @@ public class FindSensorByState {
 		
 		Sensor[] sensorsStateTab =  objectMapper.readValue(ccSensorFindByState.getResponse(), Sensor[].class);
 		sensorsStateList = Arrays.asList(sensorsStateTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByState(true, state);
-		}
 		
 		return sensorsStateList;
 	}

@@ -26,7 +26,7 @@ public class FindSensorByConfig {
 		this.port = port;
 	}
 
-	public static List<Sensor> findByConfig(Boolean refresh, Boolean config) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findByConfig(Boolean config) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsConfigList;
@@ -44,11 +44,6 @@ public class FindSensorByConfig {
 		
 		Sensor[] sensorsConfigTab =  objectMapper.readValue(ccSensorFindByConfig.getResponse(), Sensor[].class);
 		sensorsConfigList = Arrays.asList(sensorsConfigTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByConfig(true, config);
-		}
 		
 		return sensorsConfigList;
 	}

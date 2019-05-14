@@ -25,7 +25,7 @@ public class FindAlertBySensorByType {
 
 	}
 
-	public static int findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByType(String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorList;
@@ -70,10 +70,6 @@ public class FindAlertBySensorByType {
 				alertResult ++;
 			}
 			}
-		}
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByType(true, type);
 		}
 		
 		return alertResult;

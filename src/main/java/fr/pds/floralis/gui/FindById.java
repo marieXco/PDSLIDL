@@ -25,7 +25,7 @@ public class FindById {
 		this.port = port;
 	}
 
-	public static Sensor findById(Boolean refresh, int id) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static Sensor findById(int id) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		JSONObject sensorIdFindById = new JSONObject();
 		sensorIdFindById.put("id", id);
 
