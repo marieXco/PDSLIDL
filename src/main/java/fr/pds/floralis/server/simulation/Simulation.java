@@ -383,7 +383,7 @@ public class Simulation {
 								if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 									sensorLogger.warning("Alert type : ALERT for the sensor : "
 											+ sensorFound[sensorIndex].getId() + "\nFor " + realTimeSensors
-											+ " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
+											+ " seconds with the value " + messageValue);
 								}
 
 								/*
@@ -520,7 +520,7 @@ public class Simulation {
 							 */
 							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 								sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId()
-										+ " for " + realTimeSensors + " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
+										+ " for " + realTimeSensors + " seconds with the value " + messageValue);
 							}
 
 							/*
