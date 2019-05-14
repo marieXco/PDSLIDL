@@ -336,7 +336,7 @@ public class Simulation {
 							 * get a real alert, changes for evry type of sensors)
 							 */
 
-							while (realTimeSensors <= sensorSensitivity && (request) && sensorFound[sensorIndex].getState()) {
+							while (realTimeSensors <= sensorSensitivity && realTimeSensors < messageDuration && sensorFound[sensorIndex].getState()) {
 
 								/*
 								 * We remove the last "possible alert" entry on the cache (for this sensor) to
@@ -383,7 +383,7 @@ public class Simulation {
 								if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 									sensorLogger.warning("Alert type : ALERT for the sensor : "
 											+ sensorFound[sensorIndex].getId() + "\nFor " + realTimeSensors
-											+ " seconds with the value " + messageValue);
+											+ " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
 								}
 
 								/*
@@ -520,7 +520,7 @@ public class Simulation {
 							 */
 							if (realTimeSensors % 5 == 0 || realTimeSensors == messageDuration - 1) {
 								sensorLogger.info("No alert for the sensor: " + sensorFound[sensorIndex].getId()
-										+ " for " + realTimeSensors + " seconds with the value " + messageValue);
+										+ " for " + realTimeSensors + " seconds with the value " + messageValue + "\n" + sensorFound[sensorIndex].getMin());
 							}
 
 							/*

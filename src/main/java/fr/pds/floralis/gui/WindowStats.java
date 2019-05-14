@@ -62,11 +62,11 @@ import java.util.Date;
 		
 		
 		// Creation of String 
-		String ttemp = "température"; 
-		String fire = "fumée"; 
-		String ggas = "gaz";
-		String ppresence = "présence"; 
-		String llight = "lumière";
+		String ttemp = "Capteurs de température"; 
+		String fire = "Capteurs de type fumée"; 
+		String ggas = "Capteurs de fuite de gaz";
+		String ppresence = "Capteurs de présence"; 
+		String llight = "Capteurs de type lumière";
 		String smoke = 	"FIRE";
 		String presence = "PRESENCE"; 
 		String light = 	"LIGHT"; 

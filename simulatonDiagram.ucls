@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<class-diagram version="1.2.3" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
-  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+<class-diagram version="1.2.3" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
   <class id="1" language="java" name="fr.pds.floralis.server.simulation.PropertiesReader" project="floralis" 
     file="/floralis/src/main/java/fr/pds/floralis/server/simulation/PropertiesReader.java" binary="false" 
     corner="BOTTOM_RIGHT">    
@@ -42,12 +42,12 @@
     </display>  
   </class>  
   <dependency id="5">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="2"/>  
-  </dependency>  
-  <dependency id="6">    
     <end type="SOURCE" refId="4"/>    
     <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="6">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="2"/>  
   </dependency>  
   <dependency id="7">    
     <end type="SOURCE" refId="4"/>    
