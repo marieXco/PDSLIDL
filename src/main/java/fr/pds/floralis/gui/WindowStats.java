@@ -8,7 +8,8 @@
 	import java.awt.GridLayout;
 	import java.awt.event.*;
 	import java.io.IOException;
-	import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 	import java.util.List;
 
 	import javax.swing.JButton;
@@ -489,15 +490,19 @@
 				case 2: 
 					
 					// case of alert by year 
-					int year = 2019; 
+					Date dateYear = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+					String yearString = sdf.format(dateYear);
+
+			        Integer year = Integer.parseInt(yearString);
 					JPanel panelYear = new JPanel(); 
 					panelYear.setLayout(new GridLayout(5, 1));
 					for ( int i=0; i<5; i++) {
 						FindAlertByYear faby = new FindAlertByYear(host, port);
 						int countAlertFound = 0;
-						Date dateYear = new Date(year, 01, 01);
+						Date dateAlertYear = new Date(year, 01, 01);
 						try {
-						countAlertFound = faby.findByYear(dateYear);
+						countAlertFound = faby.findByYear(dateAlertYear);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -507,7 +512,7 @@
 						year--; 
 					} 
 					result.add(panelYear);
-					
+					pack();
 
 					break; 
 						
