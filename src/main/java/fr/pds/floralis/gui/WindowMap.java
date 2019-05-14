@@ -40,20 +40,7 @@ import fr.pds.floralis.gui.tablemodel.SensorTableModel;
 
 public class WindowMap extends JFrame implements ActionListener {
 
-	/*
-	 * //TODO : faire deux listes //initalisées une avec les capteurs non config
-	 * l'autre avec les capteurs config quand ajouter un capteurs prendre de la
-	 * liste non config pour mettre dans les config et inversement ajouter un
-	 * jpanel pour mettre les listes au bouton adding sensor faire vérification
-	 * (modifier la BDD en conséquence) nombre capteurs max par location
-	 * demander à marie au bouton delete retirer de la liste
-	 * 
-	 * refresh state du capteurs pour afficher en rouge si nécessaire
-	 * 
-	 * faire mag propre
-	 * 
-	 * dessiner les rectangles correctement
-	 */
+	
 
 	private String host;
 	private int port;

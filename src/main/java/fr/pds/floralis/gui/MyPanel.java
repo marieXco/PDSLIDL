@@ -53,19 +53,7 @@ public class MyPanel extends JPanel implements MouseListener {
 		this.add(sensorsLocated);
 		this.add(sensorsTable);
 
-		// String[] sensorsComboBox = new String[sensorModel.getRowCount() + 1];
-		// sensorsComboBox[0] = "-- Identifiant du capteur --";
-		//
-		// for (int listIndex = 0; listIndex < sensorsFoundList.size();
-		// listIndex++) {
-		// int tabIndex = listIndex + 1;
-		// sensorsComboBox[tabIndex] = sensorsFoundList.get(listIndex).getId()
-		// + " ";
-		// }
-		//
-		// comboSensors = new JComboBox<Object>(sensorsComboBox);
-		//
-		// sensorsLocated.add(comboSensors);
+		
 	}
 
 	@Override
@@ -208,16 +196,6 @@ public class MyPanel extends JPanel implements MouseListener {
 
 	}
 
-	/*
-	 * public MyLabel(boolean isDoubleBuffered) { super(isDoubleBuffered); //
-	 * TODO Auto-generated constructor stub }
-	 * 
-	 * public MyLabel(LayoutManager layout, boolean isDoubleBuffered) {
-	 * super(layout, isDoubleBuffered); // TODO Auto-generated constructor stub
-	 * }
-	 * 
-	 * public MyLabel(LayoutManager layout) { super(layout); // TODO
-	 * Auto-generated constructor stub }
-	 */
+	
 
 }
