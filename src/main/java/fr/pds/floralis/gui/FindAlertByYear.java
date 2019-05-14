@@ -30,7 +30,7 @@ public class FindAlertByYear {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static int findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByYear(Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -58,11 +58,6 @@ public class FindAlertByYear {
 				alertAuGogoles++; 
 			}
 			
-		}
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByYear(true, date);
 		}
 		
 		return alertAuGogoles;

@@ -26,7 +26,7 @@ public class FindAllRoom {
 		this.port = port;
 	}
 
-	public static List<Room> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Room> findAll() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Room> roomList;
@@ -41,11 +41,6 @@ public class FindAllRoom {
 		
 		Room[] roomFoundTab =  objectMapper.readValue(ccRoomFindAll.getResponse(), Room[].class);
 		roomList = Arrays.asList(roomFoundTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findAll(true);
-		}
 		
 		return roomList;
 	}

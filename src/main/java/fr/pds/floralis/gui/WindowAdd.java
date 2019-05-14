@@ -159,7 +159,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		
 		//Beginning typeSensor
 		FindAllTypeSensor tf = new FindAllTypeSensor(host,port);
-		typeSensorsFoundList = tf.findAll(false);
+		typeSensorsFoundList = tf.findAll();
 
 		String[] typeSensorComboBox = new String[typeSensorsFoundList.size() + 1];
 		typeSensorComboBox[0] = "--Type du capteur--";

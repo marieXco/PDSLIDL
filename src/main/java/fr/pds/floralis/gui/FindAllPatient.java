@@ -27,7 +27,7 @@ public class FindAllPatient {
 		this.port = port;
 	}
 
-	public static List<Patient> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Patient> findAll() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Patient> patientList;
@@ -42,11 +42,6 @@ public class FindAllPatient {
 		
 		Patient[] patientFoundTab =  objectMapper.readValue(ccPatientFindAll.getResponse(), Patient[].class);
 		patientList = Arrays.asList(patientFoundTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findAll(true);
-		}
 		
 		return patientList;
 	

@@ -29,7 +29,7 @@ public class FindAlertByMonthYear {
 	}
 
 	
-	public static int findByMonthYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByMonthYear(Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -57,12 +57,6 @@ public class FindAlertByMonthYear {
 				alertCount++; 
 			}
 			
-		}
-		
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByMonthYear(true, date);
 		}
 		
 		return alertCount;

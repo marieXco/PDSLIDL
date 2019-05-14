@@ -214,7 +214,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		// Beginning of the sensor FindAll
 		FindAllSensor fs = new FindAllSensor(host, port);
-		sensorsFoundList = fs.findAll(false);
+		sensorsFoundList = fs.findAll();
 		// End of the sensor FindAll
 
 		SensorTableModel sensorModel = new SensorTableModel(sensorsFoundList);
@@ -312,7 +312,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 
 		// Beginning of the locations recovery
 		FindAllLocation fl = new FindAllLocation(host, port);
-		List <Location>locationsFoundList = fl.findAll(false);
+		List <Location>locationsFoundList = fl.findAll();
 		// End of the locations recovery
 
 		for (int listIndex = 0; listIndex < locationsFoundList.size(); listIndex++) {
@@ -375,7 +375,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void allSensors() {
 		try {
 			FindAllSensor fs = new FindAllSensor(host, port);
-			sensorsFoundList = fs.findAll(false);
+			sensorsFoundList = fs.findAll();
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -405,7 +405,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void yesConfigSensors() {
 		try {
 			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, true);
+			sensorsFoundList = fs.findByConfig(true);
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -435,7 +435,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 	public void noConfigSensors() {
 		try {
 			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsFoundList = fs.findByConfig(false, false);
+			sensorsFoundList = fs.findByConfig(false);
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(sensorsFoundList);
 
@@ -508,7 +508,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			List<Location> locationsFoundList;
 
 			try {
-				locationsFoundList = fl.findAll(false);
+				locationsFoundList = fl.findAll();
 
 				locationList.removeAll();
 				locationList.revalidate();
@@ -772,7 +772,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 				int idSensor = sensorsFoundList.get(indexSensor - 1).getId();
 				Sensor sensorSelected = new Sensor();
 				try {
-					sensorSelected = di.findById(false, idSensor);
+					sensorSelected = di.findById(idSensor);
 				} catch (JSONException | IOException | InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -806,7 +806,7 @@ public class MainWindow extends Thread implements ActionListener, Runnable  {
 			FindAllSensor fs = new FindAllSensor(host, port);
 			List<Sensor> sensorsFoundList = new ArrayList<Sensor>();
 			try {
-				sensorsFoundList = fs.findAll(false);
+				sensorsFoundList = fs.findAll();
 			} catch (JSONException | IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

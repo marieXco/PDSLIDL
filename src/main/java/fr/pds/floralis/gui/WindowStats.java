@@ -98,7 +98,7 @@ import fr.pds.floralis.server.dao.DAO;
 		    
 			FindAllSensor allsens = new FindAllSensor(host, port);
 			try {
-				sensorFoundList = allsens.findAll(false);
+				sensorFoundList = allsens.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -112,7 +112,7 @@ import fr.pds.floralis.server.dao.DAO;
 	
 			FindAllLocation fal = new FindAllLocation(host, port);
 			try {
-				roomFoundList = fal.findAll(false);
+				roomFoundList = fal.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -128,7 +128,7 @@ import fr.pds.floralis.server.dao.DAO;
 			FindAllAlert faa = new FindAllAlert(host, port);
 			roomResult.setFont(new Font("Calibri", 1, 20));
 			try {
-				alertFoundList = faa.findAll(false);
+				alertFoundList = faa.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -144,7 +144,7 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		    FindAllPatient fap = new FindAllPatient(host, port);
 			try {
-				patientFoundList = fap.findAll(false);
+				patientFoundList = fap.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -231,7 +231,7 @@ import fr.pds.floralis.server.dao.DAO;
 					
 					FindSensorByType fsbtf = new FindSensorByType(host, port);
 					try {
-						sensorFoundList = fsbtf.findByType(false, smoke);
+						sensorFoundList = fsbtf.findByType(smoke);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -245,7 +245,7 @@ import fr.pds.floralis.server.dao.DAO;
 					String light = 	"LIGHT"; 
 					FindSensorByType fsbtl = new FindSensorByType(host, port);
 					try {
-						sensorFoundList = fsbtl.findByType(false, light);
+						sensorFoundList = fsbtl.findByType(light);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -258,7 +258,7 @@ import fr.pds.floralis.server.dao.DAO;
 					
 					FindSensorByType fsbtg = new FindSensorByType(host, port);
 					try {
-						sensorFoundList = fsbtg.findByType(false, gas);
+						sensorFoundList = fsbtg.findByType(gas);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -272,7 +272,7 @@ import fr.pds.floralis.server.dao.DAO;
 
 					FindSensorByType fsbtp = new FindSensorByType(host, port);
 					try {
-						sensorFoundList = fsbtp.findByType(false, presence);
+						sensorFoundList = fsbtp.findByType(presence);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -285,7 +285,7 @@ import fr.pds.floralis.server.dao.DAO;
 
 					FindSensorByType fsbtt = new FindSensorByType(host, port);
 					try {
-						sensorFoundList = fsbtt.findByType(false, temperature);
+						sensorFoundList = fsbtt.findByType(temperature);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -340,7 +340,7 @@ import fr.pds.floralis.server.dao.DAO;
 					// case of sensor which havent configuration 
 					FindSensorByConfig fsbc = new FindSensorByConfig(host, port);
 					try {
-						sensorFoundList = fsbc.findByConfig(false, false);
+						sensorFoundList = fsbc.findByConfig(false);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -379,7 +379,7 @@ import fr.pds.floralis.server.dao.DAO;
 					
 					FindSensorByState fsbsoff = new FindSensorByState(host, port);
 					try {
-						sensorFoundList = fsbsoff.findByState(false, false);
+						sensorFoundList = fsbsoff.findByState(false);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -396,7 +396,7 @@ import fr.pds.floralis.server.dao.DAO;
 
 					FindSensorByState fsbson = new FindSensorByState(host, port);
 					try {
-						sensorFoundList = fsbson.findByState(false, true);
+						sensorFoundList = fsbson.findByState(true);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -473,7 +473,7 @@ import fr.pds.floralis.server.dao.DAO;
 					Date date = new Date(2019, 05, 01);
 					int countAlertMonthYear = 0;
 						try {
-							countAlertMonthYear = fabmy.findByMonthYear(false, date);
+							countAlertMonthYear = fabmy.findByMonthYear(date);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -485,7 +485,7 @@ import fr.pds.floralis.server.dao.DAO;
 					Date date1 = new Date(2019, 04, 12);
 					int countAlertMonthYear1 = 0;
 						try {
-							countAlertMonthYear1 = fabmy1.findByMonthYear(false, date1);
+							countAlertMonthYear1 = fabmy1.findByMonthYear(date1);
 						} catch (JSONException | IOException | InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -509,7 +509,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertFound = 0;
 					Date dateYear = new Date(2018, 02, 12);
 					try {
-					countAlertFound = faby.findByYear(false, dateYear);
+					countAlertFound = faby.findByYear(dateYear);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -528,7 +528,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertSmoke = 0; 
 					FindAlertBySensorByType fabyf = new FindAlertBySensorByType();
 					try {
-						countAlertSmoke= fabyf.findByType(false, smoke);
+						countAlertSmoke= fabyf.findByType(smoke);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -541,7 +541,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertLight = 0;
 					FindAlertBySensorByType fabyl = new FindAlertBySensorByType();
 					try {
-						countAlertLight = fabyl.findByType(false, light);
+						countAlertLight = fabyl.findByType(light);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -555,7 +555,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertGas = 0; 
 					FindAlertBySensorByType fabyg = new FindAlertBySensorByType();
 					try {
-						countAlertGas = fabyg.findByType(false, gas);
+						countAlertGas = fabyg.findByType(gas);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -568,7 +568,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertMove = 0; 
 					FindAlertBySensorByType fabyp = new FindAlertBySensorByType();
 					try {
-						countAlertMove = fabyl.findByType(false, presence);
+						countAlertMove = fabyl.findByType(presence);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -581,7 +581,7 @@ import fr.pds.floralis.server.dao.DAO;
 					int countAlertTemperature = 0; 
 					FindAlertBySensorByType fabyt = new FindAlertBySensorByType();
 					try {
-						countAlertTemperature = fabyt.findByType(false, temperature);
+						countAlertTemperature = fabyt.findByType(temperature);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

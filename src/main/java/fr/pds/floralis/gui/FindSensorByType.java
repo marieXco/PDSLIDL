@@ -27,7 +27,7 @@ public class FindSensorByType {
 		this.port = port;
 	}
 
-	public static List<Sensor> findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findByType(String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsConfigList;
@@ -45,11 +45,6 @@ public class FindSensorByType {
 		
 		Sensor[] sensorsConfigTab =  objectMapper.readValue(ccSensorFindByType.getResponse(), Sensor[].class);
 		sensorsConfigList = Arrays.asList(sensorsConfigTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByType(true, type);
-		}
 		
 		return sensorsConfigList;
 	}
