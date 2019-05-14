@@ -336,7 +336,7 @@ public class Simulation {
 							 * get a real alert, changes for evry type of sensors)
 							 */
 
-							while (realTimeSensors <= sensorSensitivity && realTimeSensors < messageDuration && sensorFound[sensorIndex].getState()) {
+							while (realTimeSensors <= sensorSensitivity && (request) && sensorFound[sensorIndex].getState()) {
 
 								/*
 								 * We remove the last "possible alert" entry on the cache (for this sensor) to
