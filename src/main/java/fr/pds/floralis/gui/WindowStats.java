@@ -453,7 +453,6 @@
 					break; 
 				case 1: 
 					// case of alert by month
-						
 					FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
 					Date date = new Date(2019, 05, 01);
 					int countAlertMonthYear = 0;
@@ -490,18 +489,26 @@
 				case 2: 
 					
 					// case of alert by year 
-					FindAlertByYear faby = new FindAlertByYear(host, port);
-					int countAlertFound = 0;
-					Date dateYear = new Date(2018, 02, 12);
-					try {
-					countAlertFound = faby.findByYear(dateYear);
-					} catch (JSONException | IOException | InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}	
-					JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année en cours: " + countAlertFound);
-					result.add(labelalertYear);
-					pack();
+					int year = 2019; 
+					JPanel panelYear = new JPanel(); 
+					panelYear.setLayout(new GridLayout(5, 1));
+					for ( int i=0; i<5; i++) {
+						FindAlertByYear faby = new FindAlertByYear(host, port);
+						int countAlertFound = 0;
+						Date dateYear = new Date(year, 01, 01);
+						try {
+						countAlertFound = faby.findByYear(dateYear);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}	
+						JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année "+ year + " : " + countAlertFound);
+						panelYear.add(labelalertYear);
+						year--; 
+					} 
+					result.add(panelYear);
+					
+
 					break; 
 						
 				case 3: 
