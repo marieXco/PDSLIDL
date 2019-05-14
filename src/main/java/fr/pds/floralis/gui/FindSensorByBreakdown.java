@@ -26,7 +26,7 @@ public class FindSensorByBreakdown {
 		this.port = port;
 	}
 
-	public static List<Sensor> findByBreakdown(Boolean refresh, Boolean breakdown) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Sensor> findByBreakdown(Boolean breakdown) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorsBreakdownList;
@@ -45,10 +45,6 @@ public class FindSensorByBreakdown {
 		Sensor[] sensorsBreakdownTab =  objectMapper.readValue(ccSensorFindByBreakdown.getResponse(), Sensor[].class);
 		sensorsBreakdownList = Arrays.asList(sensorsBreakdownTab);
 		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByBreakdown(true, breakdown);
-		}
 		
 		return sensorsBreakdownList;
 	}

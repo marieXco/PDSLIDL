@@ -33,11 +33,15 @@ public class FindAlertBySensorByType {
 		JSONObject sensorToType = new JSONObject();
 		sensorToType.put("type", type);
 		
+		
+		// this the request, this request is sending  to the request Handler --> to Dao Sensor --> to server 
 		Request request = new Request();
 		request.setType("FINDBYTYPE");
 		request.setEntity("SENSOR");
 		request.setFields(sensorToType);
 		
+		
+		// to make socket 
 		ConnectionClient ccSensorFindByType= new ConnectionClient(request.toJSON().toString());
 		ccSensorFindByType.run();
 		
@@ -48,6 +52,7 @@ public class FindAlertBySensorByType {
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
 		
+		// this the request, this request is sending  to the request Handler --> to Dao Sensor --> to server 
 		Request request1 = new Request();
 		request1.setType("FINDALL");
 		request1.setEntity("HISTORY_ALERTS");
@@ -58,13 +63,12 @@ public class FindAlertBySensorByType {
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
-		
+		// an in integer which count 
 		int alertResult = 0;
 		
+		// this loop is here to test the sensor Id which match with the sensor Id in alert 
 		for (Alert alert :alertList) {
 			for (Sensor sensor: sensorList ) {
-				System.out.println(" Alert get ID" + alert.getSensor());
-				System.out.println("SENSOR GET ALERT"+ sensor.getId());
 
 			if(alert.getSensor() == sensor.getId()) {
 				alertResult ++;

@@ -46,7 +46,7 @@ public class FindAlertByYear {
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
 		
-		int alertAuGogoles = 0; 
+		int alertYear = 0; 
 		for (Alert alert :alertList) {
 			SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
 			String dateString = sdf.format(date);
@@ -55,12 +55,12 @@ public class FindAlertByYear {
 	        Integer test = Integer.parseInt(dateString)- 1900 ;
 	        
 			if(dateAlert.equals(test.toString())) {
-				alertAuGogoles++; 
+				alertYear++; 
 			}
 			
 		}
 		
-		return alertAuGogoles;
+		return alertYear;
 	}
 	
 
