@@ -609,8 +609,10 @@ import java.util.Date;
 				// launch a new request 
 				if (e.getSource() == newRequest) {
 					result.removeAll();
+					breakOption.removeAllItems();
 					sensorPanel.remove(breakOption);
 					sensorPanel.remove(labelBreak);
+					stateOption.removeAllItems();
 					sensorPanel.remove(stateOption);
 					sensorPanel.remove(labelState);
 				}
