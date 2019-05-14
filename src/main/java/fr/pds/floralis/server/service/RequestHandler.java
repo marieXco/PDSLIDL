@@ -78,8 +78,6 @@ public class RequestHandler implements Runnable {
 			try {
 				writer = new PrintWriter(sock.getOutputStream());
 				reader = new BufferedInputStream(sock.getInputStream());
-				
-				
 
 				String request = read();
 
@@ -109,7 +107,7 @@ public class RequestHandler implements Runnable {
 						+ "\n";
 				debug += "\t with parameters : " + parameters + "\n";
 				System.err.println("\n" + debug);
-				
+
 				String toSend = "";
 
 				switch (table.toUpperCase()) {
@@ -157,14 +155,16 @@ public class RequestHandler implements Runnable {
 
 						toSend = sensorUpdating.toString();
 						break;
-						
-					case "UPDATELOCATIONID":
-						Sensor sensorToUpdateForLocation = objectMapper.readValue(
-								parameters.get("sensorToUpdate").toString(),
-								Sensor.class);
 
-						Boolean sensorUpdatingForLocationId = sensorDao.updateLocation(
-								parameters.getInt("idLocation"), sensorToUpdateForLocation);
+					case "UPDATELOCATIONID":
+						Sensor sensorToUpdateForLocation = objectMapper
+								.readValue(parameters.get("sensorToUpdate")
+										.toString(), Sensor.class);
+
+						Boolean sensorUpdatingForLocationId = sensorDao
+								.updateLocation(
+										parameters.getInt("idLocation"),
+										sensorToUpdateForLocation);
 
 						toSend = sensorUpdatingForLocationId.toString();
 						break;
@@ -197,18 +197,18 @@ public class RequestHandler implements Runnable {
 						break;
 
 					case "FINDBYBREAKDOWN":
-						List<Sensor> sensorListBreak = sensorDao
+
+						List<Sensor> sensorListBreakdown = sensorDao
 								.findByBreakdown(parameters
 										.getBoolean("breakdown"));
 						JSONArray sensorFoundByBreakdown = new JSONArray(
-								sensorListBreak);
+								sensorListBreakdown);
 						toSend = sensorFoundByBreakdown.toString();
 						break;
 
 					case "FINDBYLOCATION":
 						List<Sensor> sensorListLocation = sensorDao
-								.findByLocation(parameters
-										.getInt("idLocation"));
+								.findByLocation(parameters.getInt("idLocation"));
 						JSONArray sensorFoundByLocation = new JSONArray(
 								sensorListLocation);
 						toSend = sensorFoundByLocation.toString();
@@ -240,7 +240,6 @@ public class RequestHandler implements Runnable {
 
 						toSend = locationFound.toJSON().toString();
 						break;
-						
 
 					case "CREATE":
 						Location locationToCreate = objectMapper.readValue(

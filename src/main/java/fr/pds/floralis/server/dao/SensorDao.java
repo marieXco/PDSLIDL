@@ -329,7 +329,7 @@ public class SensorDao implements DAO<Sensor> {
 			connect.setAutoCommit(false);
 			Statement stmt = connect.createStatement();
 
-			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data ->> 'breakdown')::text = '" + breakdown + "'::text;");
+			ResultSet rs = stmt.executeQuery( "SELECT data FROM sensors where (data -> 'breakdown')::text = '" + breakdown + "'::text;");
 			while (rs.next()) {
 				sensor = mapper.readValue(rs.getObject(1).toString(), Sensor.class);
 				sensors.add(sensor);

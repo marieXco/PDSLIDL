@@ -25,7 +25,7 @@ public class FindAlertBySensorByType {
 
 	}
 
-	public static List<Alert> findByType(Boolean refresh, String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByType(String type) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Sensor> sensorList;
@@ -33,11 +33,15 @@ public class FindAlertBySensorByType {
 		JSONObject sensorToType = new JSONObject();
 		sensorToType.put("type", type);
 		
+		
+		// this the request, this request is sending  to the request Handler --> to Dao Sensor --> to server 
 		Request request = new Request();
 		request.setType("FINDBYTYPE");
 		request.setEntity("SENSOR");
 		request.setFields(sensorToType);
 		
+		
+		// to make socket 
 		ConnectionClient ccSensorFindByType= new ConnectionClient(request.toJSON().toString());
 		ccSensorFindByType.run();
 		
@@ -48,33 +52,31 @@ public class FindAlertBySensorByType {
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
 		
+		// this the request, this request is sending  to the request Handler --> to Dao Sensor --> to server 
 		Request request1 = new Request();
 		request1.setType("FINDALL");
 		request1.setEntity("HISTORY_ALERTS");
 		request1.setFields(new JSONObject());
 		
-		ConnectionClient ccAlertFindAll = new ConnectionClient(request.toJSON().toString());
+		ConnectionClient ccAlertFindAll = new ConnectionClient(request1.toJSON().toString());
 		ccAlertFindAll.run();
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
+		// an in integer which count 
+		int alertResult = 0;
 		
-		List<Alert> alertResult = null;
-		
+		// this loop is here to test the sensor Id which match with the sensor Id in alert 
 		for (Alert alert :alertList) {
 			for (Sensor sensor: sensorList ) {
 
-			if(!sensor.getAlert().equals(alert.getId())) {
-				alertList.remove(alert);
+			if(alert.getSensor() == sensor.getId()) {
+				alertResult ++;
 			}
 			}
-		}
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByType(true, type);
 		}
 		
-		return alertList;
+		return alertResult;
 	}
 
 }

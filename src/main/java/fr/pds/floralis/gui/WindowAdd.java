@@ -159,7 +159,7 @@ public class WindowAdd extends JFrame implements ActionListener {
 		
 		//Beginning typeSensor
 		FindAllTypeSensor tf = new FindAllTypeSensor(host,port);
-		typeSensorsFoundList = tf.findAll(false);
+		typeSensorsFoundList = tf.findAll();
 
 		String[] typeSensorComboBox = new String[typeSensorsFoundList.size() + 1];
 		typeSensorComboBox[0] = "--Type du capteur--";
@@ -496,13 +496,11 @@ public class WindowAdd extends JFrame implements ActionListener {
 						
 						//The sensor is not configure
 						sensorCreate.setConfigure(false);
-
-						JSONObject sensorCreateJson = new JSONObject(sensorCreate);
 						
 						Request forthRequest = new Request();
 						forthRequest.setType("CREATE");
 						forthRequest.setEntity("SENSOR");
-						forthRequest.setFields(sensorCreateJson);
+						forthRequest.setFields(sensorCreate.toJSON());
 						
 						ConnectionClient ccSensorCreate = new ConnectionClient(host, port, forthRequest.toJSON().toString());
 						ccSensorCreate.run();

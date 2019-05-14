@@ -64,7 +64,10 @@ public class WindowConfig extends JFrame implements ActionListener {
 	JPanel warningLevelPanel = new JPanel();
 	JPanel locationPanel = new JPanel();
 	JPanel statePanel = new JPanel();
-
+	
+	/**
+	 *  Parameters for sensor
+	 */
 	JComboBox<Object> location = new JComboBox<Object>();
 
 	JTextField dateInstallation = new JTextField(10);
@@ -221,7 +224,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		this.setVisible(true);
 
 
-		//Instalation day
+		//Installation day
 		days[0] = "Jour";
 
 		months[0] = "Mois";
@@ -252,7 +255,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 		//Location
 		FindAllLocation fl = new FindAllLocation(host, port);
-		locationsFoundList = fl.findAll(false);
+		locationsFoundList = fl.findAll();
 
 		String[] locationsComboBox = new String[locationsFoundList.size() + 1];
 		locationsComboBox[0] = "--Localisation--";
@@ -274,10 +277,9 @@ public class WindowConfig extends JFrame implements ActionListener {
 		stateOnOff.setSelected(stateOn.getModel(), true);
 		stateOn.setBackground(new Color(43,81,224));
 		stateOff.setBackground(new Color(201,226,245));
-
 		// End state
 
-
+		// Add of parameters
 		stateOnOff.add(stateOn);
 		stateOnOff.add(stateOff);
 
@@ -312,6 +314,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 		container.add(buttonConfigSensor);
 
 
+		// the warning level depend of the type of the sensor
 		switch (sensorFound.getType()) {
 		case "TEMPERATURE" :
 			warningLevelPanel.add(minLabel);
@@ -343,8 +346,6 @@ public class WindowConfig extends JFrame implements ActionListener {
 			warningLevelPanel.add(gasUnit);
 			break;
 		}
-
-
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -365,7 +366,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 
 			// Checking informations
 
-			// for type TEMPERATURE
+			// ------------ for type TEMPERATURE ------------
 			if (sensorFound.getType().equals("TEMPERATURE") && 
 					(min.getText().isEmpty() || max.getText().isEmpty())) {
 				infos.setText("Vous devez renseigner les seuils de température");
@@ -377,7 +378,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 				infos.setText("La valeur minimum doit être strictement inferieure à la valeur maximum");
 			}
 
-			// For type LIGHT and PRESENCE
+			// ------------ For type LIGHT and PRESENCE ------------
 			else if((sensorFound.getType().equals("LIGHT") || sensorFound.getType().equals("PRESENCE")) && 
 					(duringDay.getText().isEmpty() || duringNight.getText().isEmpty())) {
 				infos.setText("Vous devez renseigner les seuils de durée");
@@ -388,13 +389,13 @@ public class WindowConfig extends JFrame implements ActionListener {
 				infos.setText("Vous devez renseigner le seuil de gaz");
 			}
 
-			// For all the types
+			// ------------ For all the types ------------
 			else if(addressIp.getText().isEmpty() || portSensor.getText().isEmpty()) {
 				infos.setText("Vous devez renseigner l'adresse IP et le port du capteur");
 			}
 
-			else if(portSensor.getText().length()>4) {
-				infos.setText("Le port doit être constitué de 4 chiffres");
+			else if(portSensor.getText().length()<3) {
+				infos.setText("Un port est constitué d'au moins 4 chiffres");
 			}
 
 			// If date = 0 : any selected location

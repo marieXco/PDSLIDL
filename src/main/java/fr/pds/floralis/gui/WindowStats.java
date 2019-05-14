@@ -3,186 +3,108 @@
 
 
 	import java.awt.BorderLayout;
-	import java.awt.Button;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.HeadlessException;
+	import java.awt.Dimension;
+	import java.awt.Font;
+	import java.awt.GridLayout;
 	import java.awt.event.*;
 	import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+	import java.util.List;
 
-import javax.swing.BorderFactory;
-	import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
+	import javax.swing.JButton;
+	import javax.swing.JComboBox;
 	import javax.swing.JFrame;
 	import javax.swing.JLabel;
 	import javax.swing.JPanel;
-	import javax.swing.JPasswordField;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-	import javax.swing.JTextPane;
-	import javax.swing.text.SimpleAttributeSet;
-	import javax.swing.text.StyleConstants;
+	import javax.swing.JTable;
 
-import org.json.JSONException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import fr.pds.floralis.commons.bean.entity.Alert;
-import fr.pds.floralis.commons.bean.entity.Location;
-import fr.pds.floralis.commons.bean.entity.Patient;
-import fr.pds.floralis.commons.bean.entity.Room;
-import fr.pds.floralis.commons.bean.entity.Sensor;
-import fr.pds.floralis.server.dao.DAO;
-
-	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
-	//TODO: faire les scripts
+	import org.json.JSONException;
 	
-	// this is the window where 
+	
+	import fr.pds.floralis.commons.bean.entity.Alert;
+	import fr.pds.floralis.commons.bean.entity.Location;
+	import fr.pds.floralis.commons.bean.entity.Patient;
+	import fr.pds.floralis.commons.bean.entity.Sensor;
+
+	
+	// Window for the indicators use case
 	public class WindowStats extends JFrame implements ActionListener {
 		private String host;
 		private int port;
-		
-		public WindowStats(String host, int port) throws HeadlessException {
-			super();
-			this.host = host;
-			this.port = port;
-		}
-		
+
 		
 		// Creation of panels
 		JPanel container = new JPanel();
 		JPanel requestPanel = new JPanel();
 		JPanel resultPanel = new JPanel(); 
+		JPanel result = new JPanel(); 
+		JPanel indicatorInfo= new JPanel();
+		JPanel sensorPanel = new JPanel();
+		JPanel alertPanel = new JPanel();
+		JPanel panel= new JPanel();
+		
+		// Creation of combo box 
+		JComboBox sensorOption = new JComboBox();
+		JComboBox stateOption = new JComboBox();
+		JComboBox breakOption = new JComboBox();
+		JComboBox alertOption = new JComboBox();
+		
+		// Creation of Label 
+		JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
+		JLabel labelState= new JLabel("Etats des capteurs : ");
+		JLabel labelBreak= new JLabel("Panne des capteurs : ");
+		JLabel labelAlert= new JLabel("Filtrer sur les alertes : ");
+		
+		// Creation of Button 
+		JButton newRequest = new JButton("Nouvelle requête"); 
 		
 		
-		Button countRoom = new Button("Nombre de pièce");
-		Button countAllSensor = new Button("Nombre de capteurs");
-		Button countOffSensor = new Button("Nombre de capteurs éteint");
-		Button countBreakdownSensor = new Button("Nombre de capteurs en panne");
-		Button countOnSensor = new Button("Nombre de capteurs allumés");
-		Button countNoConfigSensor = new Button("Nombres de capteurs non configurés");
-		Button countAlert = new Button("Nombre d'alerte");
-		Button countAlertBySensorType = new Button("Nombre d'alerte par type de capteurs");
-		 //countSmokeSensor = new Button("Nombre de capteurs de fumée");
-		Button countLightSensor = new Button("Nombre de capteurs de lumière");
-		Button countGasSensor = new Button("Nombre de capteurs de gaz");
-		Button countMoveSensor = new Button("Nombre de capteurs de mouvement");
-		Button countTempSensor = new Button("Nombre de capteurs température ");
-		Button countAllPatient = new Button("Nombre de patients"); 
-		Button countAlertByMonth = new Button("Nombre d'alerte par mois");
-		Button countAlertByYear = new Button("Nombre d'alerte par an");
+		// Creation of String 
+		String ttemp = "Capteurs de température"; 
+		String fire = "Capteurs de type fumée"; 
+		String ggas = "Capteurs de fuite de gaz";
+		String ppresence = "Capteurs de présence"; 
+		String llight = "Capteurs de type lumière";
+		String smoke = 	"FIRE";
+		String presence = "PRESENCE"; 
+		String light = 	"LIGHT"; 
+		String gas = "GASLEAK"; 
+		String temperature = "TEMPERATURE"; 
 		
-		
-		// Indicators values
+		// Indicators list
 		List<Location> roomFoundList; 
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
 		List<Patient> patientFoundList;
 		
-		
-		
 
 		public void initIndicators() throws IOException{
-			
-			/*
-			adding button to JPanel
-			requestPanel.add(countAllSensor);
-			requestPanel.add(countRoom);
-			requestPanel.add(countOffSensor);
-			requestPanel.add(countNoConfigSensor);
-			/*
-			requestPanel.add(countOnSensor);
-			requestPanel.add(countAlert);
-			requestPanel.add(countSmokeSensor);
-			requestPanel.add(countLightSensor);
-			requestPanel.add(countGasSensor);
-			requestPanel.add(countMoveSensor);
-			requestPanel.add(countTempSensor);
-			requestPanel.add(countAllPatient); 
-			requestPanel.add(countAlertByMonth);
-			requestPanel.add( countBreakdownSensor);
-			requestPanel.add(countAlertByYear);
-			requestPanel.add(countAlertBySensorType);
-			
-			indicators.addItem("Nombre d'alerte");
-			requestPanel.add(indicators);
-			indicators.addActionListener(this);
-			
-
-			container.add(BorderLayout.WEST, requestPanel); 
-			container.add(BorderLayout.EAST, resultPanel);
-			
-
-			countRoom.addActionListener(this);
-			countAllSensor.addActionListener(this);
-			countOffSensor.addActionListener(this);
-			countOnSensor.addActionListener(this);
-			countNoConfigSensor.addActionListener(this);
-			countAlert.addActionListener(this);
-			//countSmokeSensor.addActionListener(this);
-			countLightSensor.addActionListener(this);
-			countGasSensor.addActionListener(this);
-			countMoveSensor.addActionListener(this);
-			countTempSensor.addActionListener(this);
-			countAllPatient.addActionListener(this);
-			countAlertByMonth.addActionListener(this);
-			countBreakdownSensor.addActionListener(this);
-			countAlertByYear.addActionListener(this);
-			countAlertBySensorType.addActionListener(this);
-			
-			
-			
-			/*countSmokeSensor.setVisible(false);
-			countLightSensor.setVisible(false);
-			countGasSensor.setVisible(false);
-			countMoveSensor.setVisible(false);
-			countTempSensor.setVisible(false);
-			countOffSensor.setVisible(false);
-			countOnSensor.setVisible(false);
-			countNoLocationSensor.setVisible(false);
-			
-		
-			this.setTitle("Floralis - Indicateurs");
-			this.setContentPane(container);
-			this.setLocationRelativeTo(null);
-			this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			this.setVisible(true);
-			this.setSize(900, 800); */
-			
-			this.setTitle("Indicateurs");
-		    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		    this.setLocationRelativeTo(null);
-		    this.setSize(900, 600);
-		    //  combo.setPreferredSize(new Dimension(100, 20));
-		    
-		    
-		    JPanel indicatorInfo= new JPanel();
 		    
 		    // count patient
-			
+		    
+			// Creation of an object to use the findAll method
 			FindAllSensor allsens = new FindAllSensor(host, port);
 			try {
-				sensorFoundList = allsens.findAll(false);
+				// put the result in list 
+				sensorFoundList = allsens.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			int countSensor = sensorFoundList.size(); 	
+			// count how many values the list has 
+			int countSensor = sensorFoundList.size(); 
+			// print the result 
 			JLabel sensorResult = new JLabel("  Nombre de capteurs : " + countSensor);
 			indicatorInfo.add(sensorResult);
 			sensorResult.setFont(new Font("Calibri", 1, 20));
-			// count room 
 			
+			// count room 
+	
 			FindAllLocation fal = new FindAllLocation(host, port);
 			try {
-				roomFoundList = fal.findAll(false);
+				roomFoundList = fal.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -191,13 +113,14 @@ import fr.pds.floralis.server.dao.DAO;
 			int countRoom = roomFoundList.size(); 	
 			JLabel roomResult = new JLabel("Nombre de pièces : " + countRoom);
 		    indicatorInfo.add(roomResult);
+		    roomResult.setFont(new Font("Calibri", 1, 20));
 		    
 		    // count alert
-		    
+	    
 			FindAllAlert faa = new FindAllAlert(host, port);
 			roomResult.setFont(new Font("Calibri", 1, 20));
 			try {
-				alertFoundList = faa.findAll(false);
+				alertFoundList = faa.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -208,11 +131,12 @@ import fr.pds.floralis.server.dao.DAO;
 			alertResult.setFont(new Font("Calibri", 1, 20));
 			indicatorInfo.add(alertResult);
 			
+			
 			// count patient
 			
 		    FindAllPatient fap = new FindAllPatient(host, port);
 			try {
-				patientFoundList = fap.findAll(false);
+				patientFoundList = fap.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -225,248 +149,477 @@ import fr.pds.floralis.server.dao.DAO;
 		    indicatorInfo.setLayout(new GridLayout(1, 4));
 		    
 		    
-		    // Panel to choice of sensor 
-		    JPanel requestPanel= new JPanel();
-		    JPanel sensorPanel = new JPanel();
-			JComboBox sensorOption = new JComboBox();
-			sensorOption.addItem("Type de capteurs");
-			sensorOption.addItem("Etat des capteurs");
-			sensorOption.addItem("Panne des capteurs");
-			
-		    sensorOption.addItemListener(new ItemStateSensor());
-            
-			
-			JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
+		    // Sensor option - JComboBox
+		    sensorOption.addItem("Aucun");
+		    sensorOption.addItem("Type de capteurs");
+		    sensorOption.addItem("Etats des capteurs");
+		    sensorOption.addItem("Panne des capteurs");
+		    sensorOption.addItem("Capteurs non configurés");
 			sensorPanel.add(labelSensor);
 			sensorPanel.add(sensorOption); 
 			requestPanel.add(sensorPanel);
+			sensorOption.addActionListener(this);
+			
+		 
 		    
-		    //Panel choice of alert
-		    JButton alert = new JButton("Jcombo box des alertes");
-		    requestPanel.add(alert);
-		    //requestPanel.setPreferredSize(new Dimension(700, 200));
+		    //Alert Option - JComboBox
+			alertOption.addItem("Aucun");
+			alertOption.addItem("Alerte par mois");
+			alertOption.addItem("Alerte par an");
+			alertOption.addItem("Alerte par type de capteurs");
+			alertPanel.add(labelAlert);
+		    alertPanel.add(alertOption); 
+		    requestPanel.add(alertPanel);
+		    alertOption.addActionListener(this);
 		    requestPanel.setLayout(new GridLayout(2, 1));
+		    resultPanel.add(newRequest); 
+		    resultPanel.add(result); 
+		    newRequest.addActionListener(this);
 		    
-		    JPanel resultPanel= new JPanel();
-		   //TODO: ajouter des éléments dans la bdd pour les tests (patients, anciennes alertes) 
-		    //TODO: implémenter la comparaison sur les 12 mois, cette partie doit se trouver dans l'item listener des dates 
-		    Object[][] donnees = {
-		            {"Nombre d'alerte en 05/19", "12"},
-		            {"Nombre d'alerte en 04/19", "24"},
-		    };
-
-		    String[] entetes = {"Description", "Nombre"};
-
-		    JTable tableau = new JTable(donnees, entetes);
-
-		    resultPanel.add(tableau);
-		    resultPanel.setLayout(new GridLayout(1, 1));
-		    
-		    JPanel panel= new JPanel();
 		    panel.add(requestPanel);
 		    panel.add(resultPanel);
 		    panel.setPreferredSize(new Dimension(1350, 500));
 		    panel.setLayout(new GridLayout(1, 2));
-		    
-		   // container.add(top, BorderLayout.NORTH);
+		   
+			// initialize parameters window
+			this.setTitle("Indicateurs");
+		    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    this.setLocationRelativeTo(null);
+		    this.setSize(900, 600);
 		    this.setContentPane(container);
 		    this.setVisible(true);   
 		    this.getContentPane().add(indicatorInfo, BorderLayout.NORTH);
 		    this.getContentPane().add(panel, BorderLayout.SOUTH);
 		    this.setVisible(true);
-		 
-		    
 			
 		}
 		
 	
-			    
-		
+
 		public void actionPerformed(ActionEvent e) {
 			
-		
-				
-				/*countSmokeSensor.setVisible(true);
-				countLightSensor.setVisible(true);
-				countGasSensor.setVisible(true);
-				countMoveSensor.setVisible(true);
-				countTempSensor.setVisible(true);
-				countOffSensor.setVisible(true);
-				countOnSensor.setVisible(true);
-				countNoLocationSensor.setVisible(true);*/
+			/*
+			 * to do a new request 
+			 */
 			
-			
-		/*	if(e.getSource() == countOffSensor) {
-				FindSensorByState allloc = new FindSensorByState(host, port);
-				try {
-					sensorFoundList = allloc.findByState(false, false);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countOff = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs éteint : " + countOff);	
-			}
-			
-			if(e.getSource() == countOnSensor) {
-				FindSensorByState allloc = new FindSensorByState(host, port);
-				try {
-					sensorFoundList = allloc.findByState(false, true);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countOn = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs allumés : " + countOn);
-				
-			}
-			
-			if(e.getSource() == countNoConfigSensor) {
-				FindSensorByConfig allloc = new FindSensorByConfig(host, port);
-				try {
-					sensorFoundList = allloc.findByConfig(false, false);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countNoConfig = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs non configurés : " + countNoConfig);	
-			}
-			
-			/*if(e.getSource() == countSmokeSensor) {
-				String smoke = 	"FIRE"; 
-				FindSensorByType allloc = new FindSensorByType(host, port);
-				try {
-					sensorFoundList = allloc.findByType(false, smoke);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countSmoke = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de fumée : " + countSmoke);
-			}
+			/*
+			 * SENSOR OPTION 
+			 */
 	
-			
-			if(e.getSource() == countLightSensor) {
-				String light = 	"LIGHT"; 
-				FindSensorByType allloc = new FindSensorByType(host, port);
-				try {
-					sensorFoundList = allloc.findByType(false, light);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countLight = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de lumière : " + countLight);
-				
-			}
-			
-			if(e.getSource() == countGasSensor) {
-				String light = 	"GASLEAK"; 
-				FindSensorByType allloc = new FindSensorByType(host, port);
-				try {
-					sensorFoundList = allloc.findByType(false, light);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countGas = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de lumière : " + countGas);
-							
-			}
-			
-			if(e.getSource() == countMoveSensor) {
-				String light = 	"PRESENCE"; 
-				FindSensorByType allloc = new FindSensorByType(host, port);
-				try {
-					sensorFoundList = allloc.findByType(false, light);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countMove = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de présence: " + countMove);
-				
-			}
-			
-			if(e.getSource() == countTempSensor) {
-				String light = 	"TEMPERATURE"; 
-				FindSensorByType allloc = new FindSensorByType(host, port);
-				try {
-					sensorFoundList = allloc.findByType(false, light);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countTemperature = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs de température : " + countTemperature);
-				
-			}
-			
-			
-			
-			if (e.getSource() == countAlertByMonth) {
-				FindAlertByMonthYear faby = new FindAlertByMonthYear(host, port);
-				Date date = new Date();
-				try {
-					alertFoundList = faby.findByMonthYear(false, date);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertMonthYear = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertMonthYear);	
-			}
-			
-			if (e.getSource() == countAlertByYear) {
-				FindAlertByYear faby = new FindAlertByYear(host, port);
-				Date date = new Date();
-				try {
-					alertFoundList = faby.findByYear(false, date);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertYear = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte de l'année en cours: " + countAlertYear);	
-			}
-			
-			if(e.getSource() == countBreakdownSensor) {
-				FindSensorByBreakdown fsbb = new FindSensorByBreakdown();
-				try {
-					sensorFoundList = fsbb.findByBreakdown(false, true);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countBreakdown = sensorFoundList.size(); 	
-				System.out.println("Nombre de Capteurs en panne : " + countBreakdown);	
-			}
-			
-			if (e.getSource() == countAlertBySensorType) {
-				FindAlertBySensorByType faby = new FindAlertBySensorByType();
-				String type = "FIRE";
-				try {
-					alertFoundList = faby.findByType(false, type);
-				} catch (JSONException | IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				int countAlertType = alertFoundList.size(); 	
-				System.out.println("Nombre d'alerte d'alerte de capteurs de fumée: " + countAlertType);	 
-			}*/
+			// TODO Auto-generated method stub
+				int indexSensor = sensorOption.getSelectedIndex();
 
+				switch(indexSensor) {
+				case 0 : 
+				
+					break; 
+				case 1	: 
+					// case of sensor type filter 
+					
+					/*
+					 * SMOKE TYPE 
+					 */
+					
+					
+					FindSensorByType fsbtf = new FindSensorByType(host, port);
+					try {
+						sensorFoundList = fsbtf.findByType(smoke);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countSmoke = sensorFoundList.size(); 
+					
+					/*
+					 *  LIGHT TYPE
+					 */
+					
+					String light = 	"LIGHT"; 
+					FindSensorByType fsbtl = new FindSensorByType(host, port);
+					try {
+						sensorFoundList = fsbtl.findByType(light);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countLight = sensorFoundList.size(); 	
+
+					/*
+					 * GAS TYPE
+					 */
+					
+					FindSensorByType fsbtg = new FindSensorByType(host, port);
+					try {
+						sensorFoundList = fsbtg.findByType(gas);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countGas = sensorFoundList.size(); 
+					
+					/*
+					 *  PRESENCE TYPE
+					 */
+					
+
+					FindSensorByType fsbtp = new FindSensorByType(host, port);
+					try {
+						sensorFoundList = fsbtp.findByType(presence);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countMove = sensorFoundList.size(); 
+
+					/*
+					 * TEMPERATURE TYPE 
+					 */
+
+					FindSensorByType fsbtt = new FindSensorByType(host, port);
+					try {
+						sensorFoundList = fsbtt.findByType(temperature);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countTemperature = sensorFoundList.size(); 	
+						
+					// put values on JFRAME
+					
+					Object[][] data = {
+		            { fire , countSmoke },
+		            { llight, countLight},
+		            { ggas, countGas},
+		            { ppresence, countMove},
+		            { ttemp, countTemperature},
+					};
+
+					String[] entetes = {"Description", "Nombre"};
+					JTable tabResultType = new JTable(data, entetes); 
+					result.add(tabResultType); 
+					pack();
+					break; 
+				case 2: 
+					
+					// case of sensor state filter
+					
+					//TODO: fonctionne mais ne se raffraichit pas automatiquement
+					
+					stateOption.addItem("Aucun");
+					stateOption.addItem("Eteint");
+					stateOption.addItem("Allumé");
+					sensorPanel.add(labelState); 
+					sensorPanel.add(stateOption);
+					stateOption.addActionListener(this);
+					pack();
+					break; 
+					
+				case 3: 
+					
+					// case of sensor breakdown filter
+					
+					breakOption.addItem("Aucun");
+					breakOption.addItem("En panne");
+					breakOption.addItem("En marche");
+					sensorPanel.add(labelBreak); 
+					sensorPanel.add(breakOption);
+					breakOption.addActionListener(this);
+					pack(); 
+					break; 
+					
+				case 4: 
+					
+					// case of sensor which havent configuration 
+					FindSensorByConfig fsbc = new FindSensorByConfig(host, port);
+					try {
+						sensorFoundList = fsbc.findByConfig(false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countNoConfig = sensorFoundList.size(); 	
+					JLabel noConfig = new JLabel("Nombre de Capteurs non configurés : " + countNoConfig);	
+					result.add(noConfig);
+					pack(); 
+					break; 
+					
+					
+					default : 
+						System.out.println("Cas non trouvé");
+						break; 
+				}
 			
-		}
+				
+				/* 
+				 *  choice of state in JCombobox treatment
+				 */
+				
+				int indexStateSensor = stateOption.getSelectedIndex();
+				switch(indexStateSensor) {
+				case 0: 
+					System.out.println("init");
+					break; 
+				case 1: 
+					
+					/*
+					 * case of off sensor
+					 */
+					
+					FindSensorByState fsbsoff = new FindSensorByState(host, port);
+					try {
+						sensorFoundList = fsbsoff.findByState(false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countOff = sensorFoundList.size(); 	
+					JLabel offSensor = new JLabel("Nombres de capteurs éteint : " + countOff); 
+					result.add(offSensor);
+					break; 
+				case 2: 
+					
+					/*
+					 * case of on sensor 
+					 */
 
+					FindSensorByState fsbson = new FindSensorByState(host, port);
+					try {
+						sensorFoundList = fsbson.findByState(true);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countOn = sensorFoundList.size(); 	
+					JLabel onSensor = new JLabel("Nombre de capteurs allumés : " + countOn);
+					result.add(onSensor);
+					break; 
+					
+					default : 
+						System.out.println("Cas non trouvé");
+				}
+				
 
-		  }
+				int indexBreakSensor = breakOption.getSelectedIndex();
+				switch(indexBreakSensor) {
+				case 0:           	
+					System.out.println("init");
+					break; 
+				case 1: 
+					
+					/*
+					 * case of breakdown sensor
+					 */
+			
+					FindSensorByBreakdown fsbb = new FindSensorByBreakdown(host, port);
+					try {
+						sensorFoundList = fsbb.findByBreakdown(true);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countBreakdown = sensorFoundList.size(); 	
+					JLabel sensorBreakdown = new JLabel("Nombre de capteurs en panne : " + countBreakdown);	
+					result.add(sensorBreakdown);
+					break; 
+				case 2: 
+					
+					/*
+					 * case of working sensor
+					 */
+					FindSensorByBreakdown fsbw = new FindSensorByBreakdown(host, port);
+					try {
+						sensorFoundList = fsbw.findByBreakdown(false);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					int countWorking = sensorFoundList.size(); 	
+					JLabel sensorWorking = new JLabel("Nombre de capteurs fonctionnel : " + countWorking);	
+					result.add(sensorWorking);
+					break;
+					
+					default : 
+						System.out.println("Cas non trouvé");
+				}
+				
+				/*
+				 * ALERT OPTION 
+				 */
+				
+				int indexAlert = alertOption.getSelectedIndex();
+
+				switch(indexAlert) {
+				case 0: 
+					break; 
+				case 1: 
+					// case of alert by month
+					FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
+					Date date = new Date(2019, 05, 01);
+					int countAlertMonthYear = 0;
+						try {
+							countAlertMonthYear = fabmy.findByMonthYear(date);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
+					String alertMY = "En cours: ";
+					FindAlertByMonthYear fabmy1 = new FindAlertByMonthYear(host, port);
+					
+					Date date1 = new Date(2019, 04, 12);
+					int countAlertMonthYear1 = 0;
+						try {
+							countAlertMonthYear1 = fabmy1.findByMonthYear(date1);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					String alertMY1= "Avril"; 
+					Object[][] data = {
+				           { alertMY , countAlertMonthYear },
+				           { alertMY1, countAlertMonthYear1}
+						};
+
+					String[] entetes = {"Description", "Nombre"};
+					JTable tabResultAMType = new JTable(data, entetes); 
+					result.add(tabResultAMType); 
+					pack(); 
+						
+					break; 
+				case 2: 
+					
+					// case of alert by year 
+					Date dateYear = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+					String yearString = sdf.format(dateYear);
+
+			        Integer year = Integer.parseInt(yearString);
+					JPanel panelYear = new JPanel(); 
+					panelYear.setLayout(new GridLayout(5, 1));
+					for ( int i=0; i<5; i++) {
+						FindAlertByYear faby = new FindAlertByYear(host, port);
+						int countAlertFound = 0;
+						Date dateAlertYear = new Date(year, 01, 01);
+						try {
+						countAlertFound = faby.findByYear(dateAlertYear);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}	
+						JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année "+ year + " : " + countAlertFound);
+						panelYear.add(labelalertYear);
+						year--; 
+					} 
+					result.add(panelYear);
+					pack();
+
+					break; 
+						
+				case 3: 
+					//  case of alert by sensor type 
+					
+					/*
+					 * SMOKE TYPE 
+					 */
+					int countAlertSmoke = 0; 
+					FindAlertBySensorByType fabyf = new FindAlertBySensorByType();
+					try {
+						countAlertSmoke= fabyf.findByType(smoke);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} 	
+					
+				
+					/*
+					 *  LIGHT TYPE
+					 */
+					int countAlertLight = 0;
+					FindAlertBySensorByType fabyl = new FindAlertBySensorByType();
+					try {
+						countAlertLight = fabyl.findByType(light);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+		 
+					
+
+					/*
+					 * GAS TYPE
+					 */
+					int countAlertGas = 0; 
+					FindAlertBySensorByType fabyg = new FindAlertBySensorByType();
+					try {
+						countAlertGas = fabyg.findByType(gas);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			
+					
+					/*
+					 *  PRESENCE TYPE
+					 */
+					int countAlertMove = 0; 
+					FindAlertBySensorByType fabyp = new FindAlertBySensorByType();
+					try {
+						countAlertMove = fabyl.findByType(presence);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+
+					/*
+					 * TEMPERATURE TYPE 
+					 */
+					int countAlertTemperature = 0; 
+					FindAlertBySensorByType fabyt = new FindAlertBySensorByType();
+					try {
+						countAlertTemperature = fabyt.findByType(temperature);
+					} catch (JSONException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+						
+					// put values on JFRAME
+					
+					Object[][] dataAlert = {
+		            { fire , countAlertSmoke },
+		            { llight, countAlertLight},
+		            { ggas, countAlertGas},
+		            { ppresence, countAlertMove},
+		            { ttemp, countAlertTemperature},
+					};
+
+					String[] tetes = {"Description", "Nombre"};
+					JTable tabResultAlertType = new JTable(dataAlert, tetes); 
+					result.add(tabResultAlertType); 
+					pack(); 
+					break;
+					
+					
+					default : 
+						System.out.println("Cas non trouvé");
+						break; 
+				}
+				// launch a new request 
+				if (e.getSource() == newRequest) {
+					result.removeAll();
+					breakOption.removeAllItems();
+					sensorPanel.remove(breakOption);
+					sensorPanel.remove(labelBreak);
+					stateOption.removeAllItems();
+					sensorPanel.remove(stateOption);
+					sensorPanel.remove(labelState);
+				}
+		} 
+
+	}
 	
-	  class ItemStateSensor implements ItemListener{
-		    public void itemStateChanged(ItemEvent e) {
-		      System.out.println("événement déclenché sur : " + e.getItem());
-		    }   
-	  } 
 	
 	
 	

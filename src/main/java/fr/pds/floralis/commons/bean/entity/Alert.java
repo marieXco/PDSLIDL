@@ -14,7 +14,7 @@ import org.json.JSONObject;
  */
 
 public class Alert {
-
+ 
 	private int id;
 	private int sensor;
 	private Time start;

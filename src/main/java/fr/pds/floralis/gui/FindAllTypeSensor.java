@@ -27,7 +27,7 @@ public class FindAllTypeSensor {
 		this.port = port;
 	}
 
-	public static List<TypeSensor> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<TypeSensor> findAll() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<TypeSensor> typeSensorsList;
@@ -42,11 +42,6 @@ public class FindAllTypeSensor {
 		
 		TypeSensor[] typeSensorsFoundTab =  objectMapper.readValue(ccTypeSensorFindAll.getResponse(), TypeSensor[].class);
 		typeSensorsList = Arrays.asList(typeSensorsFoundTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findAll(true);
-		}
 		
 		return typeSensorsList;
 	}

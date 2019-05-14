@@ -30,7 +30,7 @@ public class FindAlertByYear {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static List<Alert> findByYear(Boolean refresh, Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static int findByYear(Date date) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -46,25 +46,21 @@ public class FindAlertByYear {
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
 		
+		int alertYear = 0; 
 		for (Alert alert :alertList) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-	        sdf.format(date);
-	        sdf.format(alert.getDate());
-	        System.out.println(date);
-	        System.out.println(alert);
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+			String dateString = sdf.format(date);
+	        String dateAlert = sdf.format(alert.getDate());
 
-			if(alert.equals(date)) {
-				alertList.remove(alert);
+	        Integer test = Integer.parseInt(dateString)- 1900 ;
+	        
+			if(dateAlert.equals(test.toString())) {
+				alertYear++; 
 			}
 			
 		}
 		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findByYear(true, date);
-		}
-		
-		return alertList;
+		return alertYear;
 	}
 	
 

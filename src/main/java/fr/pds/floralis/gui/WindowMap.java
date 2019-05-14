@@ -190,7 +190,7 @@ public class WindowMap extends JFrame implements ActionListener {
 	public void noConfigSensors() {
 		try {
 			FindSensorByConfig fs = new FindSensorByConfig(host, port);
-			sensorsNoConfigList = fs.findByConfig(false, false);
+			sensorsNoConfigList = fs.findByConfig(false);
 			SensorTableModel sensorModelRefresh = new SensorTableModel(
 					sensorsNoConfigList);
 			String[] sensorsComboBox = new String[sensorModelRefresh

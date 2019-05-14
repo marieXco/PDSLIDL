@@ -26,7 +26,7 @@ public class FindAllAlert {
 		this.port = port;
 	}
 
-	public static List<Alert> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Alert> findAll() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Alert> alertList;
@@ -41,11 +41,6 @@ public class FindAllAlert {
 		
 		Alert[] alertFoundTab =  objectMapper.readValue(ccAlertFindAll.getResponse(), Alert[].class);
 		alertList = Arrays.asList(alertFoundTab);
-		
-		if(refresh) { 
-			Thread.sleep(6000);
-			findAll(true);
-		}
 		
 		return alertList;
 	}

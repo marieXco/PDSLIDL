@@ -27,7 +27,7 @@ public class FindAllLocation  {
 		this.port = port;
 	}
 
-	public static List<Location> findAll(Boolean refresh) throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
+	public static List<Location> findAll() throws JsonParseException, JsonMappingException, JSONException, IOException, InterruptedException {
 		
 		objectMapper = new ObjectMapper();
 		List<Location> locationsList;
@@ -42,11 +42,6 @@ public class FindAllLocation  {
 		
 		Location[] locationsFoundTab =  objectMapper.readValue(ccLocationfindAll.getResponse(), Location[].class);
 		locationsList = Arrays.asList(locationsFoundTab);
-		
-		if(refresh) {
-			Thread.sleep(6000);
-			findAll(true);
-		}
 		
 		return locationsList;
 	}
