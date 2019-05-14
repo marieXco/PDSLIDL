@@ -417,12 +417,12 @@ public class WindowConfig extends JFrame implements ActionListener {
 					sensorFound.setMax(Integer.parseInt(max.getText().trim()));
 					break;
 				case "LIGHT":
-					sensorFound.setMin(Integer.parseInt(duringNight.getText().trim()));
-					sensorFound.setMax(Integer.parseInt(duringDay.getText().trim()));
+					sensorFound.setMax(Integer.parseInt(duringNight.getText().trim()));
+					sensorFound.setMin(Integer.parseInt(duringDay.getText().trim()));
 					break;
 				case "PRESENCE":
-					sensorFound.setMin(Integer.parseInt(duringNight.getText().trim()));
-					sensorFound.setMax(Integer.parseInt(duringDay.getText().trim()));
+					sensorFound.setMax(Integer.parseInt(duringNight.getText().trim()));
+					sensorFound.setMin(Integer.parseInt(duringDay.getText().trim()));
 					break;
 				case "GASLEAK":
 					sensorFound.setMin(0);
@@ -430,7 +430,7 @@ public class WindowConfig extends JFrame implements ActionListener {
 					break;
 				case "FIRE":
 					sensorFound.setMin(0);
-					sensorFound.setMax(1);
+					sensorFound.setMax(2);
 					break;	
 				}
 
