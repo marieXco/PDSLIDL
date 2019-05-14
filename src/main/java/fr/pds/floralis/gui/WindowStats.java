@@ -3,47 +3,33 @@
 
 
 	import java.awt.BorderLayout;
-	import java.awt.Button;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.HeadlessException;
+	import java.awt.Dimension;
+	import java.awt.Font;
+	import java.awt.GridLayout;
 	import java.awt.event.*;
 	import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+	import java.util.List;
 
-import javax.swing.BorderFactory;
-	import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
+	import javax.swing.JButton;
+	import javax.swing.JComboBox;
 	import javax.swing.JFrame;
 	import javax.swing.JLabel;
 	import javax.swing.JPanel;
-	import javax.swing.JPasswordField;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-	import javax.swing.JTextPane;
-	import javax.swing.text.SimpleAttributeSet;
-	import javax.swing.text.StyleConstants;
+	import javax.swing.JTable;
 
-import org.json.JSONException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import fr.pds.floralis.commons.bean.entity.Alert;
-import fr.pds.floralis.commons.bean.entity.Location;
-import fr.pds.floralis.commons.bean.entity.Patient;
-import fr.pds.floralis.commons.bean.entity.Room;
-import fr.pds.floralis.commons.bean.entity.Sensor;
-import fr.pds.floralis.server.dao.DAO;
-
-	//TODO: ajouter un onglet pour accéder à ses stats visibles seulement par les administrateurs sur WindowAdd
-	//TODO: faire les scripts
+	import org.json.JSONException;
 	
-	// this is the window where 
+	
+	import fr.pds.floralis.commons.bean.entity.Alert;
+	import fr.pds.floralis.commons.bean.entity.Location;
+	import fr.pds.floralis.commons.bean.entity.Patient;
+	import fr.pds.floralis.commons.bean.entity.Sensor;
+
+	
+	// Window for the indicators use case
 	public class WindowStats extends JFrame implements ActionListener {
 		private String host;
 		private int port;
@@ -58,16 +44,24 @@ import fr.pds.floralis.server.dao.DAO;
 		JPanel sensorPanel = new JPanel();
 		JPanel alertPanel = new JPanel();
 		JPanel panel= new JPanel();
+		
+		// Creation of combo box 
 		JComboBox sensorOption = new JComboBox();
 		JComboBox stateOption = new JComboBox();
 		JComboBox breakOption = new JComboBox();
 		JComboBox alertOption = new JComboBox();
+		
+		// Creation of Label 
 		JLabel labelSensor= new JLabel("Filtrer sur les capteurs : ");
 		JLabel labelState= new JLabel("Etats des capteurs : ");
 		JLabel labelBreak= new JLabel("Panne des capteurs : ");
 		JLabel labelAlert= new JLabel("Filtrer sur les alertes : ");
+		
+		// Creation of Button 
 		JButton newRequest = new JButton("Nouvelle requête"); 
 		
+		
+		// Creation of String 
 		String ttemp = "Capteurs de température"; 
 		String fire = "Capteurs de type fumée"; 
 		String ggas = "Capteurs de fuite de gaz";
@@ -77,9 +71,9 @@ import fr.pds.floralis.server.dao.DAO;
 		String presence = "PRESENCE"; 
 		String light = 	"LIGHT"; 
 		String gas = "GASLEAK"; 
-		String temperature = 	"TEMPERATURE"; 
+		String temperature = "TEMPERATURE"; 
 		
-		// Indicators values
+		// Indicators list
 		List<Location> roomFoundList; 
 		List<Sensor> sensorFoundList;
 		List<Alert> alertFoundList;
@@ -87,23 +81,21 @@ import fr.pds.floralis.server.dao.DAO;
 		
 
 		public void initIndicators() throws IOException{
-			
-			this.setTitle("Indicateurs");
-		    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		    this.setLocationRelativeTo(null);
-		    this.setSize(900, 600);
 		    
 		    // count patient
 		    
+			// Creation of an object to use the findAll method
 			FindAllSensor allsens = new FindAllSensor(host, port);
 			try {
+				// put the result in list 
 				sensorFoundList = allsens.findAll();
 			} catch (JSONException | IOException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			int countSensor = sensorFoundList.size(); 	
+			// count how many values the list has 
+			int countSensor = sensorFoundList.size(); 
+			// print the result 
 			JLabel sensorResult = new JLabel("  Nombre de capteurs : " + countSensor);
 			indicatorInfo.add(sensorResult);
 			sensorResult.setFont(new Font("Calibri", 1, 20));
@@ -157,7 +149,7 @@ import fr.pds.floralis.server.dao.DAO;
 		    indicatorInfo.setLayout(new GridLayout(1, 4));
 		    
 		    
-		    // Sensor option 
+		    // Sensor option - JComboBox
 		    sensorOption.addItem("Aucun");
 		    sensorOption.addItem("Type de capteurs");
 		    sensorOption.addItem("Etats des capteurs");
@@ -170,7 +162,7 @@ import fr.pds.floralis.server.dao.DAO;
 			
 		 
 		    
-		    //Alert Option 
+		    //Alert Option - JComboBox
 			alertOption.addItem("Aucun");
 			alertOption.addItem("Alerte par mois");
 			alertOption.addItem("Alerte par an");
@@ -180,10 +172,6 @@ import fr.pds.floralis.server.dao.DAO;
 		    requestPanel.add(alertPanel);
 		    alertOption.addActionListener(this);
 		    requestPanel.setLayout(new GridLayout(2, 1));
-		    
-		   //TODO: ajouter des éléments dans la bdd pour les tests (patients, anciennes alertes) 
-		    //TODO: implémenter la comparaison sur les 12 mois, cette partie doit se trouver dans l'item listener des dates 
-
 		    resultPanel.add(newRequest); 
 		    resultPanel.add(result); 
 		    newRequest.addActionListener(this);
@@ -192,8 +180,13 @@ import fr.pds.floralis.server.dao.DAO;
 		    panel.add(resultPanel);
 		    panel.setPreferredSize(new Dimension(1350, 500));
 		    panel.setLayout(new GridLayout(1, 2));
-		    
-		   // container.add(top, BorderLayout.NORTH);
+		   
+			// initialize parameters window
+			this.setTitle("Indicateurs");
+		    this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		    this.setLocationRelativeTo(null);
+		    this.setSize(900, 600);
 		    this.setContentPane(container);
 		    this.setVisible(true);   
 		    this.getContentPane().add(indicatorInfo, BorderLayout.NORTH);
@@ -353,14 +346,10 @@ import fr.pds.floralis.server.dao.DAO;
 					
 					
 					default : 
-						System.out.println("aie coup dur pour Célia");
+						System.out.println("Cas non trouvé");
 						break; 
 				}
-				
-				
-				
-				//cette partie la du code doit aller dans une autre méthode
-				//comment bloquer la deuxieme ecoute de la 1ere JCOMBOBOx
+			
 				
 				/* 
 				 *  choice of state in JCombobox treatment
@@ -385,7 +374,7 @@ import fr.pds.floralis.server.dao.DAO;
 						e1.printStackTrace();
 					}
 					int countOff = sensorFoundList.size(); 	
-					JLabel offSensor = new JLabel("Nombres de capteurs éteind : " + countOff); 
+					JLabel offSensor = new JLabel("Nombres de capteurs éteint : " + countOff); 
 					result.add(offSensor);
 					break; 
 				case 2: 
@@ -407,11 +396,10 @@ import fr.pds.floralis.server.dao.DAO;
 					break; 
 					
 					default : 
-						System.out.println("aie coup dur pour Célia");
+						System.out.println("Cas non trouvé");
 				}
 				
-				// not working
-				// TODO: ajouter le cas de panne par mois 
+
 				int indexBreakSensor = breakOption.getSelectedIndex();
 				switch(indexBreakSensor) {
 				case 0:           	
@@ -422,11 +410,10 @@ import fr.pds.floralis.server.dao.DAO;
 					/*
 					 * case of breakdown sensor
 					 */
-					//TODO: réinitialiser la page, la rafraichir 
 			
-					FindSensorByBreakdown fsbb = new FindSensorByBreakdown();
+					FindSensorByBreakdown fsbb = new FindSensorByBreakdown(host, port);
 					try {
-						sensorFoundList = fsbb.findByBreakdown(false, true);
+						sensorFoundList = fsbb.findByBreakdown(true);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -440,9 +427,9 @@ import fr.pds.floralis.server.dao.DAO;
 					/*
 					 * case of working sensor
 					 */
-					FindSensorByBreakdown fsbw = new FindSensorByBreakdown();
+					FindSensorByBreakdown fsbw = new FindSensorByBreakdown(host, port);
 					try {
-						sensorFoundList = fsbw.findByBreakdown(false, false);
+						sensorFoundList = fsbw.findByBreakdown(false);
 					} catch (JSONException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -453,7 +440,7 @@ import fr.pds.floralis.server.dao.DAO;
 					break;
 					
 					default : 
-						System.out.println("aie coup dur pour Célia");
+						System.out.println("Cas non trouvé");
 				}
 				
 				/*
@@ -467,8 +454,6 @@ import fr.pds.floralis.server.dao.DAO;
 					break; 
 				case 1: 
 					// case of alert by month
-					//TODO: adding compare option 
-						
 					FindAlertByMonthYear fabmy = new FindAlertByMonthYear(host, port);
 					Date date = new Date(2019, 05, 01);
 					int countAlertMonthYear = 0;
@@ -505,18 +490,30 @@ import fr.pds.floralis.server.dao.DAO;
 				case 2: 
 					
 					// case of alert by year 
-					FindAlertByYear faby = new FindAlertByYear(host, port);
-					int countAlertFound = 0;
-					Date dateYear = new Date(2018, 02, 12);
-					try {
-					countAlertFound = faby.findByYear(dateYear);
-					} catch (JSONException | IOException | InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}	
-					JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année en cours: " + countAlertFound);
-					result.add(labelalertYear);
+					Date dateYear = new Date();
+					SimpleDateFormat sdf = new SimpleDateFormat("YYYY");
+					String yearString = sdf.format(dateYear);
+
+			        Integer year = Integer.parseInt(yearString);
+					JPanel panelYear = new JPanel(); 
+					panelYear.setLayout(new GridLayout(5, 1));
+					for ( int i=0; i<5; i++) {
+						FindAlertByYear faby = new FindAlertByYear(host, port);
+						int countAlertFound = 0;
+						Date dateAlertYear = new Date(year, 01, 01);
+						try {
+						countAlertFound = faby.findByYear(dateAlertYear);
+						} catch (JSONException | IOException | InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}	
+						JLabel labelalertYear = new JLabel("Nombre d'alerte de l'année "+ year + " : " + countAlertFound);
+						panelYear.add(labelalertYear);
+						year--; 
+					} 
+					result.add(panelYear);
 					pack();
+
 					break; 
 						
 				case 3: 
@@ -606,12 +603,18 @@ import fr.pds.floralis.server.dao.DAO;
 					
 					
 					default : 
-						System.out.println("aie coup dur pour Célia");
+						System.out.println("Cas non trouvé");
 						break; 
 				}
 				// launch a new request 
 				if (e.getSource() == newRequest) {
 					result.removeAll();
+					breakOption.removeAllItems();
+					sensorPanel.remove(breakOption);
+					sensorPanel.remove(labelBreak);
+					stateOption.removeAllItems();
+					sensorPanel.remove(stateOption);
+					sensorPanel.remove(labelState);
 				}
 		} 
 
