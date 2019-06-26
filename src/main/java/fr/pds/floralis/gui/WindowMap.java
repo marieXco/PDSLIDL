@@ -74,11 +74,15 @@ public class WindowMap extends JFrame implements ActionListener {
 	private JPanel backPanel;
 
 	
-	private Rectangle ascenseur = new Rectangle(25, 50, 80, 38);
-	private Rectangle salledejeu = new Rectangle(25, 140, 81, 85);
-	private Rectangle foyer = new Rectangle(120, 137, 145, 65);
-	private Rectangle toilettes = new Rectangle(200, 50, 100, 50);
-	private Rectangle couloir = new Rectangle(80, 95, 380, 25);
+	private Rectangle entree = new Rectangle(25, 50, 80, 38);
+	private Rectangle couloirRdc = new Rectangle(25, 140, 81, 85);
+	private Rectangle couloirEtage = new Rectangle(25, 140, 81, 85);
+	private Rectangle salleCommune = new Rectangle(120, 137, 145, 65);
+	private Rectangle ascenseurRdc = new Rectangle(200, 50, 100, 50);
+	private Rectangle ascenseurEtage = new Rectangle(200, 50, 100, 50);
+	private Rectangle refectoire = new Rectangle(80, 95, 380, 25);
+	private Rectangle cuisine = new Rectangle(80, 95, 380, 25);
+	private Rectangle infirmerie = new Rectangle(80, 95, 380, 25);
 	
 
 	private BufferedImage img1;
@@ -104,11 +108,16 @@ public class WindowMap extends JFrame implements ActionListener {
 		this.setAlwaysOnTop(true);
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-		listRectangle.put(ascenseur, 1);
-		listRectangle.put(salledejeu, 2);
-		listRectangle.put(foyer, 3);
-		listRectangle.put(toilettes, 4);
-		listRectangle.put(couloir, 5);
+		listRectangle.put(entree, 1);
+		listRectangle.put(couloirRdc, 2);
+		listRectangle.put(couloirEtage, 3);
+		listRectangle.put(salleCommune, 4);
+		listRectangle.put(ascenseurRdc, 5);
+		listRectangle.put(ascenseurEtage, 6);
+		listRectangle.put(refectoire, 7);
+		listRectangle.put(cuisine, 8);
+		listRectangle.put(infirmerie, 9);
+		
 
 		try {
 			img1 = ImageIO
