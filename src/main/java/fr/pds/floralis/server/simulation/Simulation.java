@@ -645,16 +645,6 @@ public class Simulation {
 					threadState[sensorIndex] = true;
 					simulationOn = false;
 				}
-
-				else if (!sensorFound[sensorIndex].getConfigure() && !propertiesList.isEmpty()) {
-					sensorLogger.warning("Sensor with the id " + sensorFound[sensorIndex].getId()
-							+ " is off and does't have any warning limits, but we get messages;\nExiting for this sensor");
-					refreshHandle[sensorIndex].cancel(false);
-					 
-					threadState[sensorIndex] = true;
-					simulationOn = false;
-				} 
-
 			}
 		}
 
