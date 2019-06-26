@@ -112,7 +112,7 @@ public class WindowMap extends JFrame implements ActionListener {
 
 		try {
 			img1 = ImageIO
-					.read(new File("src/main/resources/images/etage.png"));
+					.read(new File("src/main/resources/images/map.png"));
 			//img2 = ImageIO.read(new File("src/main/resources/images/rdc.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
