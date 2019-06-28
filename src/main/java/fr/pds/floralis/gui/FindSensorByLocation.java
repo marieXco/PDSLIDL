@@ -31,7 +31,7 @@ public class FindSensorByLocation {
 		this.port = port;
 	}
 
-	public static List<Sensor> findByLocation(Boolean refresh, int idLocation)
+	public static List<Sensor> findByLocation(int idLocation)
 			throws JsonParseException, JsonMappingException, JSONException,
 			IOException, InterruptedException {
 
@@ -54,10 +54,7 @@ public class FindSensorByLocation {
 				ccSensorFindByLocation.getResponse(), Sensor[].class);
 		List<Sensor> sensorsLocationList = Arrays.asList(sensorsLocationTab);
 
-		if (refresh) {
-			Thread.sleep(6000);
-			findByLocation(true, idLocation);
-		}
+		
 		
 
 		return sensorsLocationList;

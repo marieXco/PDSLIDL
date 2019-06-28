@@ -40,8 +40,6 @@ import fr.pds.floralis.gui.tablemodel.SensorTableModel;
 
 public class WindowMap extends JFrame implements ActionListener {
 
-	
-
 	private String host;
 	private int port;
 
@@ -50,6 +48,11 @@ public class WindowMap extends JFrame implements ActionListener {
 		this.host = host;
 		this.port = port;
 	}
+
+	// TODO : refresh la map
+	// TODO : refaire propre : il y a des trucs inutiles genre la liste des
+	// capteurs non config
+	// TODO : mettre le code au propre et commenter aussi
 
 	private static final long serialVersionUID = 4187590358873827065L;
 
@@ -73,7 +76,7 @@ public class WindowMap extends JFrame implements ActionListener {
 
 	private JPanel backPanel;
 
-	
+	// TODO : bien placer les rectangles quand le serveur marchera
 	private Rectangle entree = new Rectangle(25, 50, 80, 38);
 	private Rectangle couloirRdc = new Rectangle(25, 140, 81, 85);
 	private Rectangle couloirEtage = new Rectangle(25, 140, 81, 85);
@@ -83,10 +86,9 @@ public class WindowMap extends JFrame implements ActionListener {
 	private Rectangle refectoire = new Rectangle(80, 95, 380, 25);
 	private Rectangle cuisine = new Rectangle(80, 95, 380, 25);
 	private Rectangle infirmerie = new Rectangle(80, 95, 380, 25);
-	
 
 	private BufferedImage img1;
-	//private BufferedImage img2;
+	// private BufferedImage img2;
 
 	private JTextField idSensortoLocate;
 	private JButton addLocation;
@@ -97,6 +99,12 @@ public class WindowMap extends JFrame implements ActionListener {
 	SimpleAttributeSet centrer = new SimpleAttributeSet();
 
 	// Button
+	// TODO : mettre ce bouton en dessous de la liste des capteurs d'une zone
+	// pour direct ajouter dans la zone
+	// TODO : il faut donc une liste des capteurs non config au clique de ce
+	// bouton et
+	// ajouter
+	// TODO : il faut un capteur de chaque type par zone donc filtrer
 	Button addingSensor = new Button("Ajouter un capteur");
 	private JComboBox<Object> comboSensors1 = new JComboBox<Object>();
 	private JTable sensorsTable1 = new JTable();
@@ -117,20 +125,19 @@ public class WindowMap extends JFrame implements ActionListener {
 		listRectangle.put(refectoire, 7);
 		listRectangle.put(cuisine, 8);
 		listRectangle.put(infirmerie, 9);
-		
 
 		try {
-			img1 = ImageIO
-					.read(new File("src/main/resources/images/map.png"));
-			//img2 = ImageIO.read(new File("src/main/resources/images/rdc.png"));
+			img1 = ImageIO.read(new File("src/main/resources/images/map.png"));
+			// img2 = ImageIO.read(new
+			// File("src/main/resources/images/rdc.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		backPanel = new JPanel();
 		MyPanel image = new MyPanel(img1, listRectangle, host, port,
 				sensorsTable, comboSensors);
-//		MyPanel image2 = new MyPanel(img2, listRectangle, host, port,
-//				sensorsTable, comboSensors);
+		// MyPanel image2 = new MyPanel(img2, listRectangle, host, port,
+		// sensorsTable, comboSensors);
 
 		StyleConstants.setAlignment(centrer, StyleConstants.ALIGN_CENTER);
 		infos.setParagraphAttributes(centrer, true);
@@ -151,7 +158,7 @@ public class WindowMap extends JFrame implements ActionListener {
 		FlowLayout fLayout = (FlowLayout) backPanel.getLayout();
 		backPanel.setLayout(fLayout);
 		backPanel.add(image, BorderLayout.NORTH);
-		//backPanel.add(image2, BorderLayout.SOUTH);
+		// backPanel.add(image2, BorderLayout.SOUTH);
 		backPanel.add(new JLabel("Id du capteur à placer:"));
 		idSensortoLocate = new JTextField(8);
 		backPanel.add(idSensortoLocate);
@@ -308,7 +315,6 @@ public class WindowMap extends JFrame implements ActionListener {
 
 			} else if (clickedButton == addLocation) {
 
-				
 				String locationId = locationToconfig.getText().toString()
 						.trim();
 				if (locationId.trim().length() > 0) {
@@ -349,7 +355,6 @@ public class WindowMap extends JFrame implements ActionListener {
 						backPanel.validate();
 					}
 					// Beginning of sensor Update
-					
 
 					JSONObject sensorUpdateJson = new JSONObject();
 					sensorUpdateJson.put("id", sensorToDisplay.getId());
@@ -365,7 +370,7 @@ public class WindowMap extends JFrame implements ActionListener {
 							host, port, thirdRequest.toJSON().toString());
 					ccSensorUpdate.run();
 				}
-				
+
 				else {
 					showLocation = new JPanel(new FlowLayout());
 					infos.setText("");

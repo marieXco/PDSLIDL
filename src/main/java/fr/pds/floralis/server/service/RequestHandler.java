@@ -113,6 +113,7 @@ public class RequestHandler implements Runnable {
 				switch (table.toUpperCase()) {
 				case "SENSOR":
 					SensorDao sensorDao = new SensorDao(connection);
+					System.out.println(command+"bonjour");
 					switch (command.toUpperCase()) {
 					case "FINDALL":
 						List<Sensor> sensorList = sensorDao.findAll();

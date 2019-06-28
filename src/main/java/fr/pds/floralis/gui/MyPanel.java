@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sound.sampled.Clip;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -69,14 +70,14 @@ public class MyPanel extends JPanel implements MouseListener {
 
 		Graphics2D g2 = (Graphics2D) g.create();
 		Graphics2D g3 = (Graphics2D) g.create();
-		g3.setColor(Color.RED);
+		g3.setColor(Color.white);
 		
 		if (image != null) {
 			int x = (getWidth() - image.getWidth()) / 2;
 			int y = (getHeight() - image.getHeight()) / 2;
 			g2.drawImage(image, x, y, this);
 			rectangle.forEach((rectangle, id) -> {
-				g2.setColor(Color.green);
+				//g2.setColor(Color.white);
 				// g2.translate(rectangle.x, rectangle.y);
 					g2.draw(rectangle);
 					g3.drawString(id.toString(), rectangle.x, rectangle.y);
@@ -126,7 +127,7 @@ public class MyPanel extends JPanel implements MouseListener {
 		System.out.println(locationId);
 		try {
 			FindSensorByLocation fs = new FindSensorByLocation(host, port);
-			sensorsFoundList = fs.findByLocation(false, locationId);
+			sensorsFoundList = fs.findByLocation(locationId);
 
 			SensorTableModel sensorModelRefresh = new SensorTableModel(
 					sensorsFoundList);
